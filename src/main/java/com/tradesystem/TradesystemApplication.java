@@ -10,4 +10,6 @@ public class TradesystemApplication {
 		SpringApplication.run(TradesystemApplication.class, args);
 	}
 
+
+
 }
