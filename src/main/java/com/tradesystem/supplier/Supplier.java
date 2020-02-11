@@ -1,26 +1,34 @@
 package com.tradesystem.supplier;
 
-import com.tradesystem.Assortments;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
 
-import java.util.Map;
+import com.tradesystem.invoice.Invoice;
+import com.tradesystem.price.Price;
+import lombok.Data;
 
-@Getter
-@Setter
+import javax.persistence.*;
+
+@Entity
+@Data
+@Table(name = "suppliers")
 public class Supplier {
 
-    private int id;
-    private int totalPool;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "supplier_id")
+    private Long id;
+
     private String name;
-    private Map<Assortments, Double> assortmentPrices;
 
+    //@OneToMany(mappedBy = "supplier")
+    //private List<Product> products;
 
-    public Supplier(int id, int totalPool, String name, Map<Assortments, Double> assortmentPrices) {
-        this.id = id;
-        this.totalPool = totalPool;
-        this.name = name;
-        this.assortmentPrices = assortmentPrices;
-    }
+    //@OneToOne(mappedBy = "supplier", fetch = FetchType.EAGER)
+    //private Price prices;
 
+    @OneToMany(mappedBy = "supplier")
+    private List<Price> prices;
+
+    @OneToMany(mappedBy = "supplier")
+    private List<Invoice> invoices;
 }

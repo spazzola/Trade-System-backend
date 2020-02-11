@@ -1,20 +1,22 @@
 package com.tradesystem.user;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+import javax.persistence.*;
+
+@Entity
+@Data
 public class User {
 
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    private Long id;
+
+    @Column(nullable = false)
     private String login;
+
+    @Column(nullable = false)
     private String password;
 
-
-    public User(int id, String login, String password) {
-        this.id = id;
-        this.login = login;
-        this.password = password;
-    }
 }

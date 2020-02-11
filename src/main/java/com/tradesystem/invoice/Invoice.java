@@ -1,25 +1,40 @@
 package com.tradesystem.invoice;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.tradesystem.buyer.Buyer;
+import com.tradesystem.supplier.Supplier;
+import lombok.Data;
 
-@Getter
-@Setter
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Entity
+@Data
+@Table(name = "invoices")
 public class Invoice {
 
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "invoice_id")
+    private Long id;
+
     private String invoiceNumber;
-    private String type;
-    private double totalPool;
-    private double usedAmount;
+    private LocalDate date;
+    private BigDecimal value;
+    private BigDecimal amountToUse;
+    private boolean isUsed;
+    private boolean isPaid;
+    private String comment;
 
+    @ManyToOne
+    @JoinColumn(name = "supplier_fk")
+    private Supplier supplier;
 
-    public Invoice(int id, String invoiceNumber, String type, double totalPool, double usedAmount) {
-        this.id = id;
-        this.invoiceNumber = invoiceNumber;
-        this.type = type;
-        this.totalPool = totalPool;
-        this.usedAmount = usedAmount;
+    @ManyToOne
+    @JoinColumn(name = "buyer_fk")
+    private Buyer buyer;
+
+    public Invoice() {
     }
-
 }

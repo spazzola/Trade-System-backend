@@ -1,29 +1,39 @@
 package com.tradesystem.buyer;
 
 
-import com.tradesystem.Assortments;
+import com.tradesystem.invoice.Invoice;
 import com.tradesystem.order.Order;
-import lombok.Getter;
-import lombok.Setter;
+import com.tradesystem.price.Price;
+import lombok.Data;
 
-import java.util.Map;
+import javax.persistence.*;
+import java.util.List;
 
-@Getter
-@Setter
+@Entity
+@Data
+@Table(name = "buyers")
 public class Buyer {
 
-    private int id;
-    private double totalPool;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "buyer_id")
+    private Long id;
+
     private String name;
-    private Order order;
-    private Map<Assortments, Double> assortmentPrices;
+
+    //@OneToMany(mappedBy = "buyer")
+    //private List<Product> products;
+
+    @OneToMany(mappedBy = "buyer")
+    private List<Price> prices;
+
+    @OneToMany(mappedBy = "buyer")
+    private List<Invoice> invoices;
+
+    @OneToMany(mappedBy = "buyer")
+    private List<Order> orders;
 
 
-    public Buyer(int id, int totalPool, String name, Map<Assortments, Double> assortmentPrices) {
-        this.id = id;
-        this.totalPool = totalPool;
-        this.name = name;
-        this.assortmentPrices = assortmentPrices;
-    }
+
 
 }
