@@ -1,34 +1,24 @@
-package com.tradesystem.order;
+package com.tradesystem.price;
 
 import com.tradesystem.buyer.Buyer;
-import com.tradesystem.ordercomment.OrderComment;
 import com.tradesystem.product.Product;
 import com.tradesystem.supplier.Supplier;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-
 
 @Entity
 @Data
-@Table(name = "orders")
-public class Order {
-
+@Table(name = "prices")
+public class Price {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
+    @Column(name = "price_id")
     private Long id;
 
-    private String comment;
-
-    private LocalDate date;
-
-    private BigDecimal quantity;
-
-    private BigDecimal sum;
+    private BigDecimal price;
 
     @ManyToOne
     @JoinColumn(name = "product_fk")
@@ -42,8 +32,5 @@ public class Order {
     @JoinColumn(name = "supplier_fk")
     private Supplier supplier;
 
-    @OneToOne
-    @JoinColumn(name = "order_comment_fk")
-    private OrderComment orderComment;
 
 }

@@ -1,12 +1,9 @@
 package com.tradesystem;
 
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.tradesystem.buyer.Buyer;
-import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
 import com.tradesystem.invoice.InvoiceService;
 import com.tradesystem.order.Order;
@@ -14,7 +11,7 @@ import com.tradesystem.order.OrderDao;
 import com.tradesystem.order.OrderService;
 import com.tradesystem.product.ProductDao;
 import com.tradesystem.price.PriceDao;
-import com.tradesystem.supplier.Supplier;
+import com.tradesystem.report.ReportService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,14 +27,9 @@ public class TradesystemApplication {
 
     @Bean
     public CommandLineRunner bookDemo(OrderDao orderDao, PriceDao priceDao, ProductDao productDao,
-                                      OrderService orderService, InvoiceDao invoiceDao, InvoiceService invoiceService) {
+                                      OrderService orderService, InvoiceDao invoiceDao, InvoiceService invoiceService,
+                                      ReportService reportService) {
         return (args) -> {
-
-
-
-
-
-
 
 
             List<Order> orders = orderDao.findByBuyerId(1L);
@@ -47,6 +39,12 @@ public class TradesystemApplication {
                 orderService.payForOrderMainMethod(order);
             }
 
+
+            LocalDate localDate = LocalDate.now();
+            System.out.println(localDate.getMonthValue());
+
+            //reportService.sumMonthlyOrderedValue(2, 2020);
+            //reportService.calculateSoldedOrdersMonth(2);
             /*
             Supplier supplier = orders.get(0).getSupplier();
             Invoice invoice = new Invoice();
