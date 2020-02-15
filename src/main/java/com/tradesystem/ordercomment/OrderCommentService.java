@@ -14,7 +14,7 @@ public class OrderCommentService {
     private OrderCommentDao orderCommentDao;
 
 
-    private void addLackAmountComment(Order order, BigDecimal negativeValue) {
+    public void addLackAmountComment(Order order, BigDecimal negativeValue) {
         String previousComment = order.getOrderComment().getSystemComment();
 
         OrderComment orderComment = order.getOrderComment();
@@ -24,7 +24,7 @@ public class OrderCommentService {
 
     }
 
-    private void addBuyerComment(Order order, BigDecimal invoiceValue, Invoice invoice) {
+    public void addBuyerComment(Order order, BigDecimal invoiceValue, Invoice invoice) {
         if (order.getOrderComment() == null) {
             String buyerName = order.getBuyer().getName();
 
@@ -44,7 +44,7 @@ public class OrderCommentService {
         }
     }
 
-    private void addSupplierComment(Order order, BigDecimal invoiceValue, Invoice invoice) {
+    public void addSupplierComment(Order order, BigDecimal invoiceValue, Invoice invoice) {
         String supplierName = order.getSupplier().getName();
         String previousComment = order.getOrderComment().getSystemComment();
 

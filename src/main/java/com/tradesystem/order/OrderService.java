@@ -5,6 +5,7 @@ import com.tradesystem.invoice.InvoiceDao;
 import com.tradesystem.invoice.InvoiceService;
 import com.tradesystem.ordercomment.OrderComment;
 import com.tradesystem.ordercomment.OrderCommentDao;
+import com.tradesystem.ordercomment.OrderCommentService;
 import com.tradesystem.price.PriceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,9 @@ public class OrderService {
 
     @Autowired
     private InvoiceService invoiceService;
+
+    @Autowired
+    private OrderCommentService orderCommentService;
 
     @Autowired
     private OrderCommentDao orderCommentDao;
@@ -109,7 +113,7 @@ public class OrderService {
                     order.setOrderComment(orderComment);
                     orderCommentDao.save(orderComment);
                 } else {
-                    addSupplierComment(order, amountToPay, invoice);
+                    orderCommentService.addSupplierComment(order, amountToPay, invoice);
                 }
                 orderDao.save(order);
 
@@ -120,7 +124,7 @@ public class OrderService {
                 amount = amount.subtract(invoiceValue);
                 amountToPay = amount;
 
-                addSupplierComment(order, invoiceValue, invoice);
+                orderCommentService.addSupplierComment(order, invoiceValue, invoice);
 
                 orderDao.save(order);
                 saveInvoice(invoice, true);
@@ -131,7 +135,7 @@ public class OrderService {
                 invoice.setAmountToUse(BigDecimal.valueOf(0.0));
                 saveInvoice(invoice, true);
 
-                addSupplierComment(order, invoiceValue, invoice);
+                orderCommentService.addSupplierComment(order, invoiceValue, invoice);
 
                 invoiceNumbers.add(invoice.getInvoiceNumber());
                 amount = BigDecimal.valueOf(0.0);
@@ -152,7 +156,7 @@ public class OrderService {
             BigDecimal negativeValue = amount.multiply(BigDecimal.valueOf(-1));
             createSupplierNegativeInvoice(negativeValue, order);
 
-            addLackAmountComment(order, negativeValue);
+            orderCommentService.addLackAmountComment(order, negativeValue);
 
             orderDao.save(order);
         }
@@ -164,7 +168,6 @@ public class OrderService {
         BigDecimal amountToPay = order.getSum();
         List<String> invoiceNumbers = new ArrayList<>();
         int countedInvoices = 0;
-        //OrderComment orderComment = new OrderComment();
         OrderComment orderComment;
 
         for (Invoice invoice : invoices) {
@@ -181,16 +184,14 @@ public class OrderService {
                 invoiceNumbers.add(invoice.getInvoiceNumber());
 
                 if (countedInvoices > 1) {
-                    //String previousComment = order.getComment();
                     String previousComment = order.getOrderComment().getSystemComment();
-                    //order.setComment(previousComment + ", " + amountToPay + " z FV nr " + invoiceNumbers.get(countedInvoices - 1));
+
                     orderComment = order.getOrderComment();
                     orderComment.setSystemComment(previousComment + ", " + amountToPay + " z FV nr " + invoiceNumbers.get(countedInvoices - 1));
                     order.setOrderComment(orderComment);
                     orderCommentDao.save(orderComment);
                 } else {
-                    addBuyerComment(order, amountToPay, invoice);
-
+                    orderCommentService.addBuyerComment(order, amountToPay, invoice);
                 }
                 orderDao.save(order);
                 break;
@@ -200,7 +201,7 @@ public class OrderService {
                 amount = amount.subtract(invoiceValue);
                 amountToPay = amount;
 
-                addBuyerComment(order, invoiceValue, invoice);
+                orderCommentService.addBuyerComment(order, invoiceValue, invoice);
 
                 orderDao.save(order);
                 saveInvoice(invoice, true);
@@ -211,7 +212,7 @@ public class OrderService {
                 invoice.setAmountToUse(BigDecimal.valueOf(0.0));
                 saveInvoice(invoice, true);
 
-                addBuyerComment(order, invoiceValue, invoice);
+                orderCommentService.addBuyerComment(order, invoiceValue, invoice);
 
                 invoiceNumbers.add(invoice.getInvoiceNumber());
                 amount = BigDecimal.valueOf(0.0);
@@ -232,63 +233,12 @@ public class OrderService {
             BigDecimal negativeValue = amount.multiply(BigDecimal.valueOf(-1));
             createBuyerNegativeInvoice(negativeValue, order);
 
-            addLackAmountComment(order, negativeValue);
+            orderCommentService.addLackAmountComment(order, negativeValue);
 
             orderDao.save(order);
         }
 
     }
-
-    private void addLackAmountComment(Order order, BigDecimal negativeValue) {
-        //String previousComment = order.getComment();
-        String previousComment = order.getOrderComment().getSystemComment();
-        //order.setComment(previousComment + ", brakło " + negativeValue);
-
-        OrderComment orderComment = order.getOrderComment();
-        orderComment.setSystemComment(previousComment + ", brakło " + negativeValue);
-        order.setOrderComment(orderComment);
-        orderCommentDao.save(orderComment);
-
-    }
-
-    private void addBuyerComment(Order order, BigDecimal invoiceValue, Invoice invoice) {
-        if (order.getOrderComment() == null) {
-            String buyerName = order.getBuyer().getName();
-            //order.setComment(buyerName + ": odjęto " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
-            //orderDao.save(order);
-
-            OrderComment orderComment = new OrderComment();
-            orderComment.setSystemComment(buyerName + ": odjęto " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
-            order.setOrderComment(orderComment);
-            orderCommentDao.save(orderComment);
-
-        } else {
-            String previousComment = order.getOrderComment().getUserComment();
-            //order.setComment(previousComment + ", " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
-            //orderDao.save(order);
-
-            OrderComment orderComment = order.getOrderComment();
-            orderComment.setSystemComment(previousComment + ", " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
-            order.setOrderComment(orderComment);
-            orderCommentDao.save(orderComment);
-
-        }
-    }
-
-    private void addSupplierComment(Order order, BigDecimal invoiceValue, Invoice invoice) {
-            String supplierName = order.getSupplier().getName();
-            //String previousComment = order.getComment();
-            String previousComment = order.getOrderComment().getSystemComment();
-            //order.setComment(previousComment + ", " +supplierName + ": odjęto " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
-            //orderDao.save(order);
-
-            OrderComment orderComment = order.getOrderComment();
-            orderComment.setSystemComment(previousComment + ", " + supplierName + ": odjęto " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
-            order.setOrderComment(orderComment);
-            orderCommentDao.save(orderComment);
-
-    }
-
 
     private void createBuyerNegativeInvoice(BigDecimal amount, Order order) {
         Invoice invoice = new Invoice();
@@ -307,31 +257,4 @@ public class OrderService {
         invoice.setUsed(isUsed);
         invoiceDao.save(invoice);
     }
-
-
-    /*
-     private void addBuyerComment(Order order, BigDecimal invoiceValue, Invoice invoice) {
-        if (order.getComment() == null) {
-            String buyerName = order.getBuyer().getName();
-            //order.setComment(buyerName + ": odjęto " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
-            //orderDao.save(order);
-
-            OrderComment orderComment = new OrderComment();
-            orderComment.setSystemComment(buyerName + ": odjęto " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
-            order.setOrderComment(orderComment);
-            orderCommentDao.save(orderComment);
-
-        } else {
-            String previousComment = order.getComment();
-            //order.setComment(previousComment + ", " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
-            //orderDao.save(order);
-
-            OrderComment orderComment = order.getOrderComment();
-            orderComment.setSystemComment(previousComment + ", " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
-            order.setOrderComment(orderComment);
-            orderCommentDao.save(orderComment);
-
-        }
-    }
-     */
 }

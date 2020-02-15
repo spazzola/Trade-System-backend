@@ -22,8 +22,6 @@ public class Order {
     @Column(name = "order_id")
     private Long id;
 
-    private String comment;
-
     private LocalDate date;
 
     private BigDecimal quantity;
