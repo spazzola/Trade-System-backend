@@ -1,6 +1,7 @@
 package com.tradesystem.user;
 
 import lombok.Data;
+import org.hibernate.annotations.Proxy;
 
 import javax.persistence.*;
 

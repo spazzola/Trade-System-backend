@@ -1,11 +1,15 @@
 package com.tradesystem.invoice;
 
-import com.tradesystem.order.OrderDao;
+import com.tradesystem.buyer.Buyer;
+import com.tradesystem.orderdetails.OrderDetailsDao;
+import com.tradesystem.supplier.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
+import java.util.List;
 
 
 @Service
@@ -15,7 +19,7 @@ public class InvoiceService {
     private InvoiceDao invoiceDao;
 
     @Autowired
-    private OrderDao orderDao;
+    private OrderDetailsDao orderDetailsDao;
 
 
     public void addBuyerInvoice(Invoice invoice) {
@@ -27,7 +31,6 @@ public class InvoiceService {
             negativeInvoice.get().setUsed(true);
             invoiceDao.save(negativeInvoice.get());
 
-            //TODO rozbic na mniejsza metode? problem z Optionalem
             BigDecimal negativeAmount = negativeInvoice.get().getAmountToUse();
             BigDecimal newAmount = invoice.getAmountToUse().add(negativeAmount);
             BigDecimal different = BigDecimal.valueOf(0.0);
@@ -53,7 +56,6 @@ public class InvoiceService {
             invoiceDao.save(invoice);
         }
     }
-
 
     public void addSupplierInvoice(Invoice invoice) {
         Long supplierId = invoice.getSupplier().getId();
@@ -94,6 +96,60 @@ public class InvoiceService {
         invoice.setAmountToUse(newAmount);
         invoice.setValue(invoice.getValue());
         invoiceDao.save(invoice);
+    }
+
+    public void trasnferInvoicesToNextMonth(LocalDate localDate) {
+       createSupplierPositiveInvoice(localDate);
+       createBuyerPositiveInvoice(localDate);
+    }
+
+    private void createSupplierPositiveInvoice(LocalDate localDate) {
+        int month = localDate.getMonthValue();
+        int year = localDate.getYear();
+        List<Invoice> invoices = invoiceDao.getSuppliersMonthNotUsedInvoices(month, year);
+
+        for (Invoice oldInvoice : invoices) {
+            BigDecimal amountToUse = oldInvoice.getAmountToUse();
+            String invoiceNumber = oldInvoice.getInvoiceNumber();
+            Supplier supplier = oldInvoice.getSupplier();
+            LocalDate date = oldInvoice.getDate();
+            oldInvoice.setUsed(true);
+            invoiceDao.save(oldInvoice);
+
+            Invoice newInvoice = createInvoice(amountToUse, invoiceNumber, date);
+            newInvoice.setSupplier(supplier);
+            invoiceDao.save(newInvoice);
+        }
+    }
+
+
+    private void createBuyerPositiveInvoice(LocalDate localDate) {
+        int month = localDate.getMonthValue();
+        int year = localDate.getYear();
+        List<Invoice> invoices = invoiceDao.getBuyersMonthNotUsedPositivesInvoices(month, year);
+
+        for (Invoice oldInvoice : invoices) {
+            BigDecimal amountToUse = oldInvoice.getAmountToUse();
+            String invoiceNumber = oldInvoice.getInvoiceNumber();
+            Buyer buyer = oldInvoice.getBuyer();
+            LocalDate date = oldInvoice.getDate();
+            oldInvoice.setUsed(true);
+            invoiceDao.save(oldInvoice);
+
+            Invoice newInvoice = createInvoice(amountToUse, invoiceNumber, date);
+            newInvoice.setBuyer(buyer);
+            invoiceDao.save(newInvoice);
+        }
+    }
+
+    private Invoice createInvoice(BigDecimal amountToUse, String invoiceNumber, LocalDate date) {
+        Invoice invoice = new Invoice();
+        invoice.setAmountToUse(amountToUse);
+        invoice.setValue(amountToUse);
+        invoice.setComment("Przeniesiono z FV o nr: " + invoiceNumber);
+        invoice.setDate(date.plusMonths(1));
+
+        return invoice;
     }
 
 }

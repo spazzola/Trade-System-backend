@@ -3,6 +3,7 @@ package com.tradesystem.invoice;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.supplier.Supplier;
 import lombok.Data;
+import org.hibernate.annotations.Proxy;
 
 
 import javax.persistence.*;

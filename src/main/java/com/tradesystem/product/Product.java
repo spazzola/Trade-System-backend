@@ -2,6 +2,8 @@ package com.tradesystem.product;
 
 import com.tradesystem.price.Price;
 import lombok.Data;
+import org.hibernate.annotations.Proxy;
+
 import java.util.List;
 import javax.persistence.*;
 
@@ -19,18 +21,4 @@ public class Product {
     @OneToMany(mappedBy = "productType")
     private List<Price> prices;
 
-
-/*
-    @OneToOne
-    @JoinColumn(name = "price_id")
-    private Price price;
-
-    @ManyToOne
-    @JoinColumn(name = "buyer_fk")
-    private Buyer buyer;
-
-    @ManyToOne
-    @JoinColumn(name = "supplier_fk")
-    private Supplier supplier;
-    */
 }

@@ -1,8 +1,10 @@
 package com.tradesystem.supplier;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.tradesystem.invoice.Invoice;
+import com.tradesystem.order.Order;
 import com.tradesystem.price.Price;
 import lombok.Data;
 
@@ -20,15 +22,14 @@ public class Supplier {
 
     private String name;
 
-    //@OneToMany(mappedBy = "supplier")
-    //private List<Product> products;
+    private BigDecimal currentBalance;
 
-    //@OneToOne(mappedBy = "supplier", fetch = FetchType.EAGER)
-    //private Price prices;
-
-    @OneToMany(mappedBy = "supplier")
+    @OneToMany(mappedBy = "supplier", fetch = FetchType.EAGER)
     private List<Price> prices;
 
     @OneToMany(mappedBy = "supplier")
     private List<Invoice> invoices;
+
+    @OneToMany(mappedBy = "supplier")
+    private List<Order> orders;
 }

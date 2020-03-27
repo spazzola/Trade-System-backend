@@ -7,6 +7,7 @@ import com.tradesystem.price.Price;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -21,8 +22,7 @@ public class Buyer {
 
     private String name;
 
-    //@OneToMany(mappedBy = "buyer")
-    //private List<Product> products;
+    private BigDecimal currentBalance;
 
     @OneToMany(mappedBy = "buyer")
     private List<Price> prices;
@@ -32,8 +32,4 @@ public class Buyer {
 
     @OneToMany(mappedBy = "buyer")
     private List<Order> orders;
-
-
-
-
 }

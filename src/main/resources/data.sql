@@ -1,7 +1,6 @@
 INSERT INTO buyers (name) VALUES
   ('Babuszka'),
-  ('Czesyk'),
-  ('Jarosik');
+  ('Czesyk');
 
 INSERT INTO suppliers (name) VALUES
   ('Malek');
@@ -22,10 +21,15 @@ INSERT INTO product (product_type) VALUES
     ('M_2_5_DRY');
 
 
-INSERT INTO orders (quantity, buyer_fk, product_fk, supplier_fk, date) VALUES
-    (10, 1, 5, 1, '2020-02-01'),
-    (15, 1, 12, 1, '2020-02-01'),
-    (50, 1, 12, 1, '2020-12-01');
+INSERT INTO orders (date, buyer_fk, supplier_fk) VALUES
+    ('2020-02-01', 1, 1),
+    ('2020-02-01', 1, 1);
+
+
+INSERT INTO order_details (quantity, product_fk, order_fk) VALUES
+    (10, 1, 1),
+    (10, 1, 1),
+    (10, 1, 2);
 
 
 INSERT INTO prices (product_fk, price, buyer_fk, supplier_fk) VALUES
@@ -55,7 +59,7 @@ INSERT INTO prices (product_fk, price, buyer_fk, supplier_fk) VALUES
     (12, 190, null, 1);
 
 
-INSERT INTO invoices (amount_to_use, invoice_number, is_paid, is_used, value, buyer_fk, supplier_fk) VALUES
-    (10000, '100', true, false, 10000, 1, null),
-    (10000, '101', true, false, 10000, 1, null),
-    (15000, '113', true, false, 100000, null, 1);
+INSERT INTO invoices (amount_to_use, invoice_number, is_paid, is_used, value, buyer_fk, supplier_fk, date) VALUES
+    (1000, '100', true, false, 1000, 1, null, '2020-02-01'),
+    (10000, '113', true, false, 10000, null, 1, '2020-02-01');
+

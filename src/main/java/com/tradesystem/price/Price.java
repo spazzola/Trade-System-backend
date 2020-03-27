@@ -4,6 +4,7 @@ import com.tradesystem.buyer.Buyer;
 import com.tradesystem.product.Product;
 import com.tradesystem.supplier.Supplier;
 import lombok.Data;
+import org.hibernate.annotations.Proxy;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
