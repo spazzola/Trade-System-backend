@@ -28,13 +28,13 @@ public class OrderDetails {
 
     private BigDecimal supplierSum;
 
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.PERSIST)
     @JoinColumn(name = "order_fk")
     private Order order;
 
     @ManyToOne
     @JoinColumn(name = "product_fk")
-    private Product productType;
+    private Product product;
 
     @OneToOne
     @JoinColumn(name = "order_comment_fk")

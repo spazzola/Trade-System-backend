@@ -22,6 +22,19 @@ public class SupplierService {
 
 
     @Transactional
+    public Supplier createBuyer(SupplierDto supplierDto) {
+        Supplier supplier = Supplier.builder()
+                .name(supplierDto.getName())
+                .build();
+
+        return supplierDao.save(supplier);
+    }
+
+    public List<Supplier> getAll() {
+        return supplierDao.findAll();
+    }
+
+    @Transactional
     public List<Supplier> getBalances() {
         List<Supplier> suppliers = supplierDao.findAll();
         List<Supplier> resultSuppliers = new ArrayList<>();

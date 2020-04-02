@@ -14,7 +14,7 @@ public interface PriceDao extends JpaRepository<Price, Long> {
 
 
     @Query(value = "SELECT price FROM prices " +
-            "INNER JOIN product prod ON prices.product_fk = prod.product_id " +
+            "INNER JOIN products prod ON prices.product_fk = prod.product_id " +
             "WHERE prices.buyer_fk = :buyerId AND prices.product_fk = :productId",
             nativeQuery = true)
     BigDecimal getBuyerPrice(@Param("buyerId") Long buyerId,
@@ -22,7 +22,7 @@ public interface PriceDao extends JpaRepository<Price, Long> {
 
 
     @Query(value = "SELECT price FROM prices " +
-            "INNER JOIN product prod ON prices.product_fk = prod.product_id " +
+            "INNER JOIN products prod ON prices.product_fk = prod.product_id " +
             "WHERE prices.supplier_fk = :supplierId AND prices.product_fk = :productId",
             nativeQuery = true)
     BigDecimal getSupplierPrice(@Param("supplierId") Long supplierId,

@@ -5,6 +5,7 @@ import com.tradesystem.buyer.BuyerService;
 import com.tradesystem.cost.Cost;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
+import com.tradesystem.invoice.InvoiceService;
 import com.tradesystem.order.Order;
 import com.tradesystem.order.OrderDao;
 import com.tradesystem.order.OrderService;
@@ -45,44 +46,13 @@ class TradesystemApplicationTests {
 	@Autowired
 	private InvoiceDao invoiceDao;
 
+	@Autowired
+	private InvoiceService invoiceService;
+
+
 	@Test
 	void contextLoads() {
 	}
 
-	@Transactional
-	@Test
-	void t() {
 
-		Set<Order> orders = orderDao.getMonthOrders(2, 2020);
-
-		for (Order order : orders) {
-			orderService.calculateOrder(order);
-		}
-
-		List<Cost> costs = Arrays.asList(new Cost("auto", BigDecimal.valueOf(0), LocalDate.now()));
-
-		Report report = reportMonthService.generateMonthReport(2, 2020, costs);
-		reportDao.save(report);
-
-		System.out.println("===============");
-		System.out.println(report.toString());
-	}
-
-	@Transactional
-	@Test
-	void a() {
-
-		Set<Order> orders = orderDao.getMonthOrders(2, 2020);
-
-		for (Order order : orders) {
-			orderService.calculateOrder(order);
-		}
-
-		List<Buyer> buyers = buyerService.getBalances();
-
-		for (Buyer buyer : buyers) {
-			System.out.println(buyer.getCurrentBalance());
-		}
-
-	}
 }

@@ -1,6 +1,7 @@
 package com.tradesystem.report;
 
 import com.tradesystem.cost.Cost;
+import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
 import com.tradesystem.order.OrderDao;
 import com.tradesystem.orderdetails.OrderDetailsDao;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReportService {
@@ -22,19 +24,6 @@ public class ReportService {
     @Autowired
     private OrderDao orderDao;
 
-
-
-    public BigDecimal calculateProfits(BigDecimal averageEarningsPerM3, BigDecimal soldedQuantity, List<Cost> costs) {
-        BigDecimal sumCosts = BigDecimal.valueOf(0);
-
-        for (Cost cost : costs) {
-            sumCosts = sumCosts.add(cost.getValue());
-        }
-
-        BigDecimal income = averageEarningsPerM3.multiply(soldedQuantity);
-
-        return income.subtract(sumCosts);
-    }
 
 
 }

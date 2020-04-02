@@ -3,7 +3,10 @@ package com.tradesystem.price;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.product.Product;
 import com.tradesystem.supplier.Supplier;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Proxy;
 
 import javax.persistence.*;
@@ -11,6 +14,9 @@ import java.math.BigDecimal;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "prices")
 public class Price {
 
@@ -21,9 +27,9 @@ public class Price {
 
     private BigDecimal price;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_fk")
-    private Product productType;
+    private Product product;
 
     @ManyToOne
     @JoinColumn(name = "buyer_fk")

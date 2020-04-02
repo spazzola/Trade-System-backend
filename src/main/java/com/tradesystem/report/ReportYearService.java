@@ -1,41 +1,51 @@
 package com.tradesystem.report;
 
 import com.tradesystem.cost.Cost;
+import com.tradesystem.cost.CostDao;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
 import com.tradesystem.order.Order;
 import com.tradesystem.order.OrderDao;
 import com.tradesystem.orderdetails.OrderDetails;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+@Service
 public class ReportYearService {
 
-    @Autowired
+
     private InvoiceDao invoiceDao;
-
-    @Autowired
     private OrderDao orderDao;
-
-    @Autowired
     private ReportService reportService;
+    private CostDao costDao;
 
+    public ReportYearService(InvoiceDao invoiceDao, OrderDao orderDao, ReportService reportService, CostDao costDao) {
+        this.invoiceDao = invoiceDao;
+        this.orderDao = orderDao;
+        this.reportService = reportService;
+        this.costDao = costDao;
+    }
 
     //TODO zrobic nowe selecty pod solo year
-    public Report generateYearReport(int year, List<Cost> costs) {
+    public Report generateYearReport(int year) {
+        List<Cost> costs = costDao.getYearCosts(year);
         //1. Zsumować wartośc wysłanych zamówień - przewidywana kwota która powinna byc na koncie
-        BigDecimal soldedValue = sumMonthlySoldedValue(year);
+        BigDecimal soldedValue = sumYearSoldedValue(year);
+        BigDecimal boughtValue = sumYearBoughtValue(year);
+
+        BigDecimal suppliersNotUsedValue = calculateSuppliersNotUsedValue(year);
+        BigDecimal buyersNotUsedValue = calculateBuyersNotUsedAmount(year);
 
         //2. Zsumować wartość faktur zaliczkowych za dany miesiąc - sprawdzic roznice pomiedzy pkt 1 a 2
         // Porownac wartosc wysłanych zamowien z wartoscia fv które wpłyneły z uwzględnieniem deficytu/nadwyżki
         //2a. Uwzglednic wartosc nadwyzki/deficytu jaki zostal u supplierow
         //TODO incomes - uwzglednic + ktory jest przerzucany na next month
-        BigDecimal monthlyIncomes = sumMonthlyIncomes(year);
-        BigDecimal incomesDifference = soldedValue.subtract(monthlyIncomes);
+        BigDecimal yearIncomes = sumYearIncomes(year);
 
         //3. Zsumować ilość wysłanych m3 = sumMonthlySoldedQuantity()
         BigDecimal soldedQuantity = sumMonthlySoldedQuantity(year);
@@ -47,23 +57,76 @@ public class ReportYearService {
         BigDecimal averageEarningsPerM3 = averageSold.subtract(averagePurchase);
 
         //7. Wyliczyc zysk
-        BigDecimal profit = reportService.calculateProfits(averageEarningsPerM3, soldedQuantity, costs);
+        BigDecimal profit = calculateProfits(year, costs);
 
         //8. Zapisac wszystko do obiektu
-
-        return new Report.ReportBuilder()
-                .setSoldedValue(soldedValue)
-                .setSoldedQuantity(soldedQuantity)
-                .setIncomes(monthlyIncomes)
-                .setIncomesDifference(incomesDifference)
-                .setAverageSold(averageSold)
-                .setAveragePurchase(averagePurchase)
-                .setAverageEarningsPerM3(averageEarningsPerM3)
-                .setProfit(profit)
-                .setType(String.valueOf(LocalDate.now().withYear(year).getYear()))
+        return Report.builder()
+                .soldedValue(soldedValue)
+                .boughtValue(boughtValue)
+                .buyersNotUsedValue(buyersNotUsedValue)
+                .suppliersNotUsedValue(suppliersNotUsedValue)
+                .soldedQuantity(soldedQuantity)
+                .averageSold(averageSold)
+                .averagePurchase(averagePurchase)
+                .averageEarningsPerM3(averageEarningsPerM3)
+                .profit(profit)
+                .type(LocalDate.now().withYear(year).toString())
                 .build();
     }
 
+    private BigDecimal calculateBuyersNotUsedAmount(int year) {
+        Optional<List<Invoice>> notUsedInvoices = invoiceDao.getBuyersYearNotUsedPositivesInvoices(year);
+        BigDecimal notUsedValue = BigDecimal.valueOf(0);
+
+        if (notUsedInvoices.isPresent()) {
+            for (Invoice invoice : notUsedInvoices.get()) {
+                notUsedValue = notUsedValue.add(invoice.getAmountToUse());
+            }
+        }
+        return notUsedValue;
+    }
+
+    private BigDecimal calculateSuppliersNotUsedValue(int year) {
+        Optional<List<Invoice>> suppliersNotUsedInvoices = invoiceDao.getSuppliersYearNotUsedInvoices(year);
+        BigDecimal notUsedValue = BigDecimal.valueOf(0);
+
+        if (suppliersNotUsedInvoices.isPresent()) {
+            for (Invoice invoice : suppliersNotUsedInvoices.get()) {
+                notUsedValue = notUsedValue.add(invoice.getAmountToUse());
+            }
+        }
+        return notUsedValue;
+    }
+
+    private BigDecimal sumYearSoldedValue(int year) {
+        Set<Order> orders = orderDao.getYearOrders(year);
+        BigDecimal sum = BigDecimal.valueOf(0);
+
+        for (Order order : orders) {
+            List<OrderDetails> orderDetails = order.getOrderDetails();
+
+            for (OrderDetails orderDetail : orderDetails) {
+                sum = sum.add(orderDetail.getBuyerSum());
+            }
+        }
+        return sum;
+    }
+
+    private BigDecimal sumYearBoughtValue(int year) {
+        Set<Order> orders = orderDao.getYearOrders(year);
+        BigDecimal sum = BigDecimal.valueOf(0);
+
+        for (Order order : orders) {
+            List<OrderDetails> orderDetails = order.getOrderDetails();
+
+            for (OrderDetails orderDetail : orderDetails) {
+                sum = sum.add(orderDetail.getSupplierSum());
+            }
+        }
+        return sum;
+    }
+
+    //TODO poprawic optional
     private BigDecimal calculateAveragePurchase(int year, BigDecimal quantity) {
         List<Invoice> usedInvoices = invoiceDao.getSuppliersYearUsedInvoices(year);
         BigDecimal usedAmount = BigDecimal.valueOf(0);
@@ -72,9 +135,9 @@ public class ReportYearService {
             usedAmount = usedAmount.add(invoice.getValue());
         }
 
-        List<Invoice> notUsedInvoices = invoiceDao.getSuppliersYearNotUsedInvoices(year);
+        Optional<List<Invoice>> notUsedInvoices = invoiceDao.getSuppliersYearNotUsedInvoices(year);
 
-        for (Invoice invoice : notUsedInvoices) {
+        for (Invoice invoice : notUsedInvoices.get()) {
             BigDecimal invoiceValue = invoice.getValue();
             BigDecimal notUsedValue = invoice.getAmountToUse();
             BigDecimal usedValue = invoiceValue.subtract(notUsedValue);
@@ -85,38 +148,22 @@ public class ReportYearService {
         return usedAmount.divide(quantity);
     }
 
+    //mega podobna metoda to tej samej z month report, roznica w liscie orderdsow
     private BigDecimal calculateAverageSold(int year, BigDecimal quantity) {
-        List<Invoice> usedInvoices = invoiceDao.getBuyersYearUsedInvoices(year);
-        BigDecimal usedAmount = BigDecimal.valueOf(0);
+        Set<Order> orders = orderDao.getYearOrders(year);
+        BigDecimal sum = BigDecimal.valueOf(0);
 
-        for (Invoice invoice : usedInvoices) {
-            usedAmount = usedAmount.add(invoice.getValue());
-        }
+        for (Order order : orders) {
+            List<OrderDetails> orderDetails = order.getOrderDetails();
 
-        List<Invoice> notUsedInvoices = invoiceDao.getBuyersYearNotUsedPositivesInvoices(year);
-
-        for (Invoice invoice : notUsedInvoices) {
-            BigDecimal invoiceValue = invoice.getValue();
-            BigDecimal notUsedValue = invoice.getAmountToUse();
-            BigDecimal usedValue = invoiceValue.subtract(notUsedValue);
-
-            usedAmount = usedAmount.add(usedValue);
-        }
-
-        Optional<List<Invoice>> negativeInvoices = invoiceDao.getBuyersYearNotUsedNegativeInvoices(year);
-
-        if (negativeInvoices.isPresent()) {
-            List<Invoice> invoices = negativeInvoices.get();
-            BigDecimal converter = BigDecimal.valueOf(-1);
-            for (Invoice invoice : invoices) {
-                usedAmount = usedAmount.add(invoice.getAmountToUse().multiply(converter));
+            for (OrderDetails orderDetail : orderDetails) {
+                sum = sum.add(orderDetail.getBuyerSum());
             }
         }
-
-        return usedAmount.divide(quantity);
+        return sum.divide(quantity, 2);
     }
 
-    private BigDecimal sumMonthlyIncomes(int year) {
+    private BigDecimal sumYearIncomes(int year) {
         List<Invoice> invoices = invoiceDao.getBuyersYearIncomedInvoices(year);
         BigDecimal incomedValue = BigDecimal.valueOf(0);
 
@@ -127,9 +174,17 @@ public class ReportYearService {
     }
 
     private BigDecimal calculateAvaragePurchase(int year, BigDecimal soldedQuantity) {
-        BigDecimal usedAmount = calculateSuppliersMonthUsedValue(year);
+        Set<Order> orders = orderDao.getYearOrders(year);
+        BigDecimal sum = BigDecimal.valueOf(0);
 
-        return usedAmount.divide(soldedQuantity);
+        for (Order order : orders) {
+            List<OrderDetails> orderDetails = order.getOrderDetails();
+
+            for (OrderDetails orderDetail : orderDetails) {
+                sum = sum.add(orderDetail.getSupplierSum());
+            }
+        }
+        return sum.divide(soldedQuantity, 2);
     }
 
     private BigDecimal calculateSuppliersMonthUsedValue(int year) {
@@ -147,7 +202,7 @@ public class ReportYearService {
     }
 
     private BigDecimal sumMonthlySoldedValue(int year) {
-        List<Order> orders = orderDao.getYearOrders(year);
+        Set<Order> orders = orderDao.getYearOrders(year);
         BigDecimal sum = BigDecimal.valueOf(0);
 
         for (Order order : orders) {
@@ -161,7 +216,7 @@ public class ReportYearService {
     }
 
     private BigDecimal sumMonthlySoldedQuantity(int year) {
-        List<Order> orders = orderDao.getYearOrders(year);
+        Set<Order> orders = orderDao.getYearOrders(year);
         BigDecimal totalQuantity = BigDecimal.valueOf(0);
 
         for (Order order : orders) {
@@ -173,4 +228,48 @@ public class ReportYearService {
         }
         return totalQuantity;
     }
+
+    private BigDecimal calculateSuppliersUsedAmount(int year) {
+        List<Invoice> invoices = invoiceDao.getSuppliersYearInvoices(year);
+
+        BigDecimal generalAmountToUse = BigDecimal.valueOf(0);
+        for (Invoice invoice : invoices) {
+            generalAmountToUse = generalAmountToUse.add(invoice.getValue());
+        }
+
+        BigDecimal amountToUse = BigDecimal.valueOf(0);
+        for (Invoice invoice : invoices) {
+            amountToUse = amountToUse.add(invoice.getAmountToUse());
+        }
+
+        return generalAmountToUse.subtract(amountToUse);
+    }
+
+    private BigDecimal calculateProfits(int year, List<Cost> costs) {
+        BigDecimal sumCosts = BigDecimal.valueOf(0);
+        Optional<List<Invoice>> invoices = invoiceDao.getBuyersYearNegativeInvoices(year);
+
+        if (invoices.isPresent()) {
+            List<Invoice> negativeInvoices = invoices.get();
+            for (Invoice invoice : negativeInvoices) {
+                sumCosts = sumCosts.add(invoice.getAmountToUse());
+
+            }
+        }
+
+        for (Cost cost : costs) {
+            sumCosts = sumCosts.add(cost.getValue());
+        }
+        //to co my zaplacilismy
+        BigDecimal suppliersUsedAmount = calculateSuppliersUsedAmount(year);
+        //BigDecimal paidOrders = calculateBuyersUsedAmount(year);
+
+
+        //BigDecimal income = paidOrders.subtract(suppliersUsedAmount);
+        //BigDecimal profits = income.add(sumCosts);
+
+        //return profits;
+        return null;
+    }
+
 }

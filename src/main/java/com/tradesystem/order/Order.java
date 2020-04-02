@@ -3,14 +3,19 @@ package com.tradesystem.order;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.orderdetails.OrderDetails;
 import com.tradesystem.supplier.Supplier;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Table(name = "orders")
 public class Order {

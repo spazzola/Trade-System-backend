@@ -2,8 +2,9 @@ package com.tradesystem.invoice;
 
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.supplier.Supplier;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import org.hibernate.annotations.Proxy;
 
 
 import javax.persistence.*;
@@ -12,6 +13,8 @@ import java.time.LocalDate;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
 @Table(name = "invoices")
 public class Invoice {
 
@@ -38,4 +41,5 @@ public class Invoice {
 
     public Invoice() {
     }
+
 }

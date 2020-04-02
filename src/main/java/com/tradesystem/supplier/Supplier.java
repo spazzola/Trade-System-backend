@@ -6,12 +6,18 @@ import java.util.List;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.order.Order;
 import com.tradesystem.price.Price;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "suppliers")
 public class Supplier {
 

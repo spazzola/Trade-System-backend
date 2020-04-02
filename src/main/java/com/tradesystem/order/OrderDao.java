@@ -45,7 +45,8 @@ public interface OrderDao extends JpaRepository<Order, Long> {
             "WHERE MONTH(orders.date) = ?1 AND YEAR(orders.date) = ?2")
     List<Order> getMonthOrders(int month, int year);
 */
-    @Query(value = "SELECT orders FROM Order orders LEFT JOIN FETCH orders.orderDetails " +
+    @Query(value = "SELECT orders FROM Order orders " +
+            "LEFT JOIN FETCH orders.orderDetails " +
             "WHERE YEAR(orders.date) = ?1")
-    List<Order> getYearOrders(int year);
+    Set<Order> getYearOrders(int year);
 }

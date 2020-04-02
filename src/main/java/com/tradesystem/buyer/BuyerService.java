@@ -13,14 +13,23 @@ import java.util.*;
 @Service
 public class BuyerService {
 
-
-
-    @Autowired
     private InvoiceDao invoiceDao;
-
-    @Autowired
     private BuyerDao buyerDao;
 
+    public BuyerService(InvoiceDao invoiceDao, BuyerDao buyerDao) {
+        this.invoiceDao = invoiceDao;
+        this.buyerDao = buyerDao;
+    }
+
+
+    @Transactional
+    public Buyer createBuyer(BuyerDto buyerDto) {
+        Buyer buyer = Buyer.builder()
+                        .name(buyerDto.getName())
+                        .build();
+
+        return buyerDao.save(buyer);
+    }
 
     @Transactional
     public List<Buyer> getBalances() {
@@ -33,6 +42,10 @@ public class BuyerService {
         }
 
         return resultBuers;
+    }
+
+    public List<Buyer> getAll() {
+        return buyerDao.findAll();
     }
 
     private Buyer setCurrentBalance(Buyer buyer) {
