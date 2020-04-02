@@ -4,7 +4,6 @@ import com.tradesystem.cost.Cost;
 import com.tradesystem.cost.CostDao;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
-import com.tradesystem.invoice.InvoiceService;
 import com.tradesystem.order.Order;
 import com.tradesystem.order.OrderDao;
 import com.tradesystem.orderdetails.OrderDetails;
@@ -36,28 +35,20 @@ public class ReportMonthService {
     public Report generateMonthReport(int month, int year) {
         List<Cost> costs = costDao.getMonthCosts(month, year);
 
-        //1. Zsumować wartośc wysłanych zamówień oraz kupionych
         BigDecimal soldedValue = sumMonthlySoldedValue(month, year);
         BigDecimal boughtValue = sumMonthlyBoughtValue(month, year);
 
-        //wyliczyc ile jest nieuzytej kwoty u supplierow
-        BigDecimal suppliersNotUsedValue = calculateSuppliersNotUsedValue(month, year);
-        //wyliczyc ile dostawcy maja nieuzytej kwoty
         BigDecimal buyersNotUsedValue = calculateBuyersNotUsedAmount(month, year);
+        BigDecimal suppliersNotUsedValue = calculateSuppliersNotUsedValue(month, year);
 
-        //3. Zsumować ilość wysłanych m3 = sumMonthlySoldedQuantity()
         BigDecimal soldedQuantity = sumMonthlySoldedQuantity(month, year);
 
-        //4. Wyliczyc sredni zarobek na m3 (sprzedaz i kupno) =
-        //   dodac kolumne isOplacone do orderDetails? zeby operowac na produktach ktore zostaly oplacone
         BigDecimal averageSold = calculateAverageSold(month, year, soldedQuantity);
         BigDecimal averagePurchase = calculateAveragePurchase(month, year, soldedQuantity);
         BigDecimal averageEarningsPerM3 = averageSold.subtract(averagePurchase);
 
-        //7. Wyliczyc zysk
         BigDecimal profit = calculateProfits(month, year, costs);
 
-        //8. Zapisac wszystko do obiektu
         return Report.builder()
                 .soldedValue(soldedValue)
                 .boughtValue(boughtValue)
@@ -181,10 +172,7 @@ public class ReportMonthService {
             sumCosts = sumCosts.add(cost.getValue().multiply(BigDecimal.valueOf(-1)));
         }
 
-        //to co my zaplacilismy
         BigDecimal suppliersUsedAmount = calculateSuppliersUsedAmount(month, year);
-
-        //obliczyc zaplaconych wartosc zamowien
         BigDecimal paidOrders = calculateBuyersUsedAmount(month, year);
 
         BigDecimal income = paidOrders.subtract(suppliersUsedAmount);

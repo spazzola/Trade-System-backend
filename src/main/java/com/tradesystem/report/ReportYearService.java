@@ -8,6 +8,7 @@ import com.tradesystem.order.Order;
 import com.tradesystem.order.OrderDao;
 import com.tradesystem.orderdetails.OrderDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,37 +31,24 @@ public class ReportYearService {
         this.costDao = costDao;
     }
 
-
-    //TODO zrobic nowe selecty pod solo year
+    @Transactional
     public Report generateYearReport(int year) {
         List<Cost> costs = costDao.getYearCosts(year);
 
-        //1. Zsumować wartośc wysłanych zamówień - przewidywana kwota która powinna byc na koncie
         BigDecimal soldedValue = sumYearSoldedValue(year);
         BigDecimal boughtValue = sumYearBoughtValue(year);
 
-        BigDecimal suppliersNotUsedValue = calculateSuppliersNotUsedValue(year);
         BigDecimal buyersNotUsedValue = calculateBuyersNotUsedAmount(year);
+        BigDecimal suppliersNotUsedValue = calculateSuppliersNotUsedValue(year);
 
-        //2. Zsumować wartość faktur zaliczkowych za dany miesiąc - sprawdzic roznice pomiedzy pkt 1 a 2
-        // Porownac wartosc wysłanych zamowien z wartoscia fv które wpłyneły z uwzględnieniem deficytu/nadwyżki
-        //2a. Uwzglednic wartosc nadwyzki/deficytu jaki zostal u supplierow
-        //TODO incomes - uwzglednic + ktory jest przerzucany na next month
-        BigDecimal yearIncomes = sumYearIncomes(year);
-
-        //3. Zsumować ilość wysłanych m3 = sumMonthlySoldedQuantity()
         BigDecimal soldedQuantity = sumMonthlySoldedQuantity(year);
 
-        //4. Wyliczyc sredni zarobek na m3 (sprzedaz i kupno) =
-        //   dodac kolumne isOplacone do orderDetails? zeby operowac na produktach ktore zostaly oplacone
         BigDecimal averageSold = calculateAverageSold(year, soldedQuantity);
         BigDecimal averagePurchase = calculateAvaragePurchase(year, soldedQuantity);
         BigDecimal averageEarningsPerM3 = averageSold.subtract(averagePurchase);
 
-        //7. Wyliczyc zysk
         BigDecimal profit = calculateProfits(year, costs);
 
-        //8. Zapisac wszystko do obiektu
         return Report.builder()
                 .soldedValue(soldedValue)
                 .boughtValue(boughtValue)
@@ -127,7 +115,6 @@ public class ReportYearService {
         return sum;
     }
 
-    //mega podobna metoda to tej samej z month report, roznica w liscie orderdsow
     private BigDecimal calculateAverageSold(int year, BigDecimal quantity) {
         Set<Order> orders = orderDao.getYearOrders(year);
         BigDecimal sum = BigDecimal.valueOf(0);
@@ -211,10 +198,9 @@ public class ReportYearService {
         for (Cost cost : costs) {
             sumCosts = sumCosts.add(cost.getValue());
         }
-        //to co my zaplacilismy
+
         BigDecimal suppliersUsedAmount = calculateSuppliersUsedAmount(year);
         BigDecimal paidOrders = calculateBuyersUsedAmount(year);
-
 
         BigDecimal income = paidOrders.subtract(suppliersUsedAmount);
         BigDecimal profits = income.add(sumCosts);

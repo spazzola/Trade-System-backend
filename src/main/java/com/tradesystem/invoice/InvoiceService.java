@@ -61,10 +61,7 @@ public class InvoiceService {
             throw new RuntimeException("Nie mozna stworzyc faktury bez buyer lub supplier");
         }
 
-        //pomysl o walidacji np.
-        //czy invoice number juz nie istnieje i czy jest w odpowiednim formacie mozna uzywac Pattern i regex
-        //czy data jest ok, to juz musisz ustalic na ile wstecz np mozna wystawic fakture
-        //zastanow sie czy wartosci i inne dane tez mozna zwalidowac
+        //TODO dorobic walidacje wartosci fv, nie moze byc =< 0
 
         final Invoice invoice = Invoice.builder()
                 .id(null)
