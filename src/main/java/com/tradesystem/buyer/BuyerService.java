@@ -2,8 +2,6 @@ package com.tradesystem.buyer;
 
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
-import com.tradesystem.price.PriceDao;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,11 +47,10 @@ public class BuyerService {
     }
 
     private Buyer setCurrentBalance(Buyer buyer) {
-        //get notUsed invoices
         List<Invoice> notUsedInvoices = invoiceDao.getBuyerNotUsedInvoices(buyer.getId());
 
         BigDecimal balance = BigDecimal.valueOf(0);
-        //get amount from them
+
         for (Invoice invoice : notUsedInvoices) {
             balance = balance.add(invoice.getAmountToUse());
         }
@@ -67,4 +64,5 @@ public class BuyerService {
 
         return buyer;
     }
+
 }

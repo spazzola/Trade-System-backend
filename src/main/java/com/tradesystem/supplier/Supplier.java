@@ -16,8 +16,8 @@ import javax.persistence.*;
 @Entity
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "suppliers")
 public class Supplier {
 

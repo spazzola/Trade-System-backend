@@ -22,5 +22,4 @@ public class ProductController {
         return productMapper.toDto(product);
     }
 
-
 }

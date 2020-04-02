@@ -40,10 +40,12 @@ public class PriceMapper {
         if (supplier != null) {
             supplierDto = supplierMapper.toDto(supplier);
         }
+
         final ProductDto productDto = productMapper.toDto(product);
 
         return PriceDto.builder()
                 .price(price.getPrice())
+                .product(productDto)
                 .buyer(buyerDto)
                 .supplier(supplierDto)
                 .build();

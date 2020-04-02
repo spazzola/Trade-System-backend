@@ -32,7 +32,6 @@ public class Report {
 
     private BigDecimal averageSold;
 
-
     private BigDecimal averagePurchase;
 
     private BigDecimal averageEarningsPerM3;

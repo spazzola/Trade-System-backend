@@ -18,7 +18,7 @@ public class PriceDto {
 
 
     private BigDecimal price;
-    private ProductDto productType;
+    private ProductDto product;
     private BuyerDto buyer;
     private SupplierDto supplier;
 

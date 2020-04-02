@@ -21,15 +21,15 @@ public class ReportYearService {
 
     private InvoiceDao invoiceDao;
     private OrderDao orderDao;
-    private ReportService reportService;
     private CostDao costDao;
 
-    public ReportYearService(InvoiceDao invoiceDao, OrderDao orderDao, ReportService reportService, CostDao costDao) {
+
+    public ReportYearService(InvoiceDao invoiceDao, OrderDao orderDao, CostDao costDao) {
         this.invoiceDao = invoiceDao;
         this.orderDao = orderDao;
-        this.reportService = reportService;
         this.costDao = costDao;
     }
+
 
     //TODO zrobic nowe selecty pod solo year
     public Report generateYearReport(int year) {
@@ -127,28 +127,6 @@ public class ReportYearService {
         return sum;
     }
 
-    //TODO poprawic optional
-    private BigDecimal calculateAveragePurchase(int year, BigDecimal quantity) {
-        List<Invoice> usedInvoices = invoiceDao.getSuppliersYearUsedInvoices(year);
-        BigDecimal usedAmount = BigDecimal.valueOf(0);
-
-        for (Invoice invoice : usedInvoices) {
-            usedAmount = usedAmount.add(invoice.getValue());
-        }
-
-        Optional<List<Invoice>> notUsedInvoices = invoiceDao.getSuppliersYearNotUsedInvoices(year);
-
-        for (Invoice invoice : notUsedInvoices.get()) {
-            BigDecimal invoiceValue = invoice.getValue();
-            BigDecimal notUsedValue = invoice.getAmountToUse();
-            BigDecimal usedValue = invoiceValue.subtract(notUsedValue);
-
-            usedAmount = usedAmount.add(usedValue);
-        }
-
-        return usedAmount.divide(quantity);
-    }
-
     //mega podobna metoda to tej samej z month report, roznica w liscie orderdsow
     private BigDecimal calculateAverageSold(int year, BigDecimal quantity) {
         Set<Order> orders = orderDao.getYearOrders(year);
@@ -186,34 +164,6 @@ public class ReportYearService {
             }
         }
         return sum.divide(soldedQuantity, 2);
-    }
-
-    private BigDecimal calculateSuppliersMonthUsedValue(int year) {
-        //czemu nazwa metody monthusedvalue a wyciamy wszystkie fv? do sprawdzenia
-        //jednak raczej pasuje, wyciaganie all fv, obliczenie total value a nastepnie odjecie tego co zostalo
-        List<Invoice> invoices = invoiceDao.getSuppliersYearInvoices(year);
-        BigDecimal totalValue = BigDecimal.valueOf(0);
-        BigDecimal notUsedAmount = BigDecimal.valueOf(0);
-        for (Invoice invoice : invoices) {
-            totalValue = totalValue.add(invoice.getValue());
-            notUsedAmount = notUsedAmount.add(invoice.getAmountToUse());
-        }
-
-        return totalValue.subtract(notUsedAmount);
-    }
-
-    private BigDecimal sumMonthlySoldedValue(int year) {
-        Set<Order> orders = orderDao.getYearOrders(year);
-        BigDecimal sum = BigDecimal.valueOf(0);
-
-        for (Order order : orders) {
-            List<OrderDetails> orderDetails = order.getOrderDetails();
-
-            for (OrderDetails orderDetail : orderDetails) {
-                sum = sum.add(orderDetail.getBuyerSum());
-            }
-        }
-        return sum;
     }
 
     private BigDecimal sumMonthlySoldedQuantity(int year) {

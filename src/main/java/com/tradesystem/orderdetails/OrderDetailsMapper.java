@@ -1,5 +1,8 @@
 package com.tradesystem.orderdetails;
 
+import com.tradesystem.ordercomment.OrderComment;
+import com.tradesystem.ordercomment.OrderCommentDto;
+import com.tradesystem.product.ProductDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -9,12 +12,24 @@ import java.util.stream.Collectors;
 public class OrderDetailsMapper {
 
     public OrderDetailsDto toDto(OrderDetails orderDetails) {
+        OrderComment orderComment = orderDetails.getOrderComment();
+
+        OrderCommentDto orderCommentDto = OrderCommentDto.builder()
+                .userComment(orderComment.getUserComment())
+                .systemComment(orderComment.getSystemComment())
+                .build();
+
+        ProductDto productDto = ProductDto.builder()
+                .productId(orderDetails.getProduct().getId())
+                .product(orderDetails.getProduct().getProduct())
+                .build();
+
         return OrderDetailsDto.builder()
                 .quantity(orderDetails.getQuantity())
                 .buyerSum(orderDetails.getBuyerSum())
                 .supplierSum(orderDetails.getSupplierSum())
-                //.product(orderDetails.getProduct())
-                //.orderComment(orderDetails.getOrderComment())
+                .product(productDto)
+                .orderComment(orderCommentDto)
                 .build();
     }
 

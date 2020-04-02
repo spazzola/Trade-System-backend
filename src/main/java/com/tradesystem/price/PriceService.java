@@ -17,16 +17,14 @@ import java.util.Optional;
 public class PriceService {
 
     private PriceDao priceDao;
-    private BuyerDao buyerDao;
-    private SupplierDao supplierDao;
     private ProductDao productDao;
 
-    public PriceService(PriceDao priceDao, BuyerDao buyerDao, SupplierDao supplierDao, ProductDao productDao) {
+
+    public PriceService(PriceDao priceDao, ProductDao productDao) {
         this.priceDao = priceDao;
-        this.buyerDao = buyerDao;
-        this.supplierDao = supplierDao;
         this.productDao = productDao;
     }
+
 
     @Transactional
     public Price createBuyerPrice(PriceDto priceDto) {
@@ -41,11 +39,16 @@ public class PriceService {
                     .id(buyerDto.getId())
                     .build();
 
-            Optional<Product> product = productDao.findById(priceDto.getProductType().getProductId());
+            Optional<Product> productOptional = productDao.findById(priceDto.getProduct().getProductId());
+            Product product = null;
+
+            if (productOptional.isPresent()) {
+                product = productOptional.get();
+            }
 
             price = Price.builder()
                     .price(priceDto.getPrice())
-                    .product(product.get())
+                    .product(product)
                     .buyer(buyer)
                     .build();
         }
@@ -65,7 +68,7 @@ public class PriceService {
                     .id(supplierDto.getId())
                     .build();
 
-            Optional<Product> product = productDao.findById(priceDto.getProductType().getProductId());
+            Optional<Product> product = productDao.findById(priceDto.getProduct().getProductId());
 
             price = Price.builder()
                     .price(priceDto.getPrice())

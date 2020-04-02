@@ -16,7 +16,6 @@ public class CostService {
         this.costDao = costDao;
     }
 
-
     @Transactional
     public List<Cost> createCosts(List<CostDto> costsDtoList) {
         List<Cost> costsList = new ArrayList<>();

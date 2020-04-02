@@ -3,7 +3,6 @@ package com.tradesystem.order;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.buyer.BuyerDto;
 import com.tradesystem.buyer.BuyerMapper;
-import com.tradesystem.orderdetails.OrderDetails;
 import com.tradesystem.orderdetails.OrderDetailsDto;
 import com.tradesystem.orderdetails.OrderDetailsMapper;
 import com.tradesystem.supplier.Supplier;
@@ -41,4 +40,5 @@ public class OrderMapper {
                 .orderDetails(orderDetailsDto)
                 .build();
     }
+
 }

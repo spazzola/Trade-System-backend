@@ -5,7 +5,7 @@ import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
 import com.tradesystem.orderdetails.OrderDetails;
 import com.tradesystem.supplier.Supplier;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -14,12 +14,15 @@ import java.util.Optional;
 @Service
 public class OrderCommentService {
 
-    @Autowired
+
+    private InvoiceDao invoiceDao;
     private OrderCommentDao orderCommentDao;
 
-    @Autowired
-    private InvoiceDao invoiceDao;
 
+    public OrderCommentService(InvoiceDao invoiceDao, OrderCommentDao orderCommentDao) {
+        this.invoiceDao = invoiceDao;
+        this.orderCommentDao = orderCommentDao;
+    }
 
     public void addLackAmountComment(OrderDetails orderDetails, BigDecimal negativeValue, Invoice invoice) {
 

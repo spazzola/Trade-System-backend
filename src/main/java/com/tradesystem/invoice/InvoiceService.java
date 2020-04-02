@@ -89,30 +89,23 @@ public class InvoiceService {
     }
 
     @Transactional
-    public Invoice editInvoice(InvoiceDto invoiceDto) {
-        final BuyerDto buyerDto = invoiceDto.getBuyer();
-        final Buyer buyer = Buyer.builder()
-                .id(buyerDto.getId())
-                .build();
+    public void payForBuyerInvoice(Long id) {
+        Optional<Invoice> invoice = invoiceDao.findById(id);
 
-        final SupplierDto supplierDto = invoiceDto.getSupplier();
-        final Supplier supplier = Supplier.builder()
-                .id(supplierDto.getId())
-                .build();
+        if (invoice.isPresent()) {
+            invoice.get().setPaid(true);
+            processNegativeInvoicesForBuyer(invoice.get());
+        }
+    }
 
-        Invoice invoice = Invoice.builder()
-                .invoiceNumber(invoiceDto.getInvoiceNumber())
-                .date(invoiceDto.getDate())
-                .value(invoiceDto.getValue())
-                .amountToUse(invoiceDto.getAmountToUse())
-                .isUsed(invoiceDto.isUsed())
-                .isPaid(invoiceDto.isPaid())
-                .comment(invoiceDto.getComment())
-                .buyer(buyer)
-                .supplier(supplier)
-                .build();
+    @Transactional
+    public void payForSupplierInvoice(Long id) {
+        Optional<Invoice> invoice = invoiceDao.findById(id);
 
-        return invoiceDao.save(invoice);
+        if (invoice.isPresent()) {
+            invoice.get().setPaid(true);
+            processNegativeInvoicesForSupplier(invoice.get());
+        }
     }
 
     @Transactional
@@ -200,7 +193,6 @@ public class InvoiceService {
         transferSupplierInvoices(localDate);
     }
 
-    //TODO poprawic optionala
     private void transferSupplierInvoices(LocalDate localDate) {
         int month = localDate.getMonthValue();
         int year = localDate.getYear();
@@ -222,7 +214,6 @@ public class InvoiceService {
         }
     }
 
-    //TODO poprawic optionala
     private void transferBuyerInvoices(LocalDate localDate) {
         int month = localDate.getMonthValue();
         int year = localDate.getYear();
@@ -237,7 +228,6 @@ public class InvoiceService {
                 oldInvoice.setUsed(true);
                 invoiceDao.save(oldInvoice);
 
-                //zmienic value na amounttouse
                 Invoice newInvoice = createInvoice(amountToUse, invoiceNumber, date);
                 newInvoice.setValue(amountToUse);
                 newInvoice.setBuyer(buyer);

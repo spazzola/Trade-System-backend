@@ -1,7 +1,6 @@
 package com.tradesystem.orderdetails;
 
-import com.tradesystem.ordercomment.OrderComment;
-import com.tradesystem.product.Product;
+import com.tradesystem.ordercomment.OrderCommentDto;
 import com.tradesystem.product.ProductDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +19,6 @@ public class OrderDetailsDto {
     private BigDecimal buyerSum;
     private BigDecimal supplierSum;
     private ProductDto product;
-    //private OrderCommentDto orderComment;
+    private OrderCommentDto orderComment;
 
 }

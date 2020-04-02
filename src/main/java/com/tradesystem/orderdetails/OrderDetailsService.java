@@ -1,16 +1,14 @@
 package com.tradesystem.orderdetails;
 
 import com.tradesystem.buyer.Buyer;
-import com.tradesystem.buyer.BuyerDao;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
-import com.tradesystem.invoice.InvoiceService;
 import com.tradesystem.ordercomment.OrderComment;
 import com.tradesystem.ordercomment.OrderCommentDao;
 import com.tradesystem.ordercomment.OrderCommentService;
 import com.tradesystem.price.PriceDao;
 import com.tradesystem.supplier.Supplier;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,27 +23,22 @@ import java.util.Optional;
 @Service
 public class OrderDetailsService {
 
-    @Autowired
-    private OrderDetailsDao orderDetailsDao;
 
-    @Autowired
     private PriceDao priceDao;
-
-    @Autowired
     private InvoiceDao invoiceDao;
-
-    @Autowired
-    private InvoiceService invoiceService;
-
-    @Autowired
+    private OrderDetailsDao orderDetailsDao;
     private OrderCommentService orderCommentService;
-
-    @Autowired
     private OrderCommentDao orderCommentDao;
 
-    @Autowired
-    private BuyerDao buyerDao;
 
+    public OrderDetailsService(PriceDao priceDao, InvoiceDao invoiceDao, OrderDetailsDao orderDetailsDao,
+                               OrderCommentService orderCommentService, OrderCommentDao orderCommentDao) {
+        this.priceDao = priceDao;
+        this.invoiceDao = invoiceDao;
+        this.orderDetailsDao = orderDetailsDao;
+        this.orderCommentService = orderCommentService;
+        this.orderCommentDao = orderCommentDao;
+    }
 
     @Transactional
     public void calculateOrderDetail(OrderDetails orderDetails) {
@@ -266,6 +259,7 @@ public class OrderDetailsService {
         } else {
             Invoice invoice = new Invoice();
             invoice.setAmountToUse(amount);
+            invoice.setValue(amount);
             invoice.setDate(LocalDate.now());
             invoice.setBuyer(buyer);
             invoiceDao.save(invoice);
@@ -288,9 +282,9 @@ public class OrderDetailsService {
         } else {
             Invoice invoice = new Invoice();
             invoice.setAmountToUse(amount);
-            invoice.setValue(BigDecimal.valueOf(0));
+            invoice.setValue(amount);
             invoice.setDate(LocalDate.now());
-            invoice.setSupplier(orderDetails.getOrder().getSupplier());
+            invoice.setSupplier(supplier);
             invoiceDao.save(invoice);
         }
     }

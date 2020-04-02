@@ -9,10 +9,11 @@ import org.hibernate.annotations.Proxy;
 import javax.persistence.*;
 
 @Entity
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "users")
 public class User {
 
     @Id

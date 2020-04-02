@@ -17,5 +17,4 @@ public class BuyerDto {
     private String name;
     private BigDecimal currentBalance;
 
-
 }

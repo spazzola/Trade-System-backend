@@ -2,7 +2,6 @@ package com.tradesystem.supplier;
 
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +13,14 @@ import java.util.Optional;
 @Service
 public class SupplierService {
 
-    @Autowired
     private SupplierDao supplierDao;
-
-    @Autowired
     private InvoiceDao invoiceDao;
+
+
+    public SupplierService(SupplierDao supplierDao, InvoiceDao invoiceDao) {
+        this.supplierDao = supplierDao;
+        this.invoiceDao = invoiceDao;
+    }
 
 
     @Transactional

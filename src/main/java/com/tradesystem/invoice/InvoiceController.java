@@ -25,10 +25,14 @@ public class InvoiceController {
         return invoiceMapper.toDto(invoice);
     }
 
-    @PutMapping("/edit")
-    public InvoiceDto edit(@RequestBody InvoiceDto invoiceDto) {
-        final Invoice invoice = invoiceService.editInvoice(invoiceDto);
-        return invoiceMapper.toDto(invoice);
+    @PutMapping("/payForBuyerInvoice")
+    public void payForBuyerInvoice(@RequestParam("id") Long id) {
+        invoiceService.payForBuyerInvoice(id);
+    }
+
+    @PutMapping("/payForSupplierInvoice")
+    public void payForSupplierInvoice(@RequestParam("id") Long id) {
+        invoiceService.payForSupplierInvoice(id);
     }
 
     @GetMapping("/get")

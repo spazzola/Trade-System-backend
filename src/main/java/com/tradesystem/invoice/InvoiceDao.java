@@ -24,6 +24,7 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
             nativeQuery = true)
     List<Invoice> getBuyerNotUsedInvoices(Long buyerId);
 
+
     @Query(value = "SELECT * FROM invoices " +
             "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
             "WHERE invoices.buyer_fk = ?1 AND amount_to_use < 0 AND is_used = false",
@@ -48,6 +49,7 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
             nativeQuery = true)
     Optional<List<Invoice>> getBuyersMonthNotUsedPositivesInvoices(int month, int year);
 
+
     @Query(value = "SELECT * FROM invoices " +
             "WHERE MONTH(invoices.date) = ?1 AND YEAR(invoices.date) = ?2 " +
             "AND is_used = false AND amount_to_use < 0",
@@ -55,23 +57,12 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
     Optional<List<Invoice>> getBuyersMonthNotUsedNegativeInvoices(int month, int year);
 
 
-    //Co w przypadku jesli bedzie mial uzyte z ktorej fsaktury np tylko 30%? dodac warunek
-    //albo wziac wszystkie faktury, od ich ogolnej wartosci odjac ta wartosc ktora zostala do uzycia
-    //wynikiem bedzie uzyta kwota ktora jest szukana
     @Query(value = "SELECT * FROM invoices " +
             "WHERE is_used = true AND buyer_fk IS NOT null " +
             "AND MONTH(invoices.date) = ?1 AND YEAR(invoices.date) = ?2",
             nativeQuery = true)
     List<Invoice> getBuyersMonthUsedInvoices(int month, int year);
 
-     /*
-        @Query(value = "SELECT * FROM invoices " +
-                "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
-                "WHERE MONTH(invoices.date) = ?1 AND YEAR(invoices.date) = ?2 " +
-                "AND is_used = false",
-                nativeQuery = true)
-        Optional<List <Invoice>> getBuyersNotUsedInvoices(int month, int year);
-    */
 
      @Query(value = "SELECT * FROM invoices " +
              "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
@@ -90,6 +81,7 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
             nativeQuery = true)
     List<Invoice> getBuyersYearUsedInvoices(int year);
 
+
     @Query(value = "SELECT * FROM invoices " +
             "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
             "WHERE is_used = false AND amount_to_use > 0 AND is_paid = true " +
@@ -97,17 +89,20 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
             nativeQuery = true)
     Optional<List<Invoice>> getBuyersYearNotUsedPositivesInvoices(int year);
 
+
     @Query(value = "SELECT * FROM invoices " +
             "WHERE is_used = false AND amount_to_use < 0" +
             "AND YEAR(invoices.date) = ?1",
             nativeQuery = true)
     Optional<List<Invoice>> getBuyersYearNotUsedNegativeInvoices(int year);
 
+
     @Query(value = "SELECT * FROM invoices " +
             "WHERE buyer_fk IS NOT null AND is_paid = true " +
             "AND YEAR(invoices.date) = ?1 AND is_paid = true",
             nativeQuery = true)
     List<Invoice> getBuyersYearIncomedInvoices(int year);
+
 
     @Query(value = "SELECT * FROM invoices " +
             "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
@@ -170,21 +165,17 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
     // =====Year=====
 
     @Query(value = "SELECT * FROM invoices " +
-            "WHERE is_used = true AND supplier_fk IS NOT null " +
-            "AND YEAR(invoices.date) = ?1",
-            nativeQuery = true)
-    List<Invoice> getSuppliersYearUsedInvoices(int year);
-
-    @Query(value = "SELECT * FROM invoices " +
             "INNER JOIN suppliers ON invoices.supplier_fk = suppliers.supplier_id " +
             "WHERE is_used = false AND amount_to_use > 0 AND supplier_fk IS NOT null " +
             "AND YEAR(invoices.date) = ?1 AND is_paid = true",
             nativeQuery = true)
     Optional<List<Invoice>> getSuppliersYearNotUsedInvoices(int year);
 
+
     @Query(value = "SELECT * FROM invoices " +
             "WHERE YEAR(invoices.date) = ?1 AND is_paid = true " +
             "AND supplier_fk IS NOT null",
             nativeQuery = true)
     List<Invoice> getSuppliersYearInvoices(int year);
+
 }

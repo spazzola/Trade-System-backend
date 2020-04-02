@@ -8,13 +8,11 @@ import com.tradesystem.invoice.InvoiceService;
 import com.tradesystem.order.Order;
 import com.tradesystem.order.OrderDao;
 import com.tradesystem.orderdetails.OrderDetails;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -24,17 +22,12 @@ public class ReportMonthService {
 
     private InvoiceDao invoiceDao;
     private OrderDao orderDao;
-    private ReportService reportService;
-    private InvoiceService invoiceService;
     private CostDao costDao;
 
 
-    public ReportMonthService(InvoiceDao invoiceDao, OrderDao orderDao,
-                              ReportService reportService, InvoiceService invoiceService, CostDao costDao) {
+    public ReportMonthService(InvoiceDao invoiceDao, OrderDao orderDao, CostDao costDao) {
         this.invoiceDao = invoiceDao;
         this.orderDao = orderDao;
-        this.reportService = reportService;
-        this.invoiceService = invoiceService;
         this.costDao = costDao;
     }
 
@@ -51,13 +44,6 @@ public class ReportMonthService {
         BigDecimal suppliersNotUsedValue = calculateSuppliersNotUsedValue(month, year);
         //wyliczyc ile dostawcy maja nieuzytej kwoty
         BigDecimal buyersNotUsedValue = calculateBuyersNotUsedAmount(month, year);
-
-        //2. Zsumować wartość faktur zaliczkowych za dany miesiąc - sprawdzic roznice pomiedzy pkt 1 a 2
-        // Porownac wartosc wysłanych zamowien z wartoscia fv które wpłyneły z uwzględnieniem deficytu/nadwyżki
-        //2a. Uwzglednic wartosc nadwyzki/deficytu jaki zostal u supplierow
-        //TODO incomes - uwzglednic + ktory jest przerzucany na next month
-        //monthly incomes rozbic na brutto i netto (obecnie jest brutto)
-        BigDecimal monthlyIncomes = sumMonthlyIncomes(month, year);
 
         //3. Zsumować ilość wysłanych m3 = sumMonthlySoldedQuantity()
         BigDecimal soldedQuantity = sumMonthlySoldedQuantity(month, year);
@@ -122,16 +108,6 @@ public class ReportMonthService {
            }
        }
         return sum.divide(quantity, 2);
-    }
-
-    private BigDecimal sumMonthlyIncomes(int month, int year) {
-        List<Invoice> invoices = invoiceDao.getBuyersMonthIncomedInvoices(month, year);
-        BigDecimal incomedValue = BigDecimal.valueOf(0);
-
-        for (Invoice invoice : invoices) {
-            incomedValue = incomedValue.add(invoice.getValue());
-        }
-        return incomedValue;
     }
 
     private BigDecimal calculateAveragePurchase(int month, int year, BigDecimal soldedQuantity) {
