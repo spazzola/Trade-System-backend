@@ -205,14 +205,11 @@ public class ReportMonthService {
             sumCosts = sumCosts.add(cost.getValue().multiply(BigDecimal.valueOf(-1)));
         }
 
-        System.out.println("wartosc kosztow: " + sumCosts);
         //to co my zaplacilismy
         BigDecimal suppliersUsedAmount = calculateSuppliersUsedAmount(month, year);
-        System.out.println("Uzyta kwota u supplierow: " + suppliersUsedAmount);
 
         //obliczyc zaplaconych wartosc zamowien
         BigDecimal paidOrders = calculateBuyersUsedAmount(month, year);
-        System.out.println("wartosc zaplaconych zamowien przez buyerow: " + paidOrders);
 
         BigDecimal income = paidOrders.subtract(suppliersUsedAmount);
         BigDecimal profits = income.add(sumCosts);

@@ -34,6 +34,7 @@ public class ReportYearService {
     //TODO zrobic nowe selecty pod solo year
     public Report generateYearReport(int year) {
         List<Cost> costs = costDao.getYearCosts(year);
+
         //1. Zsumować wartośc wysłanych zamówień - przewidywana kwota która powinna byc na koncie
         BigDecimal soldedValue = sumYearSoldedValue(year);
         BigDecimal boughtValue = sumYearBoughtValue(year);
@@ -70,7 +71,7 @@ public class ReportYearService {
                 .averagePurchase(averagePurchase)
                 .averageEarningsPerM3(averageEarningsPerM3)
                 .profit(profit)
-                .type(LocalDate.now().withYear(year).toString())
+                .type(String.valueOf(year))
                 .build();
     }
 
@@ -262,14 +263,26 @@ public class ReportYearService {
         }
         //to co my zaplacilismy
         BigDecimal suppliersUsedAmount = calculateSuppliersUsedAmount(year);
-        //BigDecimal paidOrders = calculateBuyersUsedAmount(year);
+        BigDecimal paidOrders = calculateBuyersUsedAmount(year);
 
 
-        //BigDecimal income = paidOrders.subtract(suppliersUsedAmount);
-        //BigDecimal profits = income.add(sumCosts);
+        BigDecimal income = paidOrders.subtract(suppliersUsedAmount);
+        BigDecimal profits = income.add(sumCosts);
 
-        //return profits;
-        return null;
+        return profits;
+    }
+
+    private BigDecimal calculateBuyersUsedAmount(int year) {
+        List<Invoice> notUsedInvoices = invoiceDao.getBuyersYearIncomedInvoices(year);
+        BigDecimal generalValue = BigDecimal.valueOf(0);
+        BigDecimal notUsedAmount = BigDecimal.valueOf(0);
+
+        for (Invoice invoice : notUsedInvoices) {
+            generalValue = generalValue.add(invoice.getValue());
+            notUsedAmount = notUsedAmount.add(invoice.getAmountToUse());
+        }
+
+        return generalValue.subtract(notUsedAmount);
     }
 
 }

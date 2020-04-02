@@ -92,25 +92,25 @@ public class InvoiceService {
     public Invoice editInvoice(InvoiceDto invoiceDto) {
         final BuyerDto buyerDto = invoiceDto.getBuyer();
         final Buyer buyer = Buyer.builder()
-                            .id(buyerDto.getId())
-                            .build();
+                .id(buyerDto.getId())
+                .build();
 
         final SupplierDto supplierDto = invoiceDto.getSupplier();
         final Supplier supplier = Supplier.builder()
-                            .id(supplierDto.getId())
-                            .build();
+                .id(supplierDto.getId())
+                .build();
 
         Invoice invoice = Invoice.builder()
-                            .invoiceNumber(invoiceDto.getInvoiceNumber())
-                            .date(invoiceDto.getDate())
-                            .value(invoiceDto.getValue())
-                            .amountToUse(invoiceDto.getAmountToUse())
-                            .isUsed(invoiceDto.isUsed())
-                            .isPaid(invoiceDto.isPaid())
-                            .comment(invoiceDto.getComment())
-                            .buyer(buyer)
-                            .supplier(supplier)
-                            .build();
+                .invoiceNumber(invoiceDto.getInvoiceNumber())
+                .date(invoiceDto.getDate())
+                .value(invoiceDto.getValue())
+                .amountToUse(invoiceDto.getAmountToUse())
+                .isUsed(invoiceDto.isUsed())
+                .isPaid(invoiceDto.isPaid())
+                .comment(invoiceDto.getComment())
+                .buyer(buyer)
+                .supplier(supplier)
+                .build();
 
         return invoiceDao.save(invoice);
     }
@@ -122,6 +122,7 @@ public class InvoiceService {
         return invoice
                 .orElseThrow(NoSuchElementException::new);
     }
+
     private void processNegativeInvoicesForBuyer(Invoice invoice) {
 
         Long buyerId = invoice.getBuyer().getId();
@@ -204,19 +205,20 @@ public class InvoiceService {
         int month = localDate.getMonthValue();
         int year = localDate.getYear();
         Optional<List<Invoice>> optionalInvoices = invoiceDao.getSuppliersMonthNotUsedInvoices(month - 1, year);
+        if (optionalInvoices.isPresent()) {
+            for (Invoice oldInvoice : optionalInvoices.get()) {
+                BigDecimal amountToUse = oldInvoice.getAmountToUse();
+                String invoiceNumber = oldInvoice.getInvoiceNumber();
+                Supplier supplier = oldInvoice.getSupplier();
+                LocalDate date = oldInvoice.getDate();
+                oldInvoice.setUsed(true);
+                invoiceDao.save(oldInvoice);
 
-        for (Invoice oldInvoice : optionalInvoices.get()) {
-            BigDecimal amountToUse = oldInvoice.getAmountToUse();
-            String invoiceNumber = oldInvoice.getInvoiceNumber();
-            Supplier supplier = oldInvoice.getSupplier();
-            LocalDate date = oldInvoice.getDate();
-            oldInvoice.setUsed(true);
-            invoiceDao.save(oldInvoice);
+                Invoice newInvoice = createInvoice(amountToUse, invoiceNumber, date);
+                newInvoice.setSupplier(supplier);
 
-            Invoice newInvoice = createInvoice(amountToUse, invoiceNumber, date);
-            newInvoice.setSupplier(supplier);
-
-            invoiceDao.save(newInvoice);
+                invoiceDao.save(newInvoice);
+            }
         }
     }
 
@@ -226,20 +228,22 @@ public class InvoiceService {
         int year = localDate.getYear();
         Optional<List<Invoice>> optionalInvoices = invoiceDao.getBuyersMonthNotUsedPositivesInvoices(month - 1, year);
 
-        for (Invoice oldInvoice : optionalInvoices.get()) {
-            BigDecimal amountToUse = oldInvoice.getAmountToUse();
-            String invoiceNumber = oldInvoice.getInvoiceNumber();
-            Buyer buyer = oldInvoice.getBuyer();
-            LocalDate date = oldInvoice.getDate();
-            oldInvoice.setUsed(true);
-            invoiceDao.save(oldInvoice);
+        if (optionalInvoices.isPresent()) {
+            for (Invoice oldInvoice : optionalInvoices.get()) {
+                BigDecimal amountToUse = oldInvoice.getAmountToUse();
+                String invoiceNumber = oldInvoice.getInvoiceNumber();
+                Buyer buyer = oldInvoice.getBuyer();
+                LocalDate date = oldInvoice.getDate();
+                oldInvoice.setUsed(true);
+                invoiceDao.save(oldInvoice);
 
-            //zmienic value na amounttouse
-            Invoice newInvoice = createInvoice(amountToUse, invoiceNumber, date);
-            newInvoice.setValue(amountToUse);
-            newInvoice.setBuyer(buyer);
+                //zmienic value na amounttouse
+                Invoice newInvoice = createInvoice(amountToUse, invoiceNumber, date);
+                newInvoice.setValue(amountToUse);
+                newInvoice.setBuyer(buyer);
 
-            invoiceDao.save(newInvoice);
+                invoiceDao.save(newInvoice);
+            }
         }
     }
 
@@ -251,7 +255,7 @@ public class InvoiceService {
         invoice.setValue(amountToUse);
         invoice.setPaid(true);
         invoice.setUsed(false);
-        invoice.setComment("Przeniesiono z FV o nr: " + invoiceNumber);
+        invoice.setComment("Przeniesiono z poprzedniego miesiąca,  FV o nr: " + invoiceNumber);
         invoice.setDate(date.plusMonths(1));
 
         return invoice;
