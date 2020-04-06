@@ -1,6 +1,8 @@
 package com.tradesystem.invoice;
 
+import com.tradesystem.user.RoleSecurity;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -13,14 +15,17 @@ public class InvoiceController {
 
     private InvoiceService invoiceService;
     private InvoiceMapper invoiceMapper;
+    private RoleSecurity roleSecurity;
 
-    public InvoiceController(InvoiceService invoiceService, InvoiceMapper invoiceMapper) {
+    public InvoiceController(InvoiceService invoiceService, InvoiceMapper invoiceMapper, RoleSecurity roleSecurity) {
         this.invoiceService = invoiceService;
         this.invoiceMapper = invoiceMapper;
+        this.roleSecurity = roleSecurity;
     }
 
     @PostMapping("/create")
-    public InvoiceDto create(@RequestBody InvoiceDto invoiceDto) {
+    public InvoiceDto create(@RequestBody InvoiceDto invoiceDto, Authentication authentication) {
+        roleSecurity.checkAdminRole(authentication);
         final Invoice invoice = invoiceService.createInvoice(invoiceDto);
         return invoiceMapper.toDto(invoice);
     }

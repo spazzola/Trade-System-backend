@@ -55,22 +55,25 @@ public class OrderService {
 
         for (OrderDetailsDto orderDetailsDto : orderDetailsDtoList) {
             OrderDetails orderDetails = new OrderDetails();
-            orderDetails.setQuantity(orderDetailsDto.getQuantity());
-
-
             Long productId = orderDetailsDto.getProduct().getProductId();
             Product product = productDao.findById(productId)
                     .orElseThrow(NoSuchElementException::new);
-            orderDetails.setOrder(order);
             orderDetails.setProduct(product);
+
+            orderDetails.setQuantity(orderDetailsDto.getQuantity());
+            orderDetails.setOrder(order);
+
+            String userComment = orderDetailsDto.getOrderComment().getUserComment();
+            orderDetails.getOrderComment().setUserComment(userComment);
+
             orderDetailsList.add(orderDetails);
         }
 
         order.setOrderDetails(orderDetailsList);
 
-        calculateOrder(order);
+       // calculateOrder(order);
 
-        return order;
+        return calculateOrder(order);
     }
 
     private Order calculateOrder(Order order) {

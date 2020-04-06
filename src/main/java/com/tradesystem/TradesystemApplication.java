@@ -10,8 +10,8 @@ public class TradesystemApplication {
     public static void main(String[] args) {
         SpringApplication.run(TradesystemApplication.class, args);
 
-    }
 
+    }
 
 }
 

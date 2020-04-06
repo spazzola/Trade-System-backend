@@ -125,7 +125,6 @@ public class OrderDetailsService {
                 amount = amount.subtract(invoiceValue);
                 amountToPay = amount;
 
-                System.out.println("raz");
                 orderCommentService.addSupplierComment(orderDetails, invoiceValue, invoice);
 
                 orderDetailsDao.save(orderDetails);
@@ -158,14 +157,14 @@ public class OrderDetailsService {
             createSupplierNegativeInvoice(negativeValue, orderDetails);
 
             Supplier supplier = orderDetails.getOrder().getSupplier();
-            Optional<Invoice> optionalInvoice = invoiceDao.getSupplierNegativeInvoice(supplier.getId());
-            Invoice negativeInvoice = optionalInvoice.get();
+            Invoice negativeInvoice = invoiceDao.getSupplierNegativeInvoice(supplier.getId())
+                    .orElseThrow(RuntimeException::new);
+            //Invoice negativeInvoice = optionalInvoice.get();
             orderCommentService.addLackAmountComment(orderDetails, negativeValue, negativeInvoice);
             orderDetailsDao.save(orderDetails);
         }
 
     }
-
 
     private void payForBuyerOrder(OrderDetails orderDetails, BigDecimal amount, List<Invoice> invoices) {
         BigDecimal amountToPay = orderDetails.getBuyerSum();
@@ -236,8 +235,9 @@ public class OrderDetailsService {
             BigDecimal negativeValue = amount.multiply(BigDecimal.valueOf(-1));
             createBuyerNegativeInvoice(negativeValue, orderDetails);
             Buyer buyer = orderDetails.getOrder().getBuyer();
-            Optional<Invoice> optionalInvoice = invoiceDao.getBuyerNegativeInvoice(buyer.getId());
-            Invoice negativeInvoice = optionalInvoice.get();
+            Invoice negativeInvoice = invoiceDao.getBuyerNegativeInvoice(buyer.getId())
+                    .orElseThrow(RuntimeException::new);
+            //Invoice negativeInvoice = optionalInvoice.get();
             orderCommentService.addLackAmountComment(orderDetails, negativeValue, negativeInvoice);
 
             orderDetailsDao.save(orderDetails);
@@ -265,7 +265,6 @@ public class OrderDetailsService {
             invoiceDao.save(invoice);
         }
 
-
     }
 
     private void createSupplierNegativeInvoice(BigDecimal amount, OrderDetails orderDetails) {
@@ -288,6 +287,7 @@ public class OrderDetailsService {
             invoiceDao.save(invoice);
         }
     }
+
     private void saveInvoice(Invoice invoice, boolean isUsed) {
         invoice.setUsed(isUsed);
         invoiceDao.save(invoice);

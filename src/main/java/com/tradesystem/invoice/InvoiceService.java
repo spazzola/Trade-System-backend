@@ -22,19 +22,18 @@ import java.util.List;
 public class InvoiceService {
 
     private InvoiceDao invoiceDao;
-    private OrderDetailsDao orderDetailsDao;
     private BuyerDao buyerDao;
     private SupplierDao supplierDao;
 
 
-    public InvoiceService(InvoiceDao invoiceDao, OrderDetailsDao orderDetailsDao, BuyerDao buyerDao, SupplierDao supplierDao) {
+    public InvoiceService(InvoiceDao invoiceDao, BuyerDao buyerDao, SupplierDao supplierDao) {
         this.invoiceDao = invoiceDao;
-        this.orderDetailsDao = orderDetailsDao;
         this.buyerDao = buyerDao;
         this.supplierDao = supplierDao;
     }
 
 
+    @Transactional
     public List<Invoice> getAll() {
         return invoiceDao.findAll();
     }

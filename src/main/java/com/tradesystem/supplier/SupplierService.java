@@ -32,6 +32,7 @@ public class SupplierService {
         return supplierDao.save(supplier);
     }
 
+    @Transactional
     public List<Supplier> getAll() {
         return supplierDao.findAll();
     }

@@ -42,6 +42,7 @@ public class BuyerService {
         return resultBuers;
     }
 
+    @Transactional
     public List<Buyer> getAll() {
         return buyerDao.findAll();
     }
