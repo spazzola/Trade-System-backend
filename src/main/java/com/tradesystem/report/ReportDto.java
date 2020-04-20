@@ -22,5 +22,6 @@ public class ReportDto {
     private BigDecimal averagePurchase;
     private BigDecimal averageEarningsPerM3;
     private BigDecimal profit;
+    private BigDecimal sumCosts;
     private String type;
 }

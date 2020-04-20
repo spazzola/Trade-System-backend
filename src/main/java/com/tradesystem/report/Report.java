@@ -38,6 +38,8 @@ public class Report {
 
     private BigDecimal profit;
 
+    private BigDecimal sumCosts;
+
     private String type;
 
 
