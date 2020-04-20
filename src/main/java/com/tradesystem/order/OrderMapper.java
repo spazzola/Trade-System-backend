@@ -11,6 +11,7 @@ import com.tradesystem.supplier.SupplierMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class OrderMapper {
@@ -34,11 +35,19 @@ public class OrderMapper {
         final SupplierDto supplierDto = supplierMapper.toDto(supplier);
 
         return OrderDto.builder()
+                .id(order.getId())
                 .date(order.getDate())
                 .supplier(supplierDto)
                 .buyer(buyerDto)
                 .orderDetails(orderDetailsDto)
                 .build();
+    }
+
+    public List<OrderDto> toDto(List<Order> invoices) {
+        return invoices.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
     }
 
 }

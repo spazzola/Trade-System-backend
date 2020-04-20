@@ -1,6 +1,8 @@
 package com.tradesystem.user;
 
 import org.springframework.stereotype.Component;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class UserMapper {
@@ -10,7 +12,14 @@ public class UserMapper {
                 .login(user.getLogin())
                 .email(user.getEmail())
                 .password(user.getPassword())
+                .role(user.getRole())
                 .build();
+    }
+
+    public List<UserDto> toDto(List<User> buyers) {
+        return buyers.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
 }

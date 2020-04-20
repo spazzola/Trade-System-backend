@@ -20,7 +20,7 @@ public class OrderDetailsMapper {
                 .build();
 
         ProductDto productDto = ProductDto.builder()
-                .productId(orderDetails.getProduct().getId())
+                .id(orderDetails.getProduct().getId())
                 .product(orderDetails.getProduct().getProduct())
                 .build();
 
