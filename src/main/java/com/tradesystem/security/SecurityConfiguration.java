@@ -1,10 +1,8 @@
-package com.tradesystem.utility;
+package com.tradesystem.security;
 
 import com.tradesystem.jwt.JwtRequestFilter;
 import com.tradesystem.userdetails.MyUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,9 +13,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableWebSecurity
-
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private JwtRequestFilter jwtRequestFilter;
@@ -28,12 +28,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         this.myUserDetailsService = myUserDetailsService;
     }
 
-
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeRequests().antMatchers("/user/authenticate").permitAll()
-                .antMatchers("/user/register").permitAll()
-                .antMatchers("/console/**").permitAll()
+        httpSecurity.cors().and().authorizeRequests()
+                .antMatchers("/user/authenticate").permitAll()
                 .anyRequest().authenticated().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
@@ -55,7 +53,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     public PasswordEncoder getPasswordEncoder(){
-        return new BCryptPasswordEncoder();
+        //return new BCryptPasswordEncoder();
+        return NoOpPasswordEncoder.getInstance();
     }
 
 }

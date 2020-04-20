@@ -13,8 +13,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Array;
+import java.util.*;
+
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class UserController {
 
     private UserService userService;
@@ -32,16 +36,15 @@ public class UserController {
         this.jwtUtil = jwtUtil;
     }
 
+    @GetMapping("/getAll")
+    public List<UserDto> getAll() {
+        return userService.getAll();
+    }
+
     @PostMapping("/register")
     public UserDto registerUser(@RequestBody UserDto userDto) throws Exception {
         User user = userService.registerUser(userDto);
         return userMapper.toDto(user);
-    }
-
-    @GetMapping("hello")
-    public String hello() {
-
-        return "Hello";
     }
 
     @PostMapping("/authenticate")
@@ -51,7 +54,7 @@ public class UserController {
                     new UsernamePasswordAuthenticationToken(authenticationRequest.getLogin(), authenticationRequest.getPassword())
             );
         } catch (BadCredentialsException e) {
-            throw new Exception("Bad credentials ", e);
+            throw new RuntimeException("Nieprawidłowe hasło!");
         }
 
         UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getLogin());

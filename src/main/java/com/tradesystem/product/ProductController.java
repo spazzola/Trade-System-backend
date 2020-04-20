@@ -2,8 +2,11 @@ package com.tradesystem.product;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/product")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ProductController {
 
     private ProductService productService;
@@ -22,4 +25,10 @@ public class ProductController {
         return productMapper.toDto(product);
     }
 
+    @GetMapping("/getAll")
+    public List<ProductDto> getAllProducts() {
+        List<Product> products =  productService.getAllProducts();
+
+        return productMapper.toDto(products);
+    }
 }

@@ -2,16 +2,21 @@ package com.tradesystem.invoice;
 
 import com.tradesystem.user.RoleSecurity;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.json.Json;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @RestController
 @RequestMapping("/invoice")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class InvoiceController {
 
+   //TODO Change params to LocalDate/Long
 
     private InvoiceService invoiceService;
     private InvoiceMapper invoiceMapper;
@@ -24,26 +29,35 @@ public class InvoiceController {
     }
 
     @PostMapping("/create")
-    public InvoiceDto create(@RequestBody InvoiceDto invoiceDto, Authentication authentication) {
-        roleSecurity.checkAdminRole(authentication);
+    public InvoiceDto create(@RequestBody InvoiceDto invoiceDto) {
+        //roleSecurity.checkUserRole(authentication);
         final Invoice invoice = invoiceService.createInvoice(invoiceDto);
         return invoiceMapper.toDto(invoice);
     }
 
-    @PutMapping("/payForBuyerInvoice")
-    public void payForBuyerInvoice(@RequestParam("id") Long id) {
-        invoiceService.payForBuyerInvoice(id);
-    }
+    @PutMapping("/payForInvoice")
+    public void payForInvoice(@RequestParam(value = "id") String id) {
+        Long invoiceId = Long.valueOf(id);
 
-    @PutMapping("/payForSupplierInvoice")
-    public void payForSupplierInvoice(@RequestParam("id") Long id) {
-        invoiceService.payForSupplierInvoice(id);
+        invoiceService.payForInvoice(invoiceId);
     }
 
     @GetMapping("/get")
     public InvoiceDto get(@RequestParam("id") Long id) {
         final Invoice invoice = invoiceService.getInvoice(id);
         return invoiceMapper.toDto(invoice);
+    }
+
+    @GetMapping("/getMonthInvoices")
+    public List<InvoiceDto> getMonthInvoices(@RequestParam(value = "year") String year,
+                                             @RequestParam(value = "month") String month) {
+
+        int y = Integer.valueOf(year);
+        int m = Integer.valueOf(month);
+
+        final List<Invoice> invoices = invoiceService.getInvoicesByMonth(m, y);
+
+        return invoiceMapper.toDto(invoices);
     }
 
     @GetMapping("/getAll")
@@ -53,10 +67,13 @@ public class InvoiceController {
     }
 
     @PostMapping("/transfer")
-    public void transferInvoicesToNextMonth(@RequestParam("localDate")
-                                                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate localDate) {
+    public void transferInvoicesToNextMonth(@RequestParam(value = "localDate", required = false)
+                                                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String localDate) {
+        int year = Integer.valueOf(localDate.substring(0, 4));
+        int month = Integer.valueOf(localDate.substring(5, 7));
 
-        invoiceService.trasnferInvoicesToNextMonth(localDate);
+        LocalDate currentDate = LocalDate.of(year, month, 1);
+        invoiceService.trasnferInvoicesToNextMonth(currentDate);
     }
 
 }
