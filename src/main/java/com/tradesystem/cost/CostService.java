@@ -15,7 +15,7 @@ public class CostService {
     public CostService(CostDao costDao) {
         this.costDao = costDao;
     }
-
+/*
     @Transactional
     public List<Cost> createCosts(List<CostDto> costsDtoList) {
         List<Cost> costsList = new ArrayList<>();
@@ -32,5 +32,35 @@ public class CostService {
 
         return costDao.saveAll(costsList);
     }
+*/
+    @Transactional
+    public Cost createCost(CostDto costDto) {
+        if (validateCost(costDto)) {
+            Cost cost = Cost.builder()
+                    .name(costDto.getName())
+                    .value(costDto.getValue())
+                    .date(costDto.getDate())
+                    .build();
 
+            return costDao.save(cost);
+        }
+        throw new RuntimeException("Can't create cost");
+    }
+
+    @Transactional
+    public List<Cost> getMonthCosts(int month, int year) {
+        return costDao.getMonthCosts(month, year);
+    }
+    private boolean validateCost(CostDto cost) {
+        if (cost.getName().equals("") || cost.getName() == null) {
+            return false;
+        }
+        if (cost.getDate() == null) {
+            return false;
+        }
+        if (cost.getValue().doubleValue() <= 0) {
+            return false;
+        }
+        return true;
+    }
 }
