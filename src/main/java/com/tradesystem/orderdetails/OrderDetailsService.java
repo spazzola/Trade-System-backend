@@ -14,10 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -30,6 +30,7 @@ public class OrderDetailsService {
     private OrderCommentService orderCommentService;
     private OrderCommentDao orderCommentDao;
 
+    private MathContext mathContext = new MathContext(2);
 
     public OrderDetailsService(PriceDao priceDao, InvoiceDao invoiceDao, OrderDetailsDao orderDetailsDao,
                                OrderCommentService orderCommentService, OrderCommentDao orderCommentDao) {
@@ -61,7 +62,12 @@ public class OrderDetailsService {
         BigDecimal quantity = orderDetails.getQuantity();
         BigDecimal price = priceDao.getBuyerPrice(buyerId, productId);
 
-        return quantity.multiply(price);
+        if (price != null) {
+            return quantity.multiply(price).round(mathContext);
+        } else {
+            throw new RuntimeException("Kupiec nie ma ustawionej ceny dla tego produktu");
+        }
+
     }
 
     private BigDecimal calculateSupplierOrder(OrderDetails orderDetails) {
@@ -69,9 +75,14 @@ public class OrderDetailsService {
         Long productId = orderDetails.getProduct().getId();
 
         BigDecimal quantity = orderDetails.getQuantity();
-        BigDecimal price = priceDao.getSupplierPrice(supplierId, productId);
 
-        return quantity.multiply(price);
+        BigDecimal price = priceDao.getSupplierPrice(supplierId, productId);
+        if (price != null) {
+            return quantity.multiply(price).round(mathContext);
+        } else {
+            throw new RuntimeException("Dostawca nie ma ustawionej ceny dla tego produktu");
+        }
+
     }
 
     private void payForSupplierOrder2(OrderDetails orderDetails, BigDecimal amount) {
@@ -84,6 +95,8 @@ public class OrderDetailsService {
     private void payForBuyerOrder2(OrderDetails orderDetails, BigDecimal amount) {
         Long buyerId = orderDetails.getOrder().getBuyer().getId();
         List<Invoice> invoices = invoiceDao.getBuyerNotUsedInvoices(buyerId);
+
+        //invoices.sort(Comparator.comparing(Invoice::getId));
 
         payForBuyerOrder(orderDetails, amount, invoices);
     }
@@ -234,6 +247,7 @@ public class OrderDetailsService {
         if (amount.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal negativeValue = amount.multiply(BigDecimal.valueOf(-1));
             createBuyerNegativeInvoice(negativeValue, orderDetails);
+
             Buyer buyer = orderDetails.getOrder().getBuyer();
             Invoice negativeInvoice = invoiceDao.getBuyerNegativeInvoice(buyer.getId())
                     .orElseThrow(RuntimeException::new);
