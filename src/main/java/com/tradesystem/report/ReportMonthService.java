@@ -19,21 +19,26 @@ import java.util.Set;
 @Service
 public class ReportMonthService {
 
-    private InvoiceDao invoiceDao;
-    private OrderDao orderDao;
     private CostDao costDao;
+    private OrderDao orderDao;
+    private ReportDao reportDao;
+    private InvoiceDao invoiceDao;
+    private ReportService reportService;
 
 
-    public ReportMonthService(InvoiceDao invoiceDao, OrderDao orderDao, CostDao costDao) {
+    public ReportMonthService(InvoiceDao invoiceDao, OrderDao orderDao,
+                              CostDao costDao, ReportDao reportDao, ReportService reportService) {
         this.invoiceDao = invoiceDao;
         this.orderDao = orderDao;
         this.costDao = costDao;
+        this.reportDao = reportDao;
+        this.reportService = reportService;
     }
 
 
     @Transactional
     public Report generateMonthReport(int month, int year) {
-        List<Cost> costs = costDao.getMonthCosts(month, year);
+        BigDecimal sumCosts = calculateCosts(month, year);
 
         BigDecimal soldedValue = sumMonthlySoldedValue(month, year);
         BigDecimal boughtValue = sumMonthlyBoughtValue(month, year);
@@ -47,9 +52,11 @@ public class ReportMonthService {
         BigDecimal averagePurchase = calculateAveragePurchase(month, year, soldedQuantity);
         BigDecimal averageEarningsPerM3 = averageSold.subtract(averagePurchase);
 
-        BigDecimal profit = calculateProfits(month, year, costs);
+        BigDecimal profit = calculateProfits(month, year, sumCosts);
 
-        return Report.builder()
+        String reportType = LocalDate.now().withMonth(month).getMonth().toString();
+
+        Report report = Report.builder()
                 .soldedValue(soldedValue)
                 .boughtValue(boughtValue)
                 .buyersNotUsedValue(buyersNotUsedValue)
@@ -59,8 +66,24 @@ public class ReportMonthService {
                 .averagePurchase(averagePurchase)
                 .averageEarningsPerM3(averageEarningsPerM3)
                 .profit(profit)
-                .type(LocalDate.now().withMonth(month).getMonth().toString())
+                .sumCosts(sumCosts)
+                .type(reportType)
                 .build();
+
+        if (reportService.checkIfReportExist(reportType)) {
+            reportDao.save(report);
+        }
+        return report;
+    }
+
+    private BigDecimal calculateCosts(int month, int year) {
+        List<Cost> costs = costDao.getMonthCosts(month, year);
+        BigDecimal sumCosts = BigDecimal.valueOf(0);
+
+        for (Cost cost : costs) {
+            sumCosts = sumCosts.add(cost.getValue().multiply(BigDecimal.valueOf(-1)));
+        }
+        return sumCosts;
     }
 
     private BigDecimal calculateBuyersNotUsedAmount(int month, int year) {
@@ -157,25 +180,11 @@ public class ReportMonthService {
         return totalQuantity;
     }
 
-    private BigDecimal calculateProfits(int month, int year, List<Cost> costs) {
-        BigDecimal sumCosts = BigDecimal.valueOf(0);
-        Optional<List<Invoice>> invoices = invoiceDao.getBuyersMonthNegativeInvoices(month, year);
-
-        if (invoices.isPresent()) {
-            List<Invoice> negativeInvoices = invoices.get();
-            for (Invoice invoice : negativeInvoices) {
-                sumCosts = sumCosts.add(invoice.getAmountToUse());
-            }
-        }
-
-        for (Cost cost : costs) {
-            sumCosts = sumCosts.add(cost.getValue().multiply(BigDecimal.valueOf(-1)));
-        }
-
+    private BigDecimal calculateProfits(int month, int year, BigDecimal sumCosts) {
         BigDecimal suppliersUsedAmount = calculateSuppliersUsedAmount(month, year);
-        BigDecimal paidOrders = calculateBuyersUsedAmount(month, year);
+        BigDecimal buyersUsedAmount = calculateBuyersUsedAmount(month, year);
 
-        BigDecimal income = paidOrders.subtract(suppliersUsedAmount);
+        BigDecimal income = buyersUsedAmount.subtract(suppliersUsedAmount);
         BigDecimal profits = income.add(sumCosts);
 
         return profits;

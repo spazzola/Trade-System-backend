@@ -19,21 +19,25 @@ import java.util.Set;
 @Service
 public class ReportYearService {
 
-
-    private InvoiceDao invoiceDao;
-    private OrderDao orderDao;
     private CostDao costDao;
+    private OrderDao orderDao;
+    private ReportDao reportDao;
+    private InvoiceDao invoiceDao;
+    private ReportService reportService;
 
 
-    public ReportYearService(InvoiceDao invoiceDao, OrderDao orderDao, CostDao costDao) {
+    public ReportYearService(InvoiceDao invoiceDao, OrderDao orderDao,
+                             CostDao costDao, ReportDao reportDao, ReportService reportService) {
         this.invoiceDao = invoiceDao;
         this.orderDao = orderDao;
         this.costDao = costDao;
+        this.reportDao = reportDao;
+        this.reportService = reportService;
     }
 
     @Transactional
     public Report generateYearReport(int year) {
-        List<Cost> costs = costDao.getYearCosts(year);
+        BigDecimal sumCosts = calculateCosts(year);
 
         BigDecimal soldedValue = sumYearSoldedValue(year);
         BigDecimal boughtValue = sumYearBoughtValue(year);
@@ -47,9 +51,11 @@ public class ReportYearService {
         BigDecimal averagePurchase = calculateAvaragePurchase(year, soldedQuantity);
         BigDecimal averageEarningsPerM3 = averageSold.subtract(averagePurchase);
 
-        BigDecimal profit = calculateProfits(year, costs);
+        BigDecimal profit = calculateProfits(year, sumCosts);
 
-        return Report.builder()
+        String reportType = String.valueOf(year);
+
+        Report report = Report.builder()
                 .soldedValue(soldedValue)
                 .boughtValue(boughtValue)
                 .buyersNotUsedValue(buyersNotUsedValue)
@@ -59,8 +65,24 @@ public class ReportYearService {
                 .averagePurchase(averagePurchase)
                 .averageEarningsPerM3(averageEarningsPerM3)
                 .profit(profit)
-                .type(String.valueOf(year))
+                .sumCosts(sumCosts)
+                .type(reportType)
                 .build();
+
+        if (reportService.checkIfReportExist(reportType)) {
+            reportDao.save(report);
+        }
+        return report;
+    }
+
+    private BigDecimal calculateCosts(int year) {
+        List<Cost> costs = costDao.getYearCosts(year);
+        BigDecimal sumCosts = BigDecimal.valueOf(0);
+
+        for (Cost cost : costs) {
+            sumCosts = sumCosts.add(cost.getValue().multiply(BigDecimal.valueOf(-1)));
+        }
+        return sumCosts;
     }
 
     private BigDecimal calculateBuyersNotUsedAmount(int year) {
@@ -183,22 +205,7 @@ public class ReportYearService {
         return generalAmountToUse.subtract(amountToUse);
     }
 
-    private BigDecimal calculateProfits(int year, List<Cost> costs) {
-        BigDecimal sumCosts = BigDecimal.valueOf(0);
-        Optional<List<Invoice>> invoices = invoiceDao.getBuyersYearNegativeInvoices(year);
-
-        if (invoices.isPresent()) {
-            List<Invoice> negativeInvoices = invoices.get();
-            for (Invoice invoice : negativeInvoices) {
-                sumCosts = sumCosts.add(invoice.getAmountToUse());
-
-            }
-        }
-
-        for (Cost cost : costs) {
-            sumCosts = sumCosts.add(cost.getValue());
-        }
-
+    private BigDecimal calculateProfits(int year, BigDecimal sumCosts) {
         BigDecimal suppliersUsedAmount = calculateSuppliersUsedAmount(year);
         BigDecimal paidOrders = calculateBuyersUsedAmount(year);
 
