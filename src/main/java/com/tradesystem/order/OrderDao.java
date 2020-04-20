@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Set;
+import java.util.List;
 
 @Repository("orderDao")
 public interface OrderDao extends JpaRepository<Order, Long> {
@@ -16,9 +17,17 @@ public interface OrderDao extends JpaRepository<Order, Long> {
             nativeQuery = true)
     Set<Order> getMonthOrders(int month, int year);
 
+
     @Query(value = "SELECT orders FROM Order orders " +
             "LEFT JOIN FETCH orders.orderDetails " +
             "WHERE YEAR(orders.date) = ?1")
     Set<Order> getYearOrders(int year);
+
+
+    @Query(value = "SELECT * FROM orders o " +
+            "LEFT JOIN order_details od ON od.order_fk = o.order_id " +
+            "WHERE MONTH(o.date) = ?1 AND YEAR(o.date) = ?2",
+            nativeQuery = true)
+    List<Order> getMonthOrders2(int month, int year);
 
 }

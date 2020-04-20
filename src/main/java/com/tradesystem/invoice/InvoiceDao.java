@@ -10,6 +10,10 @@ import org.springframework.stereotype.Repository;
 @Repository("invoiceDao")
 public interface InvoiceDao extends JpaRepository<Invoice, Long> {
 
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE MONTH(invoices.date) = ?1 AND YEAR(invoices.date) = ?2",
+            nativeQuery = true)
+    List<Invoice> getMonthInvoices(int month, int year);
 
 
     /***
