@@ -2,6 +2,8 @@ package com.tradesystem.supplier;
 
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
+import com.tradesystem.price.Price;
+import com.tradesystem.price.PriceDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,23 +15,28 @@ import java.util.Optional;
 @Service
 public class SupplierService {
 
-    private SupplierDao supplierDao;
-    private InvoiceDao invoiceDao;
+    private final SupplierDao supplierDao;
+    private final InvoiceDao invoiceDao;
+    private final PriceDao priceDao;
 
 
-    public SupplierService(SupplierDao supplierDao, InvoiceDao invoiceDao) {
+    public SupplierService(SupplierDao supplierDao, InvoiceDao invoiceDao, PriceDao priceDao) {
         this.supplierDao = supplierDao;
         this.invoiceDao = invoiceDao;
+        this.priceDao = priceDao;
     }
 
 
     @Transactional
-    public Supplier createBuyer(SupplierDto supplierDto) {
-        Supplier supplier = Supplier.builder()
-                .name(supplierDto.getName())
-                .build();
+    public Supplier createSupplier(SupplierDto supplierDto) {
+        if (validateSupplier(supplierDto)) {
+            Supplier supplier = Supplier.builder()
+                    .name(supplierDto.getName())
+                    .build();
 
-        return supplierDao.save(supplier);
+            return supplierDao.save(supplier);
+        }
+        throw new RuntimeException("Can't create supplier");
     }
 
     @Transactional
@@ -48,6 +55,11 @@ public class SupplierService {
         }
 
         return resultSuppliers;
+    }
+
+    @Transactional
+    public List<Price> getSupplierProducts(Long id) {
+        return priceDao.getSupplierProducts(id);
     }
 
     private Supplier setCurrentBalance(Supplier supplier) {
@@ -70,4 +82,14 @@ public class SupplierService {
         return supplier;
     }
 
+    private boolean validateSupplier(SupplierDto supplierDto) {
+        if (supplierDto.getName() == null || supplierDto.getName().equals("")) {
+            return false;
+        }
+        Supplier buyer = supplierDao.findByName(supplierDto.getName());
+        if (buyer != null) {
+            return false;
+        }
+        return true;
+    }
 }

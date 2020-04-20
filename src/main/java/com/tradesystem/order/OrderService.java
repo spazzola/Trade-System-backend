@@ -16,23 +16,36 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 
 @Service
 public class OrderService {
 
-
     private BuyerDao buyerDao;
     private SupplierDao supplierDao;
     private ProductDao productDao;
+    private OrderDao orderDao;
     private OrderDetailsService orderDetailsService;
 
 
-    public OrderService(BuyerDao buyerDao, SupplierDao supplierDao, ProductDao productDao, OrderDetailsService orderDetailsService) {
+    public OrderService(BuyerDao buyerDao, SupplierDao supplierDao, ProductDao productDao,
+                        OrderDetailsService orderDetailsService, OrderDao orderDao) {
         this.buyerDao = buyerDao;
         this.supplierDao = supplierDao;
         this.productDao = productDao;
         this.orderDetailsService = orderDetailsService;
+        this.orderDao = orderDao;
+    }
+
+    @Transactional
+    public List<Order> getAllOrders() {
+        return orderDao.findAll();
+    }
+
+    @Transactional
+    public Set<Order> getMonthOrders(int month, int year) {
+        return orderDao.getMonthOrders(month, year);
     }
 
     @Transactional
@@ -43,37 +56,46 @@ public class OrderService {
         Supplier supplier = supplierDao.findById(createOrderRequest.getSupplierId())
                 .orElseThrow(RuntimeException::new);
 
-        List<OrderDetailsDto> orderDetailsDtoList = createOrderRequest.getOrderDetails();
+        if (validateOrder(createOrderRequest)) {
+            List<OrderDetailsDto> orderDetailsDtoList = createOrderRequest.getOrderDetails();
 
-        Order order = Order.builder()
-                .date(createOrderRequest.getDate())
-                .buyer(buyer)
-                .supplier(supplier)
-                .build();
+            Order order = Order.builder()
+                    .date(createOrderRequest.getDate())
+                    .buyer(buyer)
+                    .supplier(supplier)
+                    .build();
 
-        List<OrderDetails> orderDetailsList = new ArrayList<>();
+            List<OrderDetails> orderDetailsList = new ArrayList<>();
 
-        for (OrderDetailsDto orderDetailsDto : orderDetailsDtoList) {
-            OrderDetails orderDetails = new OrderDetails();
-            Long productId = orderDetailsDto.getProduct().getProductId();
-            Product product = productDao.findById(productId)
-                    .orElseThrow(NoSuchElementException::new);
-            orderDetails.setProduct(product);
+            for (OrderDetailsDto orderDetailsDto : orderDetailsDtoList) {
 
-            orderDetails.setQuantity(orderDetailsDto.getQuantity());
-            orderDetails.setOrder(order);
+                if (validateOrderDetail(orderDetailsDto)) {
+                    OrderDetails orderDetails = new OrderDetails();
+                    Long productId = orderDetailsDto.getProduct().getId();
+                    Product product = productDao.findById(productId)
+                            .orElseThrow(NoSuchElementException::new);
+                    orderDetails.setProduct(product);
 
-            String userComment = orderDetailsDto.getOrderComment().getUserComment();
-            orderDetails.getOrderComment().setUserComment(userComment);
+                    orderDetails.setQuantity(orderDetailsDto.getQuantity());
+                    orderDetails.setOrder(order);
 
-            orderDetailsList.add(orderDetails);
+                    // TODO add functionality to adding comments from user
+                    // String userComment = orderDetailsDto.getOrderComment().getUserComment();
+                    // orderDetails.getOrderComment().setUserComment(userComment);
+
+                    orderDetailsList.add(orderDetails);
+                } else {
+                    throw new RuntimeException("Can't create order detail");
+                }
+            }
+
+            order.setOrderDetails(orderDetailsList);
+
+            return calculateOrder(order);
+        } else {
+            throw new RuntimeException("Can't create order");
         }
 
-        order.setOrderDetails(orderDetailsList);
-
-       // calculateOrder(order);
-
-        return calculateOrder(order);
     }
 
     private Order calculateOrder(Order order) {
@@ -84,4 +106,23 @@ public class OrderService {
         return order;
     }
 
+    private boolean validateOrder(CreateOrderRequest order) {
+        if (order.getDate() == null) {
+            return false;
+        }
+        if (order.getOrderDetails() == null) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateOrderDetail(OrderDetailsDto orderDetail) {
+        if (orderDetail.getQuantity().doubleValue() <= 0) {
+            return false;
+        }
+        if (orderDetail.getProduct() == null) {
+            return false;
+        }
+        return true;
+    }
 }

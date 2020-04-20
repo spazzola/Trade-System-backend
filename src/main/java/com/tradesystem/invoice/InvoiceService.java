@@ -3,7 +3,6 @@ package com.tradesystem.invoice;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.buyer.BuyerDao;
 import com.tradesystem.buyer.BuyerDto;
-import com.tradesystem.orderdetails.OrderDetailsDao;
 import com.tradesystem.supplier.Supplier;
 import com.tradesystem.supplier.SupplierDao;
 import com.tradesystem.supplier.SupplierDto;
@@ -54,53 +53,29 @@ public class InvoiceService {
                     .orElseThrow(RuntimeException::new);
         }
 
-        if (buyer != null && supplier != null) {
-            throw new RuntimeException("Nie mozna stworzyc faktury dla buyera i suppliera naraz");
-        } else if (buyer == null && supplier == null) {
-            throw new RuntimeException("Nie mozna stworzyc faktury bez buyer lub supplier");
-        }
+        if (validateInvoice(invoiceDto, buyer, supplier)) {
+            final Invoice invoice = Invoice.builder()
+                    .id(null)
+                    .invoiceNumber(invoiceDto.getInvoiceNumber())
+                    .date(invoiceDto.getDate())
+                    .value(invoiceDto.getValue())
+                    .amountToUse(invoiceDto.getAmountToUse())
+                    .isUsed(invoiceDto.isUsed())
+                    .isPaid(invoiceDto.isPaid())
+                    .comment(invoiceDto.getComment())
+                    .buyer(buyer)
+                    .supplier(supplier)
+                    .build();
 
-        //TODO dorobic walidacje wartosci fv, nie moze byc =< 0
+            if (invoice.getBuyer() != null) {
+                processNegativeInvoicesForBuyer(invoice);
+            } else {
+                processNegativeInvoicesForSupplier(invoice);
+            }
 
-        final Invoice invoice = Invoice.builder()
-                .id(null)
-                .invoiceNumber(invoiceDto.getInvoiceNumber())
-                .date(invoiceDto.getDate())
-                .value(invoiceDto.getValue())
-                .amountToUse(invoiceDto.getAmountToUse())
-                .isUsed(invoiceDto.isUsed())
-                .isPaid(invoiceDto.isPaid())
-                .comment(invoiceDto.getComment())
-                .buyer(buyer)
-                .supplier(supplier)
-                .build();
-
-        if (invoice.getBuyer() != null) {
-            processNegativeInvoicesForBuyer(invoice);
+            return invoiceDao.save(invoice);
         } else {
-            processNegativeInvoicesForSupplier(invoice);
-        }
-
-        return invoiceDao.save(invoice);
-    }
-
-    @Transactional
-    public void payForBuyerInvoice(Long id) {
-        Optional<Invoice> invoice = invoiceDao.findById(id);
-
-        if (invoice.isPresent()) {
-            invoice.get().setPaid(true);
-            processNegativeInvoicesForBuyer(invoice.get());
-        }
-    }
-
-    @Transactional
-    public void payForSupplierInvoice(Long id) {
-        Optional<Invoice> invoice = invoiceDao.findById(id);
-
-        if (invoice.isPresent()) {
-            invoice.get().setPaid(true);
-            processNegativeInvoicesForSupplier(invoice.get());
+            throw new RuntimeException("Can't create invoice");
         }
     }
 
@@ -112,68 +87,103 @@ public class InvoiceService {
                 .orElseThrow(NoSuchElementException::new);
     }
 
+    @Transactional
+    public List<Invoice> getInvoicesByMonth(int month, int year) {
+        return invoiceDao.getMonthInvoices(month, year);
+    }
+
+    @Transactional
+    public void payForInvoice(Long id) {
+        Optional<Invoice> optionalInvoice = invoiceDao.findById(id);
+        Invoice invoice = optionalInvoice
+                .orElseThrow(NoSuchElementException::new);
+
+        if (invoice.getAmountToUse().doubleValue() <= 0) {
+            throw new RuntimeException("Nie mozna zaplacic negatywnej faktury");
+        }
+        boolean isBuyerOwner = checkInvoiceOwner(invoice);
+
+        if (isBuyerOwner) {
+            invoice.setPaid(true);
+            processNegativeInvoicesForBuyer(invoice);
+        } else {
+            invoice.setPaid(true);
+            processNegativeInvoicesForSupplier(invoice);
+        }
+    }
+
+    private boolean checkInvoiceOwner(Invoice invoice) {
+        return invoice.getBuyer() != null;
+    }
+
     private void processNegativeInvoicesForBuyer(Invoice invoice) {
 
-        Long buyerId = invoice.getBuyer().getId();
-        Optional<Invoice> negativeInvoice = invoiceDao.getBuyerNegativeInvoice(buyerId);
+        if (invoice.isPaid()) {
+            Long buyerId = invoice.getBuyer().getId();
+            Optional<Invoice> negativeInvoice = invoiceDao.getBuyerNegativeInvoice(buyerId);
 
-        if (negativeInvoice.isPresent()) {
-            negativeInvoice.get().setUsed(true);
-            invoiceDao.save(negativeInvoice.get());
+            if (negativeInvoice.isPresent()) {
+                negativeInvoice.get().setUsed(true);
+                invoiceDao.save(negativeInvoice.get());
 
-            BigDecimal negativeAmount = negativeInvoice.get().getAmountToUse();
-            BigDecimal newAmount = invoice.getAmountToUse().add(negativeAmount);
-            BigDecimal different = BigDecimal.valueOf(0.0);
+                BigDecimal negativeAmount = negativeInvoice.get().getAmountToUse();
+                BigDecimal newAmount = invoice.getAmountToUse().add(negativeAmount);
+                BigDecimal different = BigDecimal.valueOf(0.0);
 
-            if (newAmount.compareTo(BigDecimal.ZERO) > 0) {
-                different = negativeAmount;
+                if (newAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    different = negativeAmount;
+                }
+                if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
+                    different = negativeAmount.subtract(newAmount);
+                }
+
+                if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
+                    invoice.setComment("Pomniejszono o " + different + " z faktury o id " + negativeInvoice.get().getId());
+                }
+                if (newAmount.compareTo(BigDecimal.ZERO) >= 0) {
+                    invoice.setComment("Pomniejszono o " + negativeAmount + " z faktury o id " + negativeInvoice.get().getId());
+                }
+
+                saveInvoice(invoice, newAmount, invoice.getValue());
             }
-            if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
-                different = negativeAmount.subtract(newAmount);
-
-            }
-
-            if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
-                invoice.setComment("Pomniejszono o " + different + " z faktury o id " + negativeInvoice.get().getId());
-            }
-            if (newAmount.compareTo(BigDecimal.ZERO) >= 0) {
-                invoice.setComment("Pomniejszono o " + negativeAmount + " z faktury o id " + negativeInvoice.get().getId());
-            }
-
-            saveInvoice(invoice, newAmount, invoice.getValue());
-
+        } else {
+            saveInvoice(invoice, invoice.getValue(), invoice.getValue());
         }
     }
 
     private void processNegativeInvoicesForSupplier(Invoice invoice) {
-        Long supplierId = invoice.getSupplier().getId();
-        Optional<Invoice> negativeInvoice = invoiceDao.getSupplierNegativeInvoice(supplierId);
 
-        if (negativeInvoice.isPresent()) {
-            negativeInvoice.get().setUsed(true);
-            invoiceDao.save(negativeInvoice.get());
+        if (invoice.isPaid()) {
+            Long supplierId = invoice.getSupplier().getId();
+            Optional<Invoice> negativeInvoice = invoiceDao.getSupplierNegativeInvoice(supplierId);
 
-            BigDecimal negativeAmount = negativeInvoice.get().getAmountToUse();
-            BigDecimal newAmount = invoice.getAmountToUse().add(negativeAmount);
-            BigDecimal different = BigDecimal.valueOf(0.0);
+            if (negativeInvoice.isPresent()) {
+                negativeInvoice.get().setUsed(true);
+                invoiceDao.save(negativeInvoice.get());
 
-            if (newAmount.compareTo(BigDecimal.ZERO) > 0) {
-                different = negativeAmount;
+                BigDecimal negativeAmount = negativeInvoice.get().getAmountToUse();
+                BigDecimal newAmount = invoice.getAmountToUse().add(negativeAmount);
+                BigDecimal different = BigDecimal.valueOf(0.0);
+
+                if (newAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    different = negativeAmount;
+                }
+                if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
+                    different = negativeAmount.subtract(newAmount);
+
+                }
+
+                if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
+                    invoice.setComment("Pomniejszono o " + different + " z faktury o id " + negativeInvoice.get().getId());
+                }
+                if (newAmount.compareTo(BigDecimal.ZERO) >= 0) {
+                    invoice.setComment("Pomniejszono o " + negativeAmount + " z faktury o id " + negativeInvoice.get().getId());
+                }
+
+                saveInvoice(invoice, newAmount, invoice.getValue());
             }
-            if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
-                different = negativeAmount.subtract(newAmount);
-
-            }
-
-            if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
-                invoice.setComment("Pomniejszono o " + different + " z faktury o id " + negativeInvoice.get().getId());
-            }
-            if (newAmount.compareTo(BigDecimal.ZERO) >= 0) {
-                invoice.setComment("Pomniejszono o " + negativeAmount + " z faktury o id " + negativeInvoice.get().getId());
-            }
-
-            saveInvoice(invoice, newAmount, invoice.getValue());
-
+        } else {
+            saveInvoice(invoice, invoice.getValue(), invoice.getValue());
         }
     }
 
@@ -245,6 +255,28 @@ public class InvoiceService {
         invoice.setDate(date.plusMonths(1));
 
         return invoice;
+    }
+
+    private boolean validateInvoice(InvoiceDto invoiceDto, Buyer buyer, Supplier supplier) {
+        if (invoiceDto.getInvoiceNumber() == null || invoiceDto.getInvoiceNumber().equals("")) {
+            return false;
+        }
+        if (invoiceDto.getDate() == null) {
+            return false;
+        }
+        if (invoiceDto.getValue().doubleValue() <= 0) {
+            return false;
+        }
+        if (invoiceDto.getAmountToUse().doubleValue() <= 0) {
+            return false;
+        }
+        if (buyer != null && supplier != null) {
+            throw new RuntimeException("Nie mozna stworzyc faktury dla buyera i suppliera naraz");
+        }
+        if (buyer == null && supplier == null) {
+            throw new RuntimeException("Nie mozna stworzyc faktury bez buyera lub suppliera");
+        }
+        return true;
     }
 
 }
