@@ -25,7 +25,7 @@
       </div>
 
       <div class="form-group">
-        <label>Zapłacona</label>
+        <label>Zapłacona</label> <br>
         <select v-model="isPaid">
           <option
             v-for="paidOption in paidOptions"
@@ -40,7 +40,7 @@
       </div>
 
       <div class="form-group">
-        <label>Wybierz kupca</label>
+        <label>Wybierz kupca</label> <br>
         <select v-model="selectedBuyer.buyer">
           <option
             v-bind:value="{id: buyer.id, name: buyer.name}"
@@ -50,11 +50,11 @@
         </select>
       </div>
 
-      <p style="display: block; margin-left: 50px;">lub</p>
+      <p style="display: block; margin-left: 50px; font-weight: bold;">lub</p>
       <br />
 
       <div class="form-group">
-        <label>Wybierz dostawcę</label>
+        <label>Wybierz dostawcę</label> <br>
         <select v-model="selectedSupplier.supplier">
           <option
             v-bind:value="{id: supplier.id, name: supplier.name}"

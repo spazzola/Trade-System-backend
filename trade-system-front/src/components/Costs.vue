@@ -67,7 +67,6 @@ export default {
             'Authorization': 'Bearer ' + store.state.jwt
           }
       });
-
     },
     getDate() {
       let currentDate = new Date();

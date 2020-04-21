@@ -12,7 +12,7 @@
             </div>
       
             <div class="form-group">
-                <label>Wybierz kupca</label>
+                <label>Wybierz kupca</label> <br>
                 <select v-model="selectedBuyer.buyer" @change="loadBuyerProducts">
                 <option
                     v-bind:value="{id: buyer.id, name: buyer.name}"
@@ -27,6 +27,11 @@
                 <input type="number" id="quantity" class="form-control" v-model="order.orderDetails[0].quantity"/>
             </div>
 
+            <div class="form-group">
+                <label>Dodaci list</label>
+                <input type="text" id="transportNumber" class="form-control" v-model="order.orderDetails[0].transportNumber"/>
+            </div>
+
             <button class="btn btn-primary btn-success btn-sm" @click.prevent="setIndividualPrice">Dodaj indywidualną cenę</button>
             <div class="form-group" v-if="individualPrice">
                 <label style="margin-top: 1%;">Podaj cenę</label>
@@ -34,7 +39,7 @@
             </div>
 
             <div class="form-group" style="margin-top: 1%;">
-                <label>Wybierz product</label>
+                <label>Wybierz product</label> <br>
                 <select v-model="selectedProduct">
                 <option
                     v-bind:value="{name: product.product}"
@@ -45,7 +50,7 @@
             </div>
 
             <div class="form-group">
-                <label>Wybierz dostawcę</label>
+                <label>Wybierz dostawcę</label> <br>
                 <select v-model="selectedSupplier.supplier">
                 <option
                     v-bind:value="{id: supplier.id, name: supplier.name}"
@@ -105,6 +110,7 @@ export default {
               {
                   quantity: 0,
                   typedPrice: 0,
+                  transportNumber: '',
                   product: {
                       id: 0
                   }
