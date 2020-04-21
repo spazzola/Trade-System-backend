@@ -57,11 +57,11 @@
         <tr v-for="(order, index) in orders.slice().reverse()" v-bind:key="index">
             <td scope="row">{{ order.date }}</td>
             <td scope="row">{{ order.orderDetails[0].product.product}}</td>
-             <td scope="row">{{ order.orderDetails[0].quantity }}</td>
+             <td scope="row">{{ order.orderDetails[0].quantity | numeralFormat('0,0[.]00') }}</td>
             <td scope="row">{{ order.buyer.name }}</td>
-            <td scope="row">{{ order.orderDetails[0].buyerSum }}</td>
+            <td scope="row">{{ order.orderDetails[0].buyerSum | numeralFormat('0,0[.]00') }}</td>
             <td scope="row">{{ order.supplier.name }}</td>
-            <td scope="row">{{ order.orderDetails[0].supplierSum }}</td>
+            <td scope="row">{{ order.orderDetails[0].supplierSum | numeralFormat('0,0[.]00') }}</td>
             <td scope="row">{{ order.orderDetails[0].orderComment.systemComment}}</td>           
         </tr>
       </tbody>

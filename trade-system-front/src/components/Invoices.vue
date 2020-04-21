@@ -77,8 +77,8 @@
             <td scope="row" v-else>-----------</td>
             <td scope="row">{{ invoice.invoiceNumber }}</td>
             <td scope="row">{{ invoice.date }}</td>
-            <td scope="row">{{ invoice.value }}</td>
-            <td scope="row">{{ invoice.amountToUse }}</td>
+            <td scope="row">{{ invoice.value | numeralFormat('0,0[.]00') }}</td>
+            <td scope="row">{{ invoice.amountToUse | numeralFormat('0,0[.]00') }}</td>
             <td scope="row">{{ switchBooleanToString(invoice.used) }}</td>
             <td
               scope="row"
