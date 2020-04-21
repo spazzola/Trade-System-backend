@@ -18,6 +18,7 @@ public class OrderDetailsDto {
     private BigDecimal quantity;
     private BigDecimal buyerSum;
     private BigDecimal supplierSum;
+    private BigDecimal typedPrice;
     private ProductDto product;
     private OrderCommentDto orderComment;
 

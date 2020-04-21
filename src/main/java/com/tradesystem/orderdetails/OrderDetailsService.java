@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,10 +61,17 @@ public class OrderDetailsService {
         Long productId = orderDetails.getProduct().getId();
 
         BigDecimal quantity = orderDetails.getQuantity();
-        BigDecimal price = priceDao.getBuyerPrice(buyerId, productId);
+
+        BigDecimal price;
+
+        if (orderDetails.getTypedPrice().doubleValue() > 0) {
+            price = orderDetails.getTypedPrice();
+        } else {
+            price = priceDao.getBuyerPrice(buyerId, productId);
+        }
 
         if (price != null) {
-            return quantity.multiply(price).round(mathContext);
+            return quantity.multiply(price).setScale(2, RoundingMode.HALF_UP);
         } else {
             throw new RuntimeException("Kupiec nie ma ustawionej ceny dla tego produktu");
         }
@@ -78,7 +86,7 @@ public class OrderDetailsService {
 
         BigDecimal price = priceDao.getSupplierPrice(supplierId, productId);
         if (price != null) {
-            return quantity.multiply(price).round(mathContext);
+            return quantity.multiply(price).setScale(2, RoundingMode.HALF_UP);
         } else {
             throw new RuntimeException("Dostawca nie ma ustawionej ceny dla tego produktu");
         }
@@ -104,6 +112,7 @@ public class OrderDetailsService {
 
     private void payForSupplierOrder(OrderDetails orderDetails, BigDecimal amount, List<Invoice> invoices) {
         BigDecimal amountToPay = amount;
+        amountToPay = amountToPay.setScale(2, RoundingMode.HALF_UP);
         List<String> invoiceNumbers = new ArrayList<>();
         int countedInvoices = 0;
         OrderComment orderComment;
@@ -181,6 +190,7 @@ public class OrderDetailsService {
 
     private void payForBuyerOrder(OrderDetails orderDetails, BigDecimal amount, List<Invoice> invoices) {
         BigDecimal amountToPay = orderDetails.getBuyerSum();
+        amountToPay = amountToPay.setScale(2, RoundingMode.HALF_UP);
         List<String> invoiceNumbers = new ArrayList<>();
         int countedInvoices = 0;
         OrderComment orderComment;

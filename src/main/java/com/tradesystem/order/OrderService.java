@@ -76,6 +76,8 @@ public class OrderService {
                             .orElseThrow(NoSuchElementException::new);
                     orderDetails.setProduct(product);
 
+                    orderDetails.setTypedPrice(orderDetailsDto.getTypedPrice());
+
                     orderDetails.setQuantity(orderDetailsDto.getQuantity());
                     orderDetails.setOrder(order);
 

@@ -25,6 +25,9 @@ public class OrderDetails {
 
     private BigDecimal supplierSum;
 
+    @Transient
+    private BigDecimal typedPrice;
+
     @ManyToOne(cascade=CascadeType.PERSIST)
     @JoinColumn(name = "order_fk")
     private Order order;
