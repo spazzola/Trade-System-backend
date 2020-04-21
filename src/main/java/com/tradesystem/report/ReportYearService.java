@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -148,7 +148,7 @@ public class ReportYearService {
                 sum = sum.add(orderDetail.getBuyerSum());
             }
         }
-        return sum.divide(quantity, 2);
+        return sum.divide(quantity, RoundingMode.HALF_EVEN);
     }
 
     private BigDecimal sumYearIncomes(int year) {
@@ -172,7 +172,7 @@ public class ReportYearService {
                 sum = sum.add(orderDetail.getSupplierSum());
             }
         }
-        return sum.divide(soldedQuantity, 2);
+        return sum.divide(soldedQuantity, RoundingMode.HALF_EVEN);
     }
 
     private BigDecimal sumMonthlySoldedQuantity(int year) {
