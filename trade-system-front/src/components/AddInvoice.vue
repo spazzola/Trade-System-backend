@@ -64,7 +64,7 @@
         </select>
       </div>
       <router-link to="/invoices">
-        <button class="btn btn-success" @click="addInvoice">Dodaj</button>
+        <button class="btn btn-success btn-sm" @click="addInvoice">Dodaj</button>
       </router-link>
     </form>
   </div>

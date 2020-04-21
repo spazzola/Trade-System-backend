@@ -5,9 +5,9 @@
             
                 <router-link to="invoices" tag="li" ><i class="nav-link"><span>Faktury</span></i></router-link>
             
-                <router-link to="/addBuyer" tag="li"><i class="nav-link">Dodaj kupca</i></router-link>
+                <router-link to="/addBuyer" tag="li"><i class="nav-link">Dodaj klienta</i></router-link>
         
-                <router-link to="/addSupplier" tag="li"><i class="nav-link">Dodaj sprzedawce</i></router-link>
+                <router-link to="/addSupplier" tag="li"><i class="nav-link">Dodaj kontrahenta</i></router-link>
 
                 <router-link to="/product" tag="li"><i class="nav-link">Dodaj produkt</i></router-link>
 

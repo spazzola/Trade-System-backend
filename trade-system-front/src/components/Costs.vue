@@ -18,7 +18,7 @@
           <label>Data (RRRR-MM-DD)</label>
           <input type="date" id="date" class="form-control" v-model="cost.date" style="width: 160px;" />
         </div>
-        <button class="btn btn-success btn-primary" @click="sendCost">Dodaj koszt</button>
+        <button class="btn btn-success btn-primary btn-sm" @click="sendCost">Dodaj koszt</button>
       </form>
       <div class="month-costs">
         <form>
