@@ -77,7 +77,7 @@ public class OrderService {
                     orderDetails.setProduct(product);
 
                     orderDetails.setTypedPrice(orderDetailsDto.getTypedPrice());
-
+                    orderDetails.setTransportNumber(orderDetailsDto.getTransportNumber());
                     orderDetails.setQuantity(orderDetailsDto.getQuantity());
                     orderDetails.setOrder(order);
 

@@ -25,6 +25,8 @@ public class OrderDetails {
 
     private BigDecimal supplierSum;
 
+    private String transportNumber;
+
     @Transient
     private BigDecimal typedPrice;
 

@@ -44,8 +44,9 @@
       <thead>
         <tr>
           <th scope="col">Data</th>
+          <th scope="col">Dodaci list</th>
           <th scope="col">Sortyment</th>
-          <th scope="col">Ilość</th>
+          <th scope="col">Ilość m3</th>
           <th scope="col">Kupiec</th>
           <th scope="col">Kupiec suma</th>
           <th scope="col">Dostawca</th>
@@ -56,6 +57,7 @@
       <tbody>
         <tr v-for="(order, index) in orders.slice().reverse()" v-bind:key="index">
             <td scope="row">{{ order.date }}</td>
+            <td scope="row">{{ order.orderDetails[0].transportNumber }}</td>
             <td scope="row">{{ order.orderDetails[0].product.product}}</td>
              <td scope="row">{{ order.orderDetails[0].quantity | numeralFormat('0,0[.]00') }}</td>
             <td scope="row">{{ order.buyer.name }}</td>
@@ -102,7 +104,7 @@ export default {
           }
         })
         .then(resp => {
-          this.invoices = [];
+          //this.invoices = [];
           const data = resp.data;
           for (let key in data) {
             const order = data[key];

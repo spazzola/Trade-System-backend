@@ -31,7 +31,6 @@ public class OrderDetailsService {
     private OrderCommentService orderCommentService;
     private OrderCommentDao orderCommentDao;
 
-    private MathContext mathContext = new MathContext(2);
 
     public OrderDetailsService(PriceDao priceDao, InvoiceDao invoiceDao, OrderDetailsDao orderDetailsDao,
                                OrderCommentService orderCommentService, OrderCommentDao orderCommentDao) {
@@ -282,6 +281,7 @@ public class OrderDetailsService {
             invoiceDao.save(invoice);
         } else {
             Invoice invoice = new Invoice();
+            invoice.setInvoiceNumber("Negatywna");
             invoice.setAmountToUse(amount);
             invoice.setValue(amount);
             invoice.setDate(LocalDate.now());
@@ -304,6 +304,7 @@ public class OrderDetailsService {
             invoiceDao.save(invoice);
         } else {
             Invoice invoice = new Invoice();
+            invoice.setInvoiceNumber("Negatywna");
             invoice.setAmountToUse(amount);
             invoice.setValue(amount);
             invoice.setDate(LocalDate.now());

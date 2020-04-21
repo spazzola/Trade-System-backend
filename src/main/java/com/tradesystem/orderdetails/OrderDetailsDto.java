@@ -19,6 +19,7 @@ public class OrderDetailsDto {
     private BigDecimal buyerSum;
     private BigDecimal supplierSum;
     private BigDecimal typedPrice;
+    private String transportNumber;
     private ProductDto product;
     private OrderCommentDto orderComment;
 

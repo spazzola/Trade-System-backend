@@ -1,0 +1,2 @@
+1. Dodać do wszystkich metod w controllerach sprzedzenie roli user lub admin.
+2. Dodac Logger do projektu.

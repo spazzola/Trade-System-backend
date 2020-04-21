@@ -30,6 +30,7 @@ public class OrderDetailsMapper {
                 .supplierSum(orderDetails.getSupplierSum())
                 .product(productDto)
                 .orderComment(orderCommentDto)
+                .transportNumber(orderDetails.getTransportNumber())
                 .build();
     }
 
