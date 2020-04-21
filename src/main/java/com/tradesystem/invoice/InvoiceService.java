@@ -112,6 +112,12 @@ public class InvoiceService {
         }
     }
 
+    @Transactional
+    public void trasnferInvoicesToNextMonth(LocalDate localDate) {
+        transferBuyerInvoices(localDate);
+        transferSupplierInvoices(localDate);
+    }
+
     private boolean checkInvoiceOwner(Invoice invoice) {
         return invoice.getBuyer() != null;
     }
@@ -191,12 +197,6 @@ public class InvoiceService {
         invoice.setAmountToUse(newAmount);
         invoice.setValue(invoice.getValue());
         invoiceDao.save(invoice);
-    }
-
-    @Transactional
-    public void trasnferInvoicesToNextMonth(LocalDate localDate) {
-        transferBuyerInvoices(localDate);
-        transferSupplierInvoices(localDate);
     }
 
     private void transferSupplierInvoices(LocalDate localDate) {
