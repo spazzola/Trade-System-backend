@@ -27,7 +27,13 @@
                 <input type="number" id="quantity" class="form-control" v-model="order.orderDetails[0].quantity"/>
             </div>
 
-            <div class="form-group">
+            <button class="btn btn-primary btn-success btn-sm" @click.prevent="setIndividualPrice">Dodaj indywidualną cenę</button>
+            <div class="form-group" v-if="individualPrice">
+                <label style="margin-top: 1%;">Podaj cenę</label>
+                <input type="number" id="typedPrice" class="form-control" v-model="order.orderDetails[0].typedPrice"/>
+            </div>
+
+            <div class="form-group" style="margin-top: 1%;">
                 <label>Wybierz product</label>
                 <select v-model="selectedProduct">
                 <option
@@ -50,7 +56,7 @@
             </div>
 
             <router-link to="/orders">
-                <button class="btn btn-success" @click="addOrder">Dodaj</button>
+                <button class="btn btn-success btn-sm" @click="addOrder">Dodaj</button>
             </router-link>
     </form>
     </div>
@@ -71,6 +77,7 @@ export default {
     },
     data() {
         return {
+        individualPrice: false,
         selectedBuyer: {
         buyer: {
           id: null
@@ -97,6 +104,7 @@ export default {
           orderDetails: [
               {
                   quantity: 0,
+                  typedPrice: 0,
                   product: {
                       id: 0
                   }
@@ -162,6 +170,9 @@ export default {
         
       })
       },
+      setIndividualPrice() {
+        this.individualPrice = !this.individualPrice;
+      }
 
   }
 }
