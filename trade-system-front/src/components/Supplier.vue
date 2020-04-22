@@ -4,7 +4,7 @@
         <left-menu></left-menu>
         <div class="add-supplier-content">
         <div class="form-group">
-            <label>Nazwa sprzedawcy</label>
+            <label>Nazwa kontrahenta</label>
             <input type="text" id="date" class="form-control" v-model="supplier.name" />
             
             <router-link to="/orders">

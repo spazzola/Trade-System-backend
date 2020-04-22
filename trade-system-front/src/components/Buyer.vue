@@ -4,7 +4,7 @@
         <left-menu></left-menu>
         <div class="add-buyer-content">
             <div class="form-group">
-                <label>Nazwa kupca</label>
+                <label>Nazwa klienta</label>
                 <input type="text" id="date" class="form-control" v-model="buyer.name" />
                 
                 <router-link to="/orders">

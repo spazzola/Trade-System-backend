@@ -12,7 +12,7 @@
             </div>
       
             <div class="form-group">
-                <label>Wybierz kupca</label> <br>
+                <label>Wybierz klienta</label> <br>
                 <select v-model="selectedBuyer.buyer" @change="loadBuyerProducts">
                 <option
                     v-bind:value="{id: buyer.id, name: buyer.name}"
@@ -39,7 +39,7 @@
             </div>
 
             <div class="form-group" style="margin-top: 1%;">
-                <label>Wybierz product</label> <br>
+                <label>Wybierz produkt</label> <br>
                 <select v-model="selectedProduct">
                 <option
                     v-bind:value="{name: product.product}"
@@ -50,7 +50,7 @@
             </div>
 
             <div class="form-group">
-                <label>Wybierz dostawcę</label> <br>
+                <label>Wybierz kontrahenta</label> <br>
                 <select v-model="selectedSupplier.supplier">
                 <option
                     v-bind:value="{id: supplier.id, name: supplier.name}"

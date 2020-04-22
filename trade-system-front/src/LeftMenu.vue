@@ -3,7 +3,7 @@
     <h1>Balanse</h1>
     <hr style="margin-top: 0px;" />
 
-    <h2>Kupcy</h2>
+    <h2>Klienci</h2>
     <ul>
       <li
         v-for="(buyer, index) in buyers"
@@ -12,7 +12,7 @@
         {{buyer.name}} : {{buyer.currentBalance }} &emsp; | &emsp; {{ buyer.currentBalance * 0.23 + buyer.currentBalance }}</li>
     </ul>
 
-    <h2 style="margin-top: 20px;">Sprzedawcy</h2>
+    <h2 style="margin-top: 20px;">Kontrahenci</h2>
     <ul>
       <li
         v-for="(supplier, index) in suppliers"

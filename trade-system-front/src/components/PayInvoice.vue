@@ -63,7 +63,7 @@ export default {
 }
 
 .form-control {
-  width: 50px;
+  width: 70px;
   height: 25px;
 }
 </style>

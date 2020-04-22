@@ -47,10 +47,10 @@
           <th scope="col">Dodaci list</th>
           <th scope="col">Sortyment</th>
           <th scope="col">Ilość m3</th>
-          <th scope="col">Kupiec</th>
-          <th scope="col">Kupiec suma</th>
-          <th scope="col">Dostawca</th>
-          <th scope="col">Dostawca suma</th>
+          <th scope="col">Klient</th>
+          <th scope="col">Klient suma</th>
+          <th scope="col">Kontrahent</th>
+          <th scope="col">Kontrahent suma</th>
           <th scope="col">Komentarz systemu</th>
         </tr>
       </thead>
@@ -59,11 +59,11 @@
             <td scope="row">{{ order.date }}</td>
             <td scope="row">{{ order.orderDetails[0].transportNumber }}</td>
             <td scope="row">{{ order.orderDetails[0].product.product}}</td>
-             <td scope="row">{{ order.orderDetails[0].quantity | numeralFormat('0,0[.]00') }}</td>
+             <td scope="row">{{ order.orderDetails[0].quantity | toCurrency }}</td>
             <td scope="row">{{ order.buyer.name }}</td>
-            <td scope="row">{{ order.orderDetails[0].buyerSum | numeralFormat('0,0[.]00') }}</td>
+            <td scope="row">{{ order.orderDetails[0].buyerSum | toCurrency }}</td>
             <td scope="row">{{ order.supplier.name }}</td>
-            <td scope="row">{{ order.orderDetails[0].supplierSum | numeralFormat('0,0[.]00') }}</td>
+            <td scope="row">{{ order.orderDetails[0].supplierSum |toCurrency }}</td>
             <td scope="row">{{ order.orderDetails[0].orderComment.systemComment}}</td>           
         </tr>
       </tbody>
@@ -160,7 +160,7 @@ td {
 }
 
 table {
-  width: 1900px;
+  width: 3000px;
 }
 
 .orders-content {

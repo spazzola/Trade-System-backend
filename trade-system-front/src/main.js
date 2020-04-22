@@ -18,6 +18,14 @@ Vue.use(Vuex)
  
 Vue.use(VueNumerals);
 
+Vue.filter('toCurrency', function (value) {
+  if (typeof value !== "number") {
+      return value;
+  }
+  let val = (value/1).toFixed(2).replace('.', ',')
+  return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+});
+
 const router = new VueRouter({
   routes
 });

@@ -3,14 +3,14 @@
         <nav-menu></nav-menu>
         <left-menu></left-menu>
          <div class="price-content">
-    <button class="btn btn-primary btn-success btn-sm" @click="forBuyer">Dla kupca</button>
-    <button class="btn btn-primary btn-success btn-sm" @click="forSupplier">Dla Sprzedawcy</button>
+    <button class="btn btn-primary btn-success btn-sm" @click="forBuyer">Dla klienta</button>
+    <button class="btn btn-primary btn-success btn-sm" @click="forSupplier">Dla kontrahenta</button>
     <button
       class="btn btn-primary btn-success btn-sm"
       style="margin-left: 100px;"
       @click="editBuyer"
-    >Edytuj cenę kupca</button>
-    <button class="btn btn-primary btn-success btn-sm" @click="editSupplier">Edytuj cenę sprzedawcy</button>
+    >Edytuj cenę klienta</button>
+    <button class="btn btn-primary btn-success btn-sm" @click="editSupplier">Edytuj cenę kontrahenta</button>
 
     <div v-if="isBuyer">
       <form>
@@ -39,7 +39,7 @@
         </div>
 
         <div class="form-group">
-          <label>Wybierz kupca</label>
+          <label>Wybierz klienta</label>
           <br />
           <select v-model="price.buyer">
             <option
@@ -81,7 +81,7 @@
         </div>
 
         <div class="form-group">
-          <label>Wybierz sprzedawce</label>
+          <label>Wybierz kontrahenta</label>
           <br />
           <select v-model="price.supplier">
             <option
@@ -99,7 +99,7 @@
     <div v-if="isEditBuyer" class="edit-price-content">
       <form>
         <div class="form-group">
-          <label>Wybierz kupca</label>
+          <label>Wybierz klienta</label>
           <select v-model="selectedBuyer.buyer" @change="loadBuyerProducts">
             <option
               v-bind:value="{id: buyer.id, name: buyer.name}"
@@ -109,7 +109,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Wybierz produkt</label>
+          <label>Wybierz kontrahenta</label>
           <select v-model="selectedProduct">
             <option
               v-bind:value="{name: product.product}"
@@ -137,7 +137,7 @@
     <div v-if="isEditSupplier" class="edit-price-content">
       <form>
         <div class="form-group">
-          <label>Wybierz Sprzedawcę</label>
+          <label>Wybierz kontrahenta</label>
           <select v-model="selectedSupplier.supplier" @change="loadSupplierProducts">
             <option
               v-bind:value="{id: supplier.id, name: supplier.name}"

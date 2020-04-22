@@ -42,16 +42,16 @@
           <tbody>
             <tr v-for="(report, index) in reports.slice().reverse()" v-bind:key="index">
               <td scope="row">{{ translateMonth(report.type) }}</td>
-              <td scope="row">{{ report.soldedValue }}</td>
-              <td scope="row">{{ report.boughtValue }}</td>
-              <td scope="row">{{ report.soldedQuantity }}</td>
-              <td scope="row">{{ report.buyersNotUsedValue }}</td>
-              <td scope="row">{{ report.suppliersNotUsedValue }}</td>
-              <td scope="row">{{ report.averagePurchase }}</td>
-              <td scope="row">{{ report.averageSold }}</td>
-              <td scope="row">{{ report.averageEarningsPerM3 }}</td>
-              <td scope="row">{{ report.sumCosts }}</td>
-              <td scope="row">{{ report.profit }}</td>
+              <td scope="row">{{ report.soldedValue | toCurrency }}</td>
+              <td scope="row">{{ report.boughtValue | toCurrency }}</td>
+              <td scope="row">{{ report.soldedQuantity | toCurrency }}</td>
+              <td scope="row">{{ report.buyersNotUsedValue | toCurrency }}</td>
+              <td scope="row">{{ report.suppliersNotUsedValue | toCurrency }}</td>
+              <td scope="row">{{ report.averagePurchase | toCurrency }}</td>
+              <td scope="row">{{ report.averageSold | toCurrency }}</td>
+              <td scope="row">{{ report.averageEarningsPerM3 | toCurrency }}</td>
+              <td scope="row">{{ report.sumCosts | toCurrency }}</td>
+              <td scope="row">{{ report.profit | toCurrency }}</td>
             </tr>
           </tbody>
         </table>
@@ -201,6 +201,6 @@ export default {
 }
 
 table {
-  width: 1600px;
+  width: 2000px;
 }
 </style>

@@ -57,8 +57,8 @@
         <thead>
           <tr>
             <th scope="col">Id</th>
-            <th scope="col">Kupiec</th>
-            <th scope="col">Dostawca</th>
+            <th scope="col">Klient</th>
+            <th scope="col">Kontrahent</th>
             <th scope="col">Nr FV</th>
             <th scope="col">Data</th>
             <th scope="col">Wartość</th>
@@ -77,13 +77,13 @@
             <td scope="row" v-else>-----------</td>
             <td scope="row">{{ invoice.invoiceNumber }}</td>
             <td scope="row">{{ invoice.date }}</td>
-            <td scope="row">{{ invoice.value | numeralFormat('0,0[.]00') }}</td>
-            <td scope="row">{{ invoice.amountToUse | numeralFormat('0,0[.]00') }}</td>
+            <td scope="row">{{ invoice.value | toCurrency }}</td>
+            <td scope="row">{{ invoice.amountToUse | toCurrency }}</td>
             <td scope="row">{{ switchBooleanToString(invoice.used) }}</td>
             <td
               scope="row"
               :style="{color: checkPaid(invoice.paid)}"
-            >{{ switchBooleanToString(invoice.paid) }}</td>
+              >{{ switchBooleanToString(invoice.paid) }}</td>
             <td scope="row">
               <div style="width: 1000px;">{{invoice.comment}}</div>
             </td>
@@ -222,7 +222,7 @@ export default {
 }
 
 table {
-  width: 1900px;
+  width: 2500px;
 }
 
 .invoices-content {
