@@ -274,9 +274,10 @@ public class OrderDetailsService {
 
         if (negativeInvoice.isPresent()) {
             Invoice invoice = negativeInvoice.get();
+            BigDecimal invoiceValue = invoice.getValue();
             BigDecimal invoiceAmount = invoice.getAmountToUse();
             BigDecimal newInvoiceAmount = invoiceAmount.add(amount);
-
+            invoice.setValue(invoiceValue.add(amount));
             invoice.setAmountToUse(newInvoiceAmount);
             invoiceDao.save(invoice);
         } else {
