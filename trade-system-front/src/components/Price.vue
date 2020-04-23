@@ -285,7 +285,7 @@ export default {
         headers: {
             'Authorization': 'Bearer ' + store.state.jwt
           }
-      });
+      }).then(this.isBuyer = !this.isBuyer);
     },
     addSupplierPrice() {
             console.log(this.price)
@@ -293,7 +293,7 @@ export default {
         headers: {
             'Authorization': 'Bearer ' + store.state.jwt
           }
-      });
+      }).then(this.isSupplier = !this.isSupplier);
     },
     loadBuyerProducts() {
       this.products = [];

@@ -6,7 +6,7 @@
             <form>
             <div class="form-group">
                 <label>Id faktury</label>
-                <input type="number" id="id" class="form-control" v-model="id" />
+                <input type="number" id="id" class="form-control" v-model="id" min="0"/>
             </div>
             <router-link to="/invoices">
                 <button class="btn btn-success" @click="pay">Dodaj płatność</button>

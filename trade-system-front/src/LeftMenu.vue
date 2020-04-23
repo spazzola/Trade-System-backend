@@ -9,7 +9,7 @@
         v-for="(buyer, index) in buyers"
         v-bind:key="index"
         :style="{color: checkAmount(buyer.currentBalance)}">
-        {{buyer.name}} : {{buyer.currentBalance }} &emsp; | &emsp; {{ buyer.currentBalance * 0.23 + buyer.currentBalance }}</li>
+        {{buyer.name}} : {{buyer.currentBalance | toCurrency }} &emsp; | &emsp; {{ buyer.currentBalance * 0.23 + buyer.currentBalance  | toCurrency}}</li>
     </ul>
 
     <h2 style="margin-top: 20px;">Kontrahenci</h2>
@@ -18,7 +18,7 @@
         v-for="(supplier, index) in suppliers"
         v-bind:key="index"
         :style="{color: checkAmount(supplier.currentBalance)}">
-        {{supplier.name}} : {{supplier.currentBalance}}</li>
+        {{supplier.name}} : {{supplier.currentBalance | toCurrency }}</li>
     </ul>
   </div>
 </template>
