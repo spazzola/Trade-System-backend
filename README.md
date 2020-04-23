@@ -1,4 +1,4 @@
-# Trade-System
+# Trade-System - version 1.0
 Trade system for managing wood trade, making for my family's industry.
 
 Back-end: Java + Spring
@@ -15,4 +15,6 @@ While adding order, you have to select which buyer want to buy product, and from
    
 User has possibility to check current balance of every buyer / supplier based on paid invoices.
 User can generate monthly / yearly report as well.
+
+Next version will be merged with company's web-page. Front-end will be re-write to make it more clean.
     
