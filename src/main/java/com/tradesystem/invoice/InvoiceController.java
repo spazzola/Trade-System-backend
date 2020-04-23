@@ -2,13 +2,9 @@ package com.tradesystem.invoice;
 
 import com.tradesystem.user.RoleSecurity;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.json.Json;
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 @RestController
@@ -72,8 +68,8 @@ public class InvoiceController {
         int year = Integer.valueOf(localDate.substring(0, 4));
         int month = Integer.valueOf(localDate.substring(5, 7));
 
-        LocalDate currentDate = LocalDate.of(year, month, 1);
-        invoiceService.trasnferInvoicesToNextMonth(currentDate);
+        LocalDate currentDate = LocalDate.of(year, month, 15);
+        invoiceService.transferInvoicesToNextMonth(currentDate);
     }
 
 }

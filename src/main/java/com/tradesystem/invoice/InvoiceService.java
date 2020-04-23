@@ -113,7 +113,7 @@ public class InvoiceService {
     }
 
     @Transactional
-    public void trasnferInvoicesToNextMonth(LocalDate localDate) {
+    public void transferInvoicesToNextMonth(LocalDate localDate) {
         transferBuyerInvoices(localDate);
         transferSupplierInvoices(localDate);
     }
@@ -128,39 +128,7 @@ public class InvoiceService {
             Long buyerId = invoice.getBuyer().getId();
             Optional<Invoice> optionalNegativeInvoice = invoiceDao.getBuyerNegativeInvoice(buyerId);
 
-            if (optionalNegativeInvoice.isPresent()) {
-                Invoice negativeInvoice = optionalNegativeInvoice.get();
-                BigDecimal converter = BigDecimal.valueOf(-1);
-                BigDecimal zero = BigDecimal.ZERO;
-
-                BigDecimal negativeAmount = negativeInvoice.getAmountToUse();
-                BigDecimal convertedNegativeAmount = negativeAmount.multiply(converter);
-                BigDecimal invoiceAmount = invoice.getAmountToUse();
-                BigDecimal newAmount;
-
-                if (invoiceAmount.compareTo(convertedNegativeAmount) == 0) {
-                    saveInvoice(negativeInvoice, zero, true);
-
-                    invoice.setComment("Pomniejszono o " + negativeAmount + " z faktury o id " + negativeInvoice.getId());
-                    saveInvoice(invoice, zero, true);
-                }
-                if (invoiceAmount.compareTo(convertedNegativeAmount) == 1) {
-                    saveInvoice(negativeInvoice, zero, true);
-
-                    newAmount = invoiceAmount.subtract(convertedNegativeAmount);
-                    invoice.setComment("Pomniejszono o " + negativeAmount + " z faktury o id " + negativeInvoice.getId());
-                    saveInvoice(invoice, newAmount, false);
-                }
-
-                if (invoiceAmount.compareTo(convertedNegativeAmount) == -1) {
-                    BigDecimal newNegativeInvoiceAmount = convertedNegativeAmount.subtract(invoiceAmount);
-                    BigDecimal newConvertedAmount = newNegativeInvoiceAmount.multiply(converter);
-                    saveInvoice(negativeInvoice, newConvertedAmount, false);
-
-                    invoice.setComment("Pomniejszono o -" + invoiceAmount + " z faktury o id " + negativeInvoice.getId());
-                    saveInvoice(invoice, zero, true);
-                }
-            }
+            optionalNegativeInvoice.ifPresent(negativeInvoice -> processNegativeInvoice(invoice, negativeInvoice));
         } else {
             saveInvoice(invoice, invoice.getValue(), false);
         }
@@ -172,41 +140,42 @@ public class InvoiceService {
             Long supplierId = invoice.getSupplier().getId();
             Optional<Invoice> optionalNegativeInvoice = invoiceDao.getSupplierNegativeInvoice(supplierId);
 
-            if (optionalNegativeInvoice.isPresent()) {
-                Invoice negativeInvoice = optionalNegativeInvoice.get();
-                BigDecimal converter = BigDecimal.valueOf(-1);
-                BigDecimal zero = BigDecimal.ZERO;
-
-                BigDecimal negativeAmount = negativeInvoice.getAmountToUse();
-                BigDecimal convertedNegativeAmount = negativeAmount.multiply(converter);
-                BigDecimal invoiceAmount = invoice.getAmountToUse();
-                BigDecimal newAmount;
-
-                if (invoiceAmount.compareTo(convertedNegativeAmount) == 0) {
-                    saveInvoice(negativeInvoice, zero, true);
-
-                    invoice.setComment("Pomniejszono o " + negativeAmount + " z faktury o id " + negativeInvoice.getId());
-                    saveInvoice(invoice, zero, true);
-                }
-                if (invoiceAmount.compareTo(convertedNegativeAmount) == 1) {
-                    saveInvoice(negativeInvoice, zero, true);
-
-                    newAmount = invoiceAmount.subtract(convertedNegativeAmount);
-                    invoice.setComment("Pomniejszono o " + negativeAmount + " z faktury o id " + negativeInvoice.getId());
-                    saveInvoice(invoice, newAmount, false);
-                }
-
-                if (invoiceAmount.compareTo(convertedNegativeAmount) == -1) {
-                    BigDecimal newNegativeInvoiceAmount = convertedNegativeAmount.subtract(invoiceAmount);
-                    BigDecimal newConvertedAmount = newNegativeInvoiceAmount.multiply(converter);
-                    saveInvoice(negativeInvoice, newConvertedAmount, false);
-
-                    invoice.setComment("Pomniejszono o -" + invoiceAmount + " z faktury o id " + negativeInvoice.getId());
-                    saveInvoice(invoice, zero, true);
-                }
-            }
+            optionalNegativeInvoice.ifPresent(negativeInvoice -> processNegativeInvoice(invoice, negativeInvoice));
         } else {
             saveInvoice(invoice, invoice.getValue(), false);
+        }
+    }
+
+    private void processNegativeInvoice(Invoice invoice, Invoice negativeInvoice) {
+        BigDecimal converter = BigDecimal.valueOf(-1);
+        BigDecimal zero = BigDecimal.ZERO;
+
+        BigDecimal negativeAmount = negativeInvoice.getAmountToUse();
+        BigDecimal convertedNegativeAmount = negativeAmount.multiply(converter);
+        BigDecimal invoiceAmount = invoice.getAmountToUse();
+        BigDecimal newAmount;
+
+        if (invoiceAmount.compareTo(convertedNegativeAmount) == 0) {
+            saveInvoice(negativeInvoice, zero, true);
+
+            invoice.setComment("Pomniejszono o " + negativeAmount + " z faktury o id " + negativeInvoice.getId());
+            saveInvoice(invoice, zero, true);
+        }
+        if (invoiceAmount.compareTo(convertedNegativeAmount) == 1) {
+            saveInvoice(negativeInvoice, zero, true);
+
+            newAmount = invoiceAmount.subtract(convertedNegativeAmount);
+            invoice.setComment("Pomniejszono o " + negativeAmount + " z faktury o id " + negativeInvoice.getId());
+            saveInvoice(invoice, newAmount, false);
+        }
+
+        if (invoiceAmount.compareTo(convertedNegativeAmount) == -1) {
+            BigDecimal newNegativeInvoiceAmount = convertedNegativeAmount.subtract(invoiceAmount);
+            BigDecimal newConvertedAmount = newNegativeInvoiceAmount.multiply(converter);
+            saveInvoice(negativeInvoice, newConvertedAmount, false);
+
+            invoice.setComment("Pomniejszono o -" + invoiceAmount + " z faktury o id " + negativeInvoice.getId());
+            saveInvoice(invoice, zero, true);
         }
     }
 
@@ -262,7 +231,6 @@ public class InvoiceService {
 
     private Invoice createInvoice(BigDecimal amountToUse, String invoiceNumber, LocalDate date) {
         Invoice invoice = new Invoice();
-        date = date.with(TemporalAdjusters.firstDayOfMonth());
         invoice.setAmountToUse(amountToUse);
         invoice.setInvoiceNumber(invoiceNumber + "-przeniesiona");
         invoice.setValue(amountToUse);
