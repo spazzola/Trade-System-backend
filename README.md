@@ -2,6 +2,7 @@
 Trade system for managing wood trade, done for my family's industry.
 
 Back-end: Java + Spring
+
 Front-end: Vue.js
 
 Application dedicated to sales agents. With that program you can easily manage tradings:
