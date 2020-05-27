@@ -4,6 +4,7 @@ import com.tradesystem.buyer.Buyer;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
 import com.tradesystem.order.Order;
+import com.tradesystem.order.UpdateOrderRequest;
 import com.tradesystem.ordercomment.OrderComment;
 import com.tradesystem.ordercomment.OrderCommentDao;
 import com.tradesystem.ordercomment.OrderCommentService;
@@ -81,6 +82,11 @@ public class OrderDetailsService {
             throw new RuntimeException("Kupiec nie ma ustawionej ceny dla tego produktu");
         }
 
+    }
+
+    @Transactional
+    public OrderDetails updateOrder(UpdateOrderRequest updateOrderRequest) {
+        return null;
     }
 
     private BigDecimal calculateSupplierOrder(OrderDetails orderDetails) {

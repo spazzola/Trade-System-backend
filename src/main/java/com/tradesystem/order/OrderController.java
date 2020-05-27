@@ -63,5 +63,6 @@ public class OrderController {
     public OrderDetailsDto updateOrder(@RequestBody UpdateOrderRequest updateOrderRequest) {
         OrderDetails orderDetails = orderDetailsService.updateOrder(updateOrderRequest);
         return orderDetailsMapper.toDto(orderDetails);
+
     }
 }
