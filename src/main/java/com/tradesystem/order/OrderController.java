@@ -61,7 +61,7 @@ public class OrderController {
 
     @PutMapping("/updateOrder")
     public OrderDetailsDto updateOrder(@RequestBody UpdateOrderRequest updateOrderRequest) {
-
-        return null;
+        OrderDetails orderDetails = orderDetailsService.updateOrder(updateOrderRequest);
+        return orderDetailsMapper.toDto(orderDetails);
     }
 }
