@@ -3,6 +3,7 @@ package com.tradesystem.orderdetails;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
+import com.tradesystem.order.Order;
 import com.tradesystem.ordercomment.OrderComment;
 import com.tradesystem.ordercomment.OrderCommentDao;
 import com.tradesystem.ordercomment.OrderCommentService;
@@ -53,6 +54,11 @@ public class OrderDetailsService {
         payForBuyerOrder2(orderDetails, buyerSum);
         payForSupplierOrder2(orderDetails, supplierSum);
 
+    }
+
+    @Transactional
+    public OrderDetails getOrderByTransportNumber(String transportNumber) {
+        return orderDetailsDao.findByTransportNumber(transportNumber);
     }
 
     private BigDecimal calculateBuyerOrder(OrderDetails orderDetails) {

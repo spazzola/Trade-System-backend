@@ -36,6 +36,29 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
     Optional<Invoice> getBuyerNegativeInvoice(Long buyerId);
 
 
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE buyer_fk IS NOT null AND is_paid = true AND is_used = false AND amount_to_use > 0",
+            nativeQuery = true)
+    Optional<List <Invoice>> getBuyersPaidNotUsedPositiveInvoices();
+
+
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE buyer_fk IS NOT null AND is_used = false AND amount_to_use < 0",
+            nativeQuery = true)
+    Optional<List <Invoice>> getBuyersPaidNotUsedNegativeInvoices();
+
+
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE supplier_fk IS NOT null AND is_paid = true AND is_used = false AND amount_to_use > 0",
+            nativeQuery = true)
+    Optional<List <Invoice>> getSuppliersPaidNotUsedPositiveInvoices();
+
+
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE supplier_fk IS NOT null AND is_used = false AND amount_to_use < 0",
+            nativeQuery = true)
+    Optional<List <Invoice>> getSuppliersPaidNotUsedNegativeInvoices();
+
     // =====Month=====
 
     //TODO data

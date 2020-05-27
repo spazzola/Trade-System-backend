@@ -4,6 +4,7 @@ import com.tradesystem.user.RoleSecurity;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -70,6 +71,26 @@ public class InvoiceController {
 
         LocalDate currentDate = LocalDate.of(year, month, 15);
         invoiceService.transferInvoicesToNextMonth(currentDate);
+    }
+
+    @GetMapping("/getBuyersPositiveBalance")
+    public BigDecimal getBuyersPositiveBalance() {
+        return invoiceService.getBuyersPositiveBalance();
+    }
+
+    @GetMapping("/getBuyersNegativeBalance")
+    public BigDecimal getBuyersNegativeBalance() {
+        return invoiceService.getBuyersNegativeBalance();
+    }
+
+    @GetMapping("/getSuppliersPositiveBalance")
+    public BigDecimal getSuppliersPositiveBalance() {
+        return invoiceService.getSuppliersPositiveBalance();
+    }
+
+    @GetMapping("/getSuppliersNegativeBalance")
+    public BigDecimal getSuppliersNegativeBalance() {
+        return invoiceService.getSuppliersNegativeBalance();
     }
 
 }

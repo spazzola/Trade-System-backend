@@ -2,9 +2,7 @@ package com.tradesystem.invoice;
 
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.supplier.Supplier;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 
 import javax.persistence.*;
@@ -12,7 +10,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @Table(name = "invoices")

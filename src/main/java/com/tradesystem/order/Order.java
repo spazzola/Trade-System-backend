@@ -3,17 +3,15 @@ package com.tradesystem.order;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.orderdetails.OrderDetails;
 import com.tradesystem.supplier.Supplier;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

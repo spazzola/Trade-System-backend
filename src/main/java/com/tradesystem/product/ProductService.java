@@ -27,6 +27,11 @@ public class ProductService {
     }
 
     @Transactional
+    public Product getProduct(String productName) {
+        return productDao.findByProduct(productName);
+    }
+
+    @Transactional
     public List<Product> getAllProducts() {
         return productDao.findAll();
     }

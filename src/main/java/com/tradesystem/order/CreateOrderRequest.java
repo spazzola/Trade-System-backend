@@ -9,9 +9,9 @@ import java.util.List;
 @Data
 public class CreateOrderRequest {
 
-    LocalDate date;
-    Long buyerId;
-    Long supplierId;
-    List<OrderDetailsDto> orderDetails;
+    private LocalDate date;
+    private Long buyerId;
+    private Long supplierId;
+    private List<OrderDetailsDto> orderDetails;
 
 }

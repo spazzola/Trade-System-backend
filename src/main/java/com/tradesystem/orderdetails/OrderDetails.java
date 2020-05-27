@@ -4,12 +4,15 @@ import com.tradesystem.order.Order;
 import com.tradesystem.ordercomment.OrderComment;
 import com.tradesystem.product.Product;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "order_details")
 public class OrderDetails {
 

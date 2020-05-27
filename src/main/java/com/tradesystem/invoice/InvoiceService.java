@@ -118,6 +118,57 @@ public class InvoiceService {
         transferSupplierInvoices(localDate);
     }
 
+    @Transactional
+    public BigDecimal getBuyersPositiveBalance() {
+        Optional<List <Invoice>> optionalInvoices = invoiceDao.getBuyersPaidNotUsedPositiveInvoices();
+        BigDecimal result = BigDecimal.valueOf(0);
+
+        if (optionalInvoices.isPresent()) {
+            for (Invoice invoice : optionalInvoices.get()) {
+                result = result.add(invoice.getAmountToUse());
+            }
+        }
+        return result;
+    }
+
+    @Transactional
+    public BigDecimal getBuyersNegativeBalance() {
+        Optional<List <Invoice>> optionalInvoices = invoiceDao.getBuyersPaidNotUsedNegativeInvoices();
+        BigDecimal result = BigDecimal.valueOf(0);
+
+        if (optionalInvoices.isPresent()) {
+            for (Invoice invoice : optionalInvoices.get()) {
+                result = result.add(invoice.getAmountToUse());
+            }
+        }
+        return result;
+    }
+
+    @Transactional
+    public BigDecimal getSuppliersPositiveBalance() {
+        Optional<List <Invoice>> optionalInvoices = invoiceDao.getSuppliersPaidNotUsedPositiveInvoices();
+        BigDecimal result = BigDecimal.valueOf(0);
+
+        if (optionalInvoices.isPresent()) {
+            for (Invoice invoice : optionalInvoices.get()) {
+                result = result.add(invoice.getAmountToUse());
+            }
+        }
+        return result;
+    }
+
+    @Transactional
+    public BigDecimal getSuppliersNegativeBalance() {
+        Optional<List <Invoice>> optionalInvoices = invoiceDao.getSuppliersPaidNotUsedNegativeInvoices();
+        BigDecimal result = BigDecimal.valueOf(0);
+
+        if (optionalInvoices.isPresent()) {
+            for (Invoice invoice : optionalInvoices.get()) {
+                result = result.add(invoice.getAmountToUse());
+            }
+        }
+        return result;
+    }
     private boolean checkInvoiceOwner(Invoice invoice) {
         return invoice.getBuyer() != null;
     }

@@ -4,17 +4,15 @@ package com.tradesystem.buyer;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.order.Order;
 import com.tradesystem.price.Price;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

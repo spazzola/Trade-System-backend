@@ -3,16 +3,15 @@ package com.tradesystem.price;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.product.Product;
 import com.tradesystem.supplier.Supplier;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Data
+//@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
