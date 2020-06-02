@@ -3,11 +3,12 @@ package com.tradesystem.orderdetails;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
-import com.tradesystem.order.Order;
 import com.tradesystem.order.UpdateOrderRequest;
 import com.tradesystem.ordercomment.OrderComment;
 import com.tradesystem.ordercomment.OrderCommentDao;
 import com.tradesystem.ordercomment.OrderCommentService;
+import com.tradesystem.payment.Payment;
+import com.tradesystem.payment.PaymentDao;
 import com.tradesystem.price.PriceDao;
 import com.tradesystem.supplier.Supplier;
 
@@ -16,11 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -32,15 +31,17 @@ public class OrderDetailsService {
     private OrderDetailsDao orderDetailsDao;
     private OrderCommentService orderCommentService;
     private OrderCommentDao orderCommentDao;
+    private PaymentDao paymentDao;
 
 
     public OrderDetailsService(PriceDao priceDao, InvoiceDao invoiceDao, OrderDetailsDao orderDetailsDao,
-                               OrderCommentService orderCommentService, OrderCommentDao orderCommentDao) {
+                               OrderCommentService orderCommentService, OrderCommentDao orderCommentDao, PaymentDao paymentDao) {
         this.priceDao = priceDao;
         this.invoiceDao = invoiceDao;
         this.orderDetailsDao = orderDetailsDao;
         this.orderCommentService = orderCommentService;
         this.orderCommentDao = orderCommentDao;
+        this.paymentDao = paymentDao;
     }
 
     @Transactional
@@ -81,12 +82,6 @@ public class OrderDetailsService {
         } else {
             throw new RuntimeException("Kupiec nie ma ustawionej ceny dla tego produktu");
         }
-
-    }
-
-    @Transactional
-    public OrderDetails updateOrder(UpdateOrderRequest updateOrderRequest) {
-        return null;
     }
 
     private BigDecimal calculateSupplierOrder(OrderDetails orderDetails) {
@@ -129,6 +124,8 @@ public class OrderDetailsService {
         OrderComment orderComment;
 
         for (Invoice invoice : invoices) {
+            createSupplierPayment(orderDetails, invoice);
+
             BigDecimal invoiceValue = invoice.getAmountToUse();
 
             countedInvoices++;
@@ -207,6 +204,8 @@ public class OrderDetailsService {
         OrderComment orderComment;
 
         for (Invoice invoice : invoices) {
+            createBuyerPayment(orderDetails, invoice);
+
             BigDecimal invoiceValue = invoice.getAmountToUse();
             countedInvoices++;
 
@@ -238,7 +237,6 @@ public class OrderDetailsService {
                 amountToPay = amount;
 
                 orderCommentService.addBuyerComment(orderDetails, invoiceValue, invoice);
-
                 orderDetailsDao.save(orderDetails);
                 saveInvoice(invoice, true);
                 invoiceNumbers.add(invoice.getInvoiceNumber());
@@ -274,7 +272,6 @@ public class OrderDetailsService {
                     .orElseThrow(RuntimeException::new);
             //Invoice negativeInvoice = optionalInvoice.get();
             orderCommentService.addLackAmountComment(orderDetails, negativeValue, negativeInvoice);
-
             orderDetailsDao.save(orderDetails);
         }
 
@@ -292,6 +289,8 @@ public class OrderDetailsService {
             invoice.setValue(invoiceValue.add(amount));
             invoice.setAmountToUse(newInvoiceAmount);
             invoiceDao.save(invoice);
+
+            createBuyerPayment(orderDetails, invoice);
         } else {
             Invoice invoice = new Invoice();
             invoice.setInvoiceNumber("Negatywna");
@@ -300,6 +299,8 @@ public class OrderDetailsService {
             invoice.setDate(LocalDate.now());
             invoice.setBuyer(buyer);
             invoiceDao.save(invoice);
+
+            createBuyerPayment(orderDetails, invoice);
         }
 
     }
@@ -315,6 +316,8 @@ public class OrderDetailsService {
 
             invoice.setAmountToUse(newInvoiceAmount);
             invoiceDao.save(invoice);
+
+            createSupplierPayment(orderDetails, invoice);
         } else {
             Invoice invoice = new Invoice();
             invoice.setInvoiceNumber("Negatywna");
@@ -323,6 +326,8 @@ public class OrderDetailsService {
             invoice.setDate(LocalDate.now());
             invoice.setSupplier(supplier);
             invoiceDao.save(invoice);
+
+            createSupplierPayment(orderDetails, invoice);
         }
     }
 
@@ -330,4 +335,19 @@ public class OrderDetailsService {
         invoice.setUsed(isUsed);
         invoiceDao.save(invoice);
     }
+
+    private void createBuyerPayment(OrderDetails orderDetails, Invoice invoice) {
+        Payment payment = new Payment();
+        payment.setOrderDetails(orderDetails);
+        payment.setBuyerInvoice(invoice);
+        paymentDao.save(payment);
+    }
+
+    private void createSupplierPayment(OrderDetails orderDetails, Invoice invoice) {
+        Payment payment = new Payment();
+        payment.setOrderDetails(orderDetails);
+        payment.setSupplierInvoice(invoice);
+        paymentDao.save(payment);
+    }
+
 }

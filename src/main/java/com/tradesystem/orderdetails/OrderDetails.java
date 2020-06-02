@@ -2,10 +2,12 @@ package com.tradesystem.orderdetails;
 
 import com.tradesystem.order.Order;
 import com.tradesystem.ordercomment.OrderComment;
+import com.tradesystem.payment.Payment;
 import com.tradesystem.product.Product;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -44,5 +46,8 @@ public class OrderDetails {
     @OneToOne
     @JoinColumn(name = "order_comment_fk")
     private OrderComment orderComment;
+
+    @OneToMany(mappedBy = "orderDetails")
+    private List<Payment> paymentsList;
 
 }

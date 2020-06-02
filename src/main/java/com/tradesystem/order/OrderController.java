@@ -1,9 +1,6 @@
 package com.tradesystem.order;
 
-import com.tradesystem.orderdetails.OrderDetails;
-import com.tradesystem.orderdetails.OrderDetailsDto;
-import com.tradesystem.orderdetails.OrderDetailsMapper;
-import com.tradesystem.orderdetails.OrderDetailsService;
+import com.tradesystem.orderdetails.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,14 +16,17 @@ public class OrderController {
     private OrderDao orderDao;
     private OrderDetailsService orderDetailsService;
     private OrderDetailsMapper orderDetailsMapper;
+    private UpdateOrderDetailsService updateOrderDetailsService;
 
     public OrderController(OrderService orderService, OrderMapper orderMapper,
-                           OrderDao orderDao, OrderDetailsService orderDetailsService, OrderDetailsMapper orderDetailsMapper) {
+                           OrderDao orderDao, OrderDetailsService orderDetailsService,
+                           OrderDetailsMapper orderDetailsMapper, UpdateOrderDetailsService updateOrderDetailsService) {
         this.orderService = orderService;
         this.orderMapper = orderMapper;
         this.orderDao = orderDao;
         this.orderDetailsService = orderDetailsService;
         this.orderDetailsMapper = orderDetailsMapper;
+        this.updateOrderDetailsService = updateOrderDetailsService;
     }
 
     @PostMapping("/create")
@@ -59,9 +59,9 @@ public class OrderController {
         return orderDetailsMapper.toDto(orderDetails);
     }
 
-    @PutMapping("/updateOrder")
-    public OrderDetailsDto updateOrder(@RequestBody UpdateOrderRequest updateOrderRequest) {
-        OrderDetails orderDetails = orderDetailsService.updateOrder(updateOrderRequest);
+    @PutMapping("/updateBuyerOrder")
+    public OrderDetailsDto updateBuyerOrder(@RequestBody UpdateOrderRequest updateOrderRequest) {
+        OrderDetails orderDetails = updateOrderDetailsService.updateBuyerOrder(updateOrderRequest);
         return orderDetailsMapper.toDto(orderDetails);
 
     }
