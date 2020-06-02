@@ -1,2 +1,3 @@
 1. Dodać do wszystkich metod w controllerach sprzedzenie roli user lub admin.
-2. Dodac Logger do projektu.
+2. Dodać Logger do projektu.
+3. POPRAWIĆ - podczas generowania kolejnej negatywnej fv nie zwiększa się pole Wartość (powinno się powiększyć tak jak u suppliera)

@@ -1,6 +1,8 @@
 package com.tradesystem.invoice;
 
 import com.tradesystem.buyer.Buyer;
+import com.tradesystem.orderdetails.OrderDetails;
+import com.tradesystem.payment.Payment;
 import com.tradesystem.supplier.Supplier;
 import lombok.*;
 
@@ -8,6 +10,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -37,6 +40,13 @@ public class Invoice {
     @ManyToOne
     @JoinColumn(name = "buyer_fk")
     private Buyer buyer;
+
+    @OneToMany(mappedBy = "buyerInvoice")
+    private List<Payment> buyerPayments;
+
+    @OneToMany(mappedBy = "supplierInvoice")
+    private List<Payment> supplierPayments;
+
 
     public Invoice() {
     }
