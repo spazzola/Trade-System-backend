@@ -5,6 +5,7 @@ import com.tradesystem.invoice.InvoiceDao;
 import com.tradesystem.order.UpdateOrderRequest;
 import com.tradesystem.payment.Payment;
 import com.tradesystem.payment.PaymentDao;
+import com.tradesystem.price.PriceDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +20,10 @@ public class UpdateOrderDetailsService {
     private OrderDetailsDao orderDetailsDao;
     private PaymentDao paymentDao;
     private InvoiceDao invoiceDao;
+    private PriceDao priceDao;
 
     public UpdateOrderDetailsService(OrderDetailsDao orderDetailsDao, PaymentDao paymentDao,
-                                     OrderDetailsService orderDetailsService, InvoiceDao invoiceDao) {
+                                     OrderDetailsService orderDetailsService, InvoiceDao invoiceDao, PriceDao priceDao) {
         this.orderDetailsDao = orderDetailsDao;
         this.paymentDao = paymentDao;
         this.orderDetailsService = orderDetailsService;
@@ -33,8 +35,6 @@ public class UpdateOrderDetailsService {
         //1. Na podstawie dodaci listu znajdz stare zamowienie
         OrderDetails orderDetails = orderDetailsService.getOrderByTransportNumber(updateOrderRequest.getNewTransportNumber());
 
-        BigDecimal oldSupplierSum = orderDetails.getSupplierSum();
-
         //2. Na podstawie znalezionego orderDetail wez faktury z ktorych zostaly sciagniete sumy dla buyera i suppliera
         List<Invoice> invoices = new ArrayList<>();
         List<Payment> payments = paymentDao.findBuyerPayment(orderDetails.getId());
@@ -42,7 +42,7 @@ public class UpdateOrderDetailsService {
         for (Payment payment : payments) {
             Long invoiceId = payment.getBuyerInvoice().getId();
             Invoice invoice = invoiceDao.findById(invoiceId)
-                                                .orElseThrow(RuntimeException::new);
+                    .orElseThrow(RuntimeException::new);
             invoices.add(invoice);
         }
 
@@ -51,49 +51,41 @@ public class UpdateOrderDetailsService {
         if (invoices.size() == 1) {
             Invoice oldInvoice = invoices.get(0);
 
-            processUpdatingBuyerOneInvoice(orderDetails, updateOrderRequest, oldInvoice);
+            processUpdatingBuyerInvoice(orderDetails, updateOrderRequest, oldInvoice, true);
             processUpdatingBuyerOrderDetails(orderDetails, updateOrderRequest);
-        } else {
 
+        } else {
             Invoice oldInvoice = invoices.get(invoices.size() - 1);
-            processUpdatingBuyerManyInvoices(orderDetails, updateOrderRequest, oldInvoice);
+            processUpdatingBuyerInvoice(orderDetails, updateOrderRequest, oldInvoice, false);
             processUpdatingBuyerOrderDetails(orderDetails, updateOrderRequest);
 
         }
         return null;
     }
 
-    private void processUpdatingBuyerOneInvoice(OrderDetails orderDetails,
-                                                UpdateOrderRequest updateOrderRequest, Invoice invoice) {
+    private void processUpdatingBuyerInvoice(OrderDetails orderDetails,
+                                             UpdateOrderRequest updateOrderRequest, Invoice invoice, boolean condition) {
 
         BigDecimal oldBuyerSum = orderDetails.getBuyerSum();
-        BigDecimal newBuyerSum = updateOrderRequest.getNewBuyerSum();
+
+        BigDecimal newBuyerPrice = updateOrderRequest.getNewBuyerPrice();
+        BigDecimal newBuyerSum = updateOrderRequest.getNewQuantity().multiply(newBuyerPrice);
+        updateOrderRequest.setNewBuyerSum(newBuyerSum);
 
         BigDecimal difference = oldBuyerSum.subtract(newBuyerSum);
 
         BigDecimal oldAmountToUse = invoice.getAmountToUse();
+
         invoice.setAmountToUse(oldAmountToUse.add(difference));
 
-        BigDecimal oldValue = invoice.getValue();
-        invoice.setValue(oldValue.add(difference));
-        invoiceDao.save(invoice);
-
-    }
-
-    private void processUpdatingBuyerManyInvoices(OrderDetails orderDetails,
-                                                  UpdateOrderRequest updateOrderRequest, Invoice invoice) {
-
-        BigDecimal oldBuyerSum = orderDetails.getBuyerSum();
-        BigDecimal newBuyerSum = updateOrderRequest.getNewBuyerSum();
-
-        BigDecimal difference = oldBuyerSum.subtract(newBuyerSum);
-
-        BigDecimal oldAmountToUse = invoice.getAmountToUse();
-        invoice.setAmountToUse(oldAmountToUse.add(difference));
-        invoice.setUsed(false);
+        if (condition) {
+            BigDecimal oldValue = invoice.getValue();
+            invoice.setValue(oldValue.add(difference));
+        } else {
+            invoice.setUsed(false);
+        }
         invoiceDao.save(invoice);
     }
-
 
     private void processUpdatingBuyerOrderDetails(OrderDetails orderDetails, UpdateOrderRequest updateOrderRequest) {
         orderDetails.setQuantity(updateOrderRequest.getNewQuantity());
