@@ -46,6 +46,10 @@ public class UpdateOrderDetailsService {
             orderDetails.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
         }
 
+        if (updateOrderDetailsRequest.getNewQuantity() == null || updateOrderDetailsRequest.getNewQuantity().equals(BigDecimal.ZERO)) {
+            updateOrderDetailsRequest.setNewQuantity(orderDetails.getQuantity());
+        }
+
         orderCommentService.addEditComment(orderDetails, " ZAMÓWIENIE EDYTOWANO");
 
         List<Invoice> invoices = new ArrayList<>();
@@ -111,6 +115,9 @@ public class UpdateOrderDetailsService {
             orderDetails.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
         }
 
+        if (updateOrderDetailsRequest.getNewQuantity() == null || updateOrderDetailsRequest.getNewQuantity().equals(BigDecimal.ZERO)) {
+            updateOrderDetailsRequest.setNewQuantity(orderDetails.getQuantity());
+        }
         orderCommentService.addEditComment(orderDetails, " ZAMÓWIENIE EDYTOWANO");
 
         List<Invoice> invoices = new ArrayList<>();
