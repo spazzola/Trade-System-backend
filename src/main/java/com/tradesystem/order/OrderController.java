@@ -59,10 +59,21 @@ public class OrderController {
         return orderDetailsMapper.toDto(orderDetails);
     }
 
+    @PutMapping("/updateOrder")
+    public OrderDetailsDto updateOrder(@RequestBody UpdateOrderRequest updateOrderRequest) {
+        OrderDetails orderDetails = updateOrderDetailsService.updateOrder(updateOrderRequest);
+        return orderDetailsMapper.toDto(orderDetails);
+    }
+
     @PutMapping("/updateBuyerOrder")
     public OrderDetailsDto updateBuyerOrder(@RequestBody UpdateOrderRequest updateOrderRequest) {
         OrderDetails orderDetails = updateOrderDetailsService.updateBuyerOrder(updateOrderRequest);
         return orderDetailsMapper.toDto(orderDetails);
+    }
 
+    @PutMapping("/updateSupplierOrder")
+    public OrderDetailsDto updateSupplierOrder(@RequestBody UpdateOrderRequest updateOrderRequest) {
+        OrderDetails orderDetails = updateOrderDetailsService.updateSupplierOrder(updateOrderRequest);
+        return orderDetailsMapper.toDto(orderDetails);
     }
 }

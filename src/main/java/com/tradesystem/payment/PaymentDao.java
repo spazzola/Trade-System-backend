@@ -13,4 +13,9 @@ public interface PaymentDao extends JpaRepository<Payment, Long> {
             "WHERE order_details_fk = ?1 AND buyer_invoice_fk IS NOT null",
             nativeQuery = true)
     List<Payment> findBuyerPayment(Long OrderDetailsFk);
+
+    @Query(value = "SELECT * FROM payments " +
+            "WHERE order_details_fk = ?1 AND supplier_invoice_fk IS NOT null",
+            nativeQuery = true)
+    List<Payment> findSupplierPayment(Long OrderDetailsFk);
 }
