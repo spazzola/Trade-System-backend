@@ -3,6 +3,7 @@ package com.tradesystem.orderdetails;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
 import com.tradesystem.order.UpdateOrderDetailsRequest;
+import com.tradesystem.ordercomment.OrderCommentService;
 import com.tradesystem.payment.Payment;
 import com.tradesystem.payment.PaymentDao;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,14 @@ public class UpdateOrderDetailsService {
     private OrderDetailsService orderDetailsService;
     private PaymentDao paymentDao;
     private InvoiceDao invoiceDao;
+    private OrderCommentService orderCommentService;
 
-    public UpdateOrderDetailsService(PaymentDao paymentDao, OrderDetailsService orderDetailsService, InvoiceDao invoiceDao) {
+    public UpdateOrderDetailsService(PaymentDao paymentDao, OrderDetailsService orderDetailsService,
+                                     InvoiceDao invoiceDao,  OrderCommentService orderCommentService) {
         this.paymentDao = paymentDao;
         this.orderDetailsService = orderDetailsService;
         this.invoiceDao = invoiceDao;
+        this.orderCommentService = orderCommentService;
     }
 
 
@@ -41,6 +45,8 @@ public class UpdateOrderDetailsService {
         if (!orderDetails.getTransportNumber().equals(updateOrderDetailsRequest.getNewTransportNumber())) {
             orderDetails.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
         }
+
+        orderCommentService.addEditComment(orderDetails, " ZAMÓWIENIE EDYTOWANO");
 
         List<Invoice> invoices = new ArrayList<>();
         List<Payment> payments = paymentDao.findBuyerPayment(orderDetails.getId());
@@ -99,11 +105,13 @@ public class UpdateOrderDetailsService {
 
     @Transactional
     public OrderDetails updateSupplierOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest) {
-        OrderDetails orderDetails = orderDetailsService.getOrderByTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
+        OrderDetails orderDetails = orderDetailsService.getOrderByTransportNumber(updateOrderDetailsRequest.getOldTransportNumber());
 
         if (!orderDetails.getTransportNumber().equals(updateOrderDetailsRequest.getNewTransportNumber())) {
             orderDetails.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
         }
+
+        orderCommentService.addEditComment(orderDetails, " ZAMÓWIENIE EDYTOWANO");
 
         List<Invoice> invoices = new ArrayList<>();
         List<Payment> payments = paymentDao.findSupplierPayment(orderDetails.getId());

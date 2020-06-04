@@ -57,7 +57,7 @@ public class OrderCommentService {
 
 
     private void addSupplierLackAmountComment(OrderDetails orderDetails, BigDecimal negativeValue,
-                                             OrderComment orderComment, String previousComment, Invoice invoice) {
+                                              OrderComment orderComment, String previousComment, Invoice invoice) {
         Supplier supplier = orderDetails.getOrder().getSupplier();
 
         orderComment.setSystemComment(previousComment + " " + supplier.getName() + ": wartość negatywnej faktury o id " + invoice.getId() + " została powiększona o " + negativeValue);
@@ -94,6 +94,14 @@ public class OrderCommentService {
         orderComment.setSystemComment(previousComment + ", " + supplierName + ": odjęto " + invoiceValue + " z FV nr " + invoice.getInvoiceNumber());
         orderDetails.setOrderComment(orderComment);
         orderCommentDao.save(orderComment);
-
     }
+
+    public void addEditComment(OrderDetails orderDetails, String editComment) {
+        String previousComment = orderDetails.getOrderComment().getSystemComment();
+
+        if (!previousComment.contains(editComment)) {
+            orderDetails.getOrderComment().setSystemComment(previousComment + editComment);
+        }
+    }
+
 }
