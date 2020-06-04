@@ -2,10 +2,9 @@ package com.tradesystem.orderdetails;
 
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
-import com.tradesystem.order.UpdateOrderRequest;
+import com.tradesystem.order.UpdateOrderDetailsRequest;
 import com.tradesystem.payment.Payment;
 import com.tradesystem.payment.PaymentDao;
-import com.tradesystem.price.PriceDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,14 +16,10 @@ import java.util.List;
 public class UpdateOrderDetailsService {
 
     private OrderDetailsService orderDetailsService;
-    private OrderDetailsDao orderDetailsDao;
     private PaymentDao paymentDao;
     private InvoiceDao invoiceDao;
-    private PriceDao priceDao;
 
-    public UpdateOrderDetailsService(OrderDetailsDao orderDetailsDao, PaymentDao paymentDao,
-                                     OrderDetailsService orderDetailsService, InvoiceDao invoiceDao, PriceDao priceDao) {
-        this.orderDetailsDao = orderDetailsDao;
+    public UpdateOrderDetailsService(PaymentDao paymentDao, OrderDetailsService orderDetailsService, InvoiceDao invoiceDao) {
         this.paymentDao = paymentDao;
         this.orderDetailsService = orderDetailsService;
         this.invoiceDao = invoiceDao;
@@ -32,23 +27,21 @@ public class UpdateOrderDetailsService {
 
 
     @Transactional
-    public OrderDetails updateOrder(UpdateOrderRequest updateOrderRequest) {
-        OrderDetails orderDetails = updateBuyerOrder(updateOrderRequest);
-        orderDetails = updateSupplierOrder(updateOrderRequest);
+    public OrderDetails updateOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest) {
+        OrderDetails orderDetails = updateBuyerOrder(updateOrderDetailsRequest);
+        orderDetails = updateSupplierOrder(updateOrderDetailsRequest);
 
         return orderDetails;
     }
 
     @Transactional
-    public OrderDetails updateBuyerOrder(UpdateOrderRequest updateOrderRequest) {
-        //1. Na podstawie dodaci listu znajdz stare zamowienie
-        OrderDetails orderDetails = orderDetailsService.getOrderByTransportNumber(updateOrderRequest.getOldTransportNumber());
+    public OrderDetails updateBuyerOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest) {
+        OrderDetails orderDetails = orderDetailsService.getOrderByTransportNumber(updateOrderDetailsRequest.getOldTransportNumber());
 
-        if (!orderDetails.getTransportNumber().equals(updateOrderRequest.getNewTransportNumber())) {
-            orderDetails.setTransportNumber(updateOrderRequest.getNewTransportNumber());
+        if (!orderDetails.getTransportNumber().equals(updateOrderDetailsRequest.getNewTransportNumber())) {
+            orderDetails.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
         }
 
-        //2. Na podstawie znalezionego orderDetail wez faktury z ktorych zostaly sciagniete sumy dla buyera i suppliera
         List<Invoice> invoices = new ArrayList<>();
         List<Payment> payments = paymentDao.findBuyerPayment(orderDetails.getId());
 
@@ -59,31 +52,29 @@ public class UpdateOrderDetailsService {
             invoices.add(invoice);
         }
 
-        //      a) Jesli zamowienie jest polaczone z jedna FV (negatywna, ktora moze byc suma wielu zamowien lub jedna zaplacona):
-        //          -zmniejszamy/zwiekszamy wartosc FV o roznice pomiedzy starym a nowym zamowieniem
         if (invoices.size() == 1) {
             Invoice oldInvoice = invoices.get(0);
 
-            processUpdatingBuyerInvoice(orderDetails, updateOrderRequest, oldInvoice, true);
-            processUpdatingBuyerOrderDetails(orderDetails, updateOrderRequest);
+            processUpdatingBuyerInvoice(orderDetails, updateOrderDetailsRequest, oldInvoice, true);
+            processUpdatingBuyerOrderDetails(orderDetails, updateOrderDetailsRequest);
 
         } else {
             Invoice oldInvoice = invoices.get(invoices.size() - 1);
-            processUpdatingBuyerInvoice(orderDetails, updateOrderRequest, oldInvoice, false);
-            processUpdatingBuyerOrderDetails(orderDetails, updateOrderRequest);
+            processUpdatingBuyerInvoice(orderDetails, updateOrderDetailsRequest, oldInvoice, false);
+            processUpdatingBuyerOrderDetails(orderDetails, updateOrderDetailsRequest);
 
         }
         return orderDetails;
     }
 
     private void processUpdatingBuyerInvoice(OrderDetails orderDetails,
-                                             UpdateOrderRequest updateOrderRequest, Invoice invoice, boolean condition) {
+                                             UpdateOrderDetailsRequest updateOrderDetailsRequest, Invoice invoice, boolean condition) {
 
         BigDecimal oldBuyerSum = orderDetails.getBuyerSum();
 
-        BigDecimal newBuyerPrice = updateOrderRequest.getNewBuyerPrice();
-        BigDecimal newBuyerSum = updateOrderRequest.getNewQuantity().multiply(newBuyerPrice);
-        updateOrderRequest.setNewBuyerSum(newBuyerSum);
+        BigDecimal newBuyerPrice = updateOrderDetailsRequest.getNewBuyerPrice();
+        BigDecimal newBuyerSum = updateOrderDetailsRequest.getNewQuantity().multiply(newBuyerPrice);
+        updateOrderDetailsRequest.setNewBuyerSum(newBuyerSum);
 
         BigDecimal difference = oldBuyerSum.subtract(newBuyerSum);
 
@@ -100,22 +91,20 @@ public class UpdateOrderDetailsService {
         invoiceDao.save(invoice);
     }
 
-    private void processUpdatingBuyerOrderDetails(OrderDetails orderDetails, UpdateOrderRequest updateOrderRequest) {
-        orderDetails.setQuantity(updateOrderRequest.getNewQuantity());
-        orderDetails.setBuyerSum(updateOrderRequest.getNewBuyerSum());
+    private void processUpdatingBuyerOrderDetails(OrderDetails orderDetails, UpdateOrderDetailsRequest updateOrderDetailsRequest) {
+        orderDetails.setQuantity(updateOrderDetailsRequest.getNewQuantity());
+        orderDetails.setBuyerSum(updateOrderDetailsRequest.getNewBuyerSum());
     }
 
 
     @Transactional
-    public OrderDetails updateSupplierOrder(UpdateOrderRequest updateOrderRequest) {
-        //1. Na podstawie dodaci listu znajdz stare zamowienie
-        OrderDetails orderDetails = orderDetailsService.getOrderByTransportNumber(updateOrderRequest.getNewTransportNumber());
+    public OrderDetails updateSupplierOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest) {
+        OrderDetails orderDetails = orderDetailsService.getOrderByTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
 
-        if (!orderDetails.getTransportNumber().equals(updateOrderRequest.getNewTransportNumber())) {
-            orderDetails.setTransportNumber(updateOrderRequest.getNewTransportNumber());
+        if (!orderDetails.getTransportNumber().equals(updateOrderDetailsRequest.getNewTransportNumber())) {
+            orderDetails.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
         }
 
-        //2. Na podstawie znalezionego orderDetail wez faktury z ktorych zostaly sciagniete sumy dla buyera i suppliera
         List<Invoice> invoices = new ArrayList<>();
         List<Payment> payments = paymentDao.findSupplierPayment(orderDetails.getId());
 
@@ -126,31 +115,29 @@ public class UpdateOrderDetailsService {
             invoices.add(invoice);
         }
 
-        //      a) Jesli zamowienie jest polaczone z jedna FV (negatywna, ktora moze byc suma wielu zamowien lub jedna zaplacona):
-        //          -zmniejszamy/zwiekszamy wartosc FV o roznice pomiedzy starym a nowym zamowieniem
         if (invoices.size() == 1) {
             Invoice oldInvoice = invoices.get(0);
 
-            processUpdatingSupplierInvoice(orderDetails, updateOrderRequest, oldInvoice, true);
-            processUpdatingSupplierOrderDetails(orderDetails, updateOrderRequest);
+            processUpdatingSupplierInvoice(orderDetails, updateOrderDetailsRequest, oldInvoice, true);
+            processUpdatingSupplierOrderDetails(orderDetails, updateOrderDetailsRequest);
 
         } else {
             Invoice oldInvoice = invoices.get(invoices.size() - 1);
-            processUpdatingSupplierInvoice(orderDetails, updateOrderRequest, oldInvoice, false);
-            processUpdatingSupplierOrderDetails(orderDetails, updateOrderRequest);
+            processUpdatingSupplierInvoice(orderDetails, updateOrderDetailsRequest, oldInvoice, false);
+            processUpdatingSupplierOrderDetails(orderDetails, updateOrderDetailsRequest);
 
         }
         return orderDetails;
     }
 
     private void processUpdatingSupplierInvoice(OrderDetails orderDetails,
-                                             UpdateOrderRequest updateOrderRequest, Invoice invoice, boolean condition) {
+                                                UpdateOrderDetailsRequest updateOrderDetailsRequest, Invoice invoice, boolean condition) {
 
         BigDecimal oldSupplierSum = orderDetails.getSupplierSum();
 
-        BigDecimal newSupplierPrice = updateOrderRequest.getNewSupplierPrice();
-        BigDecimal newSupplierSum = updateOrderRequest.getNewQuantity().multiply(newSupplierPrice);
-        updateOrderRequest.setNewSupplierSum(newSupplierSum);
+        BigDecimal newSupplierPrice = updateOrderDetailsRequest.getNewSupplierPrice();
+        BigDecimal newSupplierSum = updateOrderDetailsRequest.getNewQuantity().multiply(newSupplierPrice);
+        updateOrderDetailsRequest.setNewSupplierSum(newSupplierSum);
 
         BigDecimal difference = oldSupplierSum.subtract(newSupplierSum);
 
@@ -167,9 +154,9 @@ public class UpdateOrderDetailsService {
         invoiceDao.save(invoice);
     }
 
-    private void processUpdatingSupplierOrderDetails(OrderDetails orderDetails, UpdateOrderRequest updateOrderRequest) {
-        orderDetails.setQuantity(updateOrderRequest.getNewQuantity());
-        orderDetails.setSupplierSum(updateOrderRequest.getNewSupplierSum());
+    private void processUpdatingSupplierOrderDetails(OrderDetails orderDetails, UpdateOrderDetailsRequest updateOrderDetailsRequest) {
+        orderDetails.setQuantity(updateOrderDetailsRequest.getNewQuantity());
+        orderDetails.setSupplierSum(updateOrderDetailsRequest.getNewSupplierSum());
     }
 
 }

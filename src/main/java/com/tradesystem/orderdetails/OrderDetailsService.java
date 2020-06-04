@@ -3,7 +3,6 @@ package com.tradesystem.orderdetails;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
-import com.tradesystem.order.UpdateOrderRequest;
 import com.tradesystem.ordercomment.OrderComment;
 import com.tradesystem.ordercomment.OrderCommentDao;
 import com.tradesystem.ordercomment.OrderCommentService;

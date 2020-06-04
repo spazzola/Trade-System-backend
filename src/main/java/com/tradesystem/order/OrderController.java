@@ -4,7 +4,6 @@ import com.tradesystem.orderdetails.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/order")
@@ -60,20 +59,20 @@ public class OrderController {
     }
 
     @PutMapping("/updateOrder")
-    public OrderDetailsDto updateOrder(@RequestBody UpdateOrderRequest updateOrderRequest) {
-        OrderDetails orderDetails = updateOrderDetailsService.updateOrder(updateOrderRequest);
+    public OrderDetailsDto updateOrder(@RequestBody UpdateOrderDetailsRequest updateOrderDetailsRequest) {
+        OrderDetails orderDetails = updateOrderDetailsService.updateOrder(updateOrderDetailsRequest);
         return orderDetailsMapper.toDto(orderDetails);
     }
 
     @PutMapping("/updateBuyerOrder")
-    public OrderDetailsDto updateBuyerOrder(@RequestBody UpdateOrderRequest updateOrderRequest) {
-        OrderDetails orderDetails = updateOrderDetailsService.updateBuyerOrder(updateOrderRequest);
+    public OrderDetailsDto updateBuyerOrder(@RequestBody UpdateOrderDetailsRequest updateOrderDetailsRequest) {
+        OrderDetails orderDetails = updateOrderDetailsService.updateBuyerOrder(updateOrderDetailsRequest);
         return orderDetailsMapper.toDto(orderDetails);
     }
 
     @PutMapping("/updateSupplierOrder")
-    public OrderDetailsDto updateSupplierOrder(@RequestBody UpdateOrderRequest updateOrderRequest) {
-        OrderDetails orderDetails = updateOrderDetailsService.updateSupplierOrder(updateOrderRequest);
+    public OrderDetailsDto updateSupplierOrder(@RequestBody UpdateOrderDetailsRequest updateOrderDetailsRequest) {
+        OrderDetails orderDetails = updateOrderDetailsService.updateSupplierOrder(updateOrderDetailsRequest);
         return orderDetailsMapper.toDto(orderDetails);
     }
 }
