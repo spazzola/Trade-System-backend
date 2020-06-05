@@ -2,15 +2,19 @@ package com.tradesystem.supplier;
 
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
+import com.tradesystem.order.Order;
+import com.tradesystem.order.OrderDao;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class SupplierService {
@@ -18,12 +22,14 @@ public class SupplierService {
     private final SupplierDao supplierDao;
     private final InvoiceDao invoiceDao;
     private final PriceDao priceDao;
+    private final OrderDao orderDao;
 
 
-    public SupplierService(SupplierDao supplierDao, InvoiceDao invoiceDao, PriceDao priceDao) {
+    public SupplierService(SupplierDao supplierDao, InvoiceDao invoiceDao, PriceDao priceDao, OrderDao orderDao) {
         this.supplierDao = supplierDao;
         this.invoiceDao = invoiceDao;
         this.priceDao = priceDao;
+        this.orderDao = orderDao;
     }
 
 
@@ -49,12 +55,31 @@ public class SupplierService {
         List<Supplier> suppliers = supplierDao.findAll();
         List<Supplier> resultSuppliers = new ArrayList<>();
 
+        calculateMonthTakenQuantity(suppliers);
+
         for (Supplier supplier : suppliers) {
             supplier = setCurrentBalance(supplier);
             resultSuppliers.add(supplier);
         }
 
         return resultSuppliers;
+    }
+
+    private void calculateMonthTakenQuantity(List<Supplier> suppliers) {
+        int month = LocalDate.now().getMonthValue();
+        int year = LocalDate.now().getYear();
+
+        for (Supplier supplier : suppliers) {
+            Set<Order> orders = orderDao.getSupplierMonthOrders(supplier.getId(), month, year);
+            BigDecimal sumQuantity = BigDecimal.valueOf(0);
+
+            for (Order order : orders) {
+                sumQuantity = sumQuantity.add(order.getOrderDetails().get(0).getQuantity());
+            }
+
+            supplier.setMonthTakenQuantity(sumQuantity);
+            supplierDao.save(supplier);
+        }
     }
 
     @Transactional

@@ -30,6 +30,8 @@ public class Supplier {
 
     private BigDecimal currentBalance;
 
+    private BigDecimal monthTakenQuantity;
+
     @OneToMany(mappedBy = "supplier", fetch = FetchType.EAGER)
     private List<Price> prices;
 

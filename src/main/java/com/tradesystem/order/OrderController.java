@@ -75,4 +75,5 @@ public class OrderController {
         OrderDetails orderDetails = updateOrderDetailsService.updateSupplierOrder(updateOrderDetailsRequest);
         return orderDetailsMapper.toDto(orderDetails);
     }
+
 }

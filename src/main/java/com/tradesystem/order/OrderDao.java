@@ -30,4 +30,9 @@ public interface OrderDao extends JpaRepository<Order, Long> {
             nativeQuery = true)
     List<Order> getMonthOrders2(int month, int year);
 
+
+    @Query(value = "SELECT * FROM orders o " +
+            "WHERE supplier_fk = ?1 AND MONTH(o.date) = ?2 AND YEAR(o.date) = ?3",
+            nativeQuery = true)
+    Set<Order> getSupplierMonthOrders(Long supplierId, int month, int year);
 }

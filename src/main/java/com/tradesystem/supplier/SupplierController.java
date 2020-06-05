@@ -39,9 +39,9 @@ public class SupplierController {
 
     @GetMapping("/getAllWithBalances")
     public List<SupplierDto> getAllWithBalances(){
-        final List<Supplier> buyers = supplierService.getBalances();
-
-        return supplierMapper.toDto(buyers);
+        final List<Supplier> suppliers = supplierService.getBalances();
+        System.out.println(suppliers);
+        return supplierMapper.toDto(suppliers);
     }
 
     @GetMapping("/getSupplierProducts")
