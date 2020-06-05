@@ -2,13 +2,16 @@ package com.tradesystem.buyer;
 
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
+import com.tradesystem.order.Order;
+import com.tradesystem.order.OrderService;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDao;
-import com.tradesystem.product.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -17,11 +20,13 @@ public class BuyerService {
     private InvoiceDao invoiceDao;
     private BuyerDao buyerDao;
     private PriceDao priceDao;
+    private OrderService orderService;
 
-    public BuyerService(InvoiceDao invoiceDao, BuyerDao buyerDao, PriceDao priceDao) {
+    public BuyerService(InvoiceDao invoiceDao, BuyerDao buyerDao, PriceDao priceDao, OrderService orderService) {
         this.invoiceDao = invoiceDao;
         this.buyerDao = buyerDao;
         this.priceDao = priceDao;
+        this.orderService = orderService;
     }
 
 
@@ -60,6 +65,36 @@ public class BuyerService {
         return priceDao.getBuyerProducts(id);
     }
 
+    @Transactional
+    public List<Buyer> getAllWithAverageEarning() {
+        int month = LocalDate.now().getMonthValue();
+        int year = LocalDate.now().getYear();
+
+        List<Buyer> buyers = buyerDao.findAll();
+        List<Buyer> resultList = new ArrayList<>();
+
+        for (Buyer buyer : buyers) {
+            List<Order> orders = orderService.getBuyerMonthOrders(buyer.getId(), month, year);
+
+            BigDecimal totalBuyerSum = BigDecimal.valueOf(0);
+            BigDecimal totalSupplierSum = BigDecimal.valueOf(0);
+            BigDecimal totalQuantity = BigDecimal.valueOf(0);
+
+            for (Order order : orders) {
+
+                totalBuyerSum = totalBuyerSum.add(order.getOrderDetails().get(0).getBuyerSum());
+                totalSupplierSum = totalSupplierSum.add(order.getOrderDetails().get(0).getSupplierSum());
+                totalQuantity = totalQuantity.add(order.getOrderDetails().get(0).getQuantity());
+            }
+            BigDecimal difference = totalBuyerSum.subtract(totalSupplierSum);
+            BigDecimal profitPerM3 = difference.divide(totalQuantity, RoundingMode.HALF_EVEN);
+
+            buyer.setAverageProfitPerM3(profitPerM3);
+            resultList.add(buyer);
+        }
+        return resultList;
+    }
+
     private Buyer setCurrentBalance(Buyer buyer) {
         List<Invoice> notUsedInvoices = invoiceDao.getBuyerNotUsedInvoices(buyer.getId());
 
@@ -79,7 +114,7 @@ public class BuyerService {
         return buyer;
     }
 
-    public boolean validateBuyer(BuyerDto buyerDto) {
+    private boolean validateBuyer(BuyerDto buyerDto) {
         if (buyerDto.getName() == null || buyerDto.getName().equals("")) {
             return false;
         }

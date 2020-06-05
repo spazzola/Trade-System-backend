@@ -54,6 +54,12 @@ public class BuyerController {
         return buyerMapper.toDto(buyers);
     }
 
+    @GetMapping("/getAllWithAverageEarnings")
+    public List<BuyerDto> getAllWithAverageEarnings() {
+        final List<Buyer> buyers = buyerService.getAllWithAverageEarning();
+        return buyerMapper.toDto(buyers);
+    }
+
     @GetMapping("/getBuyerProducts")
     public List<PriceDto> getBuyerProducts(@RequestParam("id") String id) {
         List<Price> prices = buyerService.getBuyerProducts(Long.valueOf(id));
