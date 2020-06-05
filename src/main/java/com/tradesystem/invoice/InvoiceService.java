@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.List;
@@ -90,6 +89,11 @@ public class InvoiceService {
     @Transactional
     public List<Invoice> getInvoicesByMonth(int month, int year) {
         return invoiceDao.getMonthInvoices(month, year);
+    }
+
+    @Transactional
+    public Invoice getInvoiceByInvoiceNumber(String invoiceNumber) {
+        return invoiceDao.getByInvoiceNumber(invoiceNumber);
     }
 
     @Transactional

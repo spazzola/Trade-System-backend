@@ -18,11 +18,14 @@ public class InvoiceController {
     private InvoiceService invoiceService;
     private InvoiceMapper invoiceMapper;
     private RoleSecurity roleSecurity;
+    private UpdateInvoiceService updateInvoiceService;
 
-    public InvoiceController(InvoiceService invoiceService, InvoiceMapper invoiceMapper, RoleSecurity roleSecurity) {
+    public InvoiceController(InvoiceService invoiceService, InvoiceMapper invoiceMapper,
+                             RoleSecurity roleSecurity, UpdateInvoiceService updateInvoiceService) {
         this.invoiceService = invoiceService;
         this.invoiceMapper = invoiceMapper;
         this.roleSecurity = roleSecurity;
+        this.updateInvoiceService = updateInvoiceService;
     }
 
     @PostMapping("/create")
@@ -93,4 +96,15 @@ public class InvoiceController {
         return invoiceService.getSuppliersNegativeBalance();
     }
 
+    @GetMapping("/getInvoiceByInvoiceNumber")
+    public InvoiceDto getInvoiceByInvoiceNumber(@RequestParam(value = "invoiceNumber") String invoiceNumber) {
+        Invoice invoice = invoiceService.getInvoiceByInvoiceNumber(invoiceNumber);
+        return invoiceMapper.toDto(invoice);
+    }
+
+    @PutMapping("/updateInvoice")
+    public InvoiceDto updateInvoice(@RequestBody UpdateInvoiceRequest updateInvoiceRequest) {
+        Invoice invoice = updateInvoiceService.updateInvoice(updateInvoiceRequest);
+        return invoiceMapper.toDto(invoice);
+    }
 }

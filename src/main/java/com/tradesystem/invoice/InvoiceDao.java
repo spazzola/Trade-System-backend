@@ -16,6 +16,11 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
     List<Invoice> getMonthInvoices(int month, int year);
 
 
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE invoice_number = ?1 AND is_paid = true AND value = amount_to_use",
+            nativeQuery = true)
+    Invoice getByInvoiceNumber(String invoiceNumber);
+
     /***
      *
      * ======================= BUYER =======================
