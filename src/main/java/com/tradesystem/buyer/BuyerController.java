@@ -1,5 +1,9 @@
 package com.tradesystem.buyer;
 
+import com.tradesystem.order.Order;
+import com.tradesystem.order.OrderDto;
+import com.tradesystem.order.OrderMapper;
+import com.tradesystem.order.OrderService;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDto;
 import com.tradesystem.price.PriceMapper;
@@ -17,11 +21,16 @@ public class BuyerController {
     private BuyerService buyerService;
     private BuyerMapper buyerMapper;
     private PriceMapper priceMapper;
+    private OrderService orderService;
+    private OrderMapper orderMapper;
 
-    public BuyerController(BuyerService buyerService, BuyerMapper buyerMapper, PriceMapper priceMapper) {
+    public BuyerController(BuyerService buyerService, BuyerMapper buyerMapper,
+                           PriceMapper priceMapper, OrderService orderService, OrderMapper orderMapper) {
         this.buyerService = buyerService;
         this.buyerMapper = buyerMapper;
         this.priceMapper = priceMapper;
+        this.orderService = orderService;
+        this.orderMapper = orderMapper;
     }
 
     @PostMapping("/create")
@@ -50,5 +59,18 @@ public class BuyerController {
         List<Price> prices = buyerService.getBuyerProducts(Long.valueOf(id));
 
         return priceMapper.toDto(prices);
+    }
+
+    @GetMapping("/getBuyerMonthOrders")
+    public List<OrderDto> getBuyerMonthOrders(@RequestParam("buyerId") String buyerId,
+                                                 @RequestParam("month") String month,
+                                                 @RequestParam("year") String year) {
+
+        Long id = Long.valueOf(buyerId);
+        int m = Integer.valueOf(month);
+        int y = Integer.valueOf(year);
+
+        List<Order> orders = orderService.getSupplierMonthOrders(id, m, y);
+        return orderMapper.toDto(orders);
     }
 }

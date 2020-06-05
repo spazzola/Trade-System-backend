@@ -101,6 +101,16 @@ public class OrderService {
 
     }
 
+    @Transactional
+    public List<Order> getSupplierMonthOrders(Long supplierId, int month, int year) {
+       return orderDao.getSupplierMonthOrders(supplierId, month, year);
+    }
+
+    @Transactional
+    public List<Order> getBuyerMonthOrders(Long buyerId, int month, int year) {
+        return orderDao.getBuyerMonthOrders(buyerId, month, year);
+    }
+
     private Order calculateOrder(Order order) {
         List<OrderDetails> orderDetails = order.getOrderDetails();
         for (OrderDetails orderDetail : orderDetails) {

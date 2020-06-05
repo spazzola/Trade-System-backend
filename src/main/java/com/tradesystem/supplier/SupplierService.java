@@ -70,7 +70,7 @@ public class SupplierService {
         int year = LocalDate.now().getYear();
 
         for (Supplier supplier : suppliers) {
-            Set<Order> orders = orderDao.getSupplierMonthOrders(supplier.getId(), month, year);
+            List<Order> orders = orderDao.getSupplierMonthOrders(supplier.getId(), month, year);
             BigDecimal sumQuantity = BigDecimal.valueOf(0);
 
             for (Order order : orders) {
