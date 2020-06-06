@@ -23,7 +23,7 @@ public class ProductService {
                     .build();
             return productDao.save(product);
         }
-        throw new RuntimeException("Can't create product");
+        throw new RuntimeException("Nie można stworzyć produktu");
     }
 
     @Transactional

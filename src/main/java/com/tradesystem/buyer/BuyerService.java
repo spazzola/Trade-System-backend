@@ -70,17 +70,23 @@ public class BuyerService {
         int month = LocalDate.now().getMonthValue();
         int year = LocalDate.now().getYear();
 
-        List<Buyer> buyers = buyerDao.findAll();
+        List<Buyer> buyers = new ArrayList<>();
+        Set<Order> orders = orderService.getMonthOrders(month, year);
+
+        for (Order order : orders) {
+            buyers.add(order.getBuyer());
+        }
+
         List<Buyer> resultList = new ArrayList<>();
 
         for (Buyer buyer : buyers) {
-            List<Order> orders = orderService.getBuyerMonthOrders(buyer.getId(), month, year);
+            List<Order> buyerOrders = orderService.getBuyerMonthOrders(buyer.getId(), month, year);
 
             BigDecimal totalBuyerSum = BigDecimal.valueOf(0);
             BigDecimal totalSupplierSum = BigDecimal.valueOf(0);
             BigDecimal totalQuantity = BigDecimal.valueOf(0);
 
-            for (Order order : orders) {
+            for (Order order : buyerOrders) {
 
                 totalBuyerSum = totalBuyerSum.add(order.getOrderDetails().get(0).getBuyerSum());
                 totalSupplierSum = totalSupplierSum.add(order.getOrderDetails().get(0).getSupplierSum());
