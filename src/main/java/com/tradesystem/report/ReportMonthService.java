@@ -74,6 +74,21 @@ public class ReportMonthService {
         if (reportService.checkIfReportExist(reportType)) {
             reportDao.save(report);
         }
+        else {
+            Report previousReport = reportDao.findByType(report.getType());
+            previousReport.setSoldedValue(soldedValue);
+            previousReport.setBoughtValue(boughtValue);
+            previousReport.setBuyersNotUsedValue(buyersNotUsedValue);
+            previousReport.setSuppliersNotUsedValue(suppliersNotUsedValue);
+            previousReport.setSoldedQuantity(soldedQuantity);
+            previousReport.setAverageSold(averageSold);
+            previousReport.setAverageEarningsPerM3(averageEarningsPerM3);
+            previousReport.setProfit(profit);
+            previousReport.setSumCosts(sumCosts);
+            previousReport.setType(reportType);
+
+            reportDao.save(previousReport);
+        }
         return report;
     }
 
