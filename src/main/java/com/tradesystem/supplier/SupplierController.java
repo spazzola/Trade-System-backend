@@ -72,4 +72,11 @@ public class SupplierController {
         return orderMapper.toDto(orders);
     }
 
+    @PutMapping("/updateSupplierName")
+    public SupplierDto updateSupplierName(@RequestParam("oldSupplierName") String oldSupplierName,
+                                    @RequestParam("newSupplierName") String newSupplierName) {
+
+        Supplier supplier = supplierService.updateSupplierName(oldSupplierName, newSupplierName);
+        return supplierMapper.toDto(supplier);
+    }
 }

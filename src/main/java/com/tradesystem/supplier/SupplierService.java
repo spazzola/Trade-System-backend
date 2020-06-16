@@ -87,6 +87,14 @@ public class SupplierService {
         return priceDao.getSupplierProducts(id);
     }
 
+    @Transactional
+    public Supplier updateSupplierName(String oldSupplierName, String newSupplierName) {
+        Supplier buyer = supplierDao.findByName(oldSupplierName);
+        buyer.setName(newSupplierName);
+
+        return supplierDao.save(buyer);
+    }
+
     private Supplier setCurrentBalance(Supplier supplier) {
 
         List<Invoice> notUsedInvoices = invoiceDao.getSupplierNotUsedInvoices(supplier.getId());
