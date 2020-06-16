@@ -79,4 +79,13 @@ public class BuyerController {
         List<Order> orders = orderService.getSupplierMonthOrders(id, m, y);
         return orderMapper.toDto(orders);
     }
+
+    @PutMapping("/updateBuyerName")
+    public BuyerDto updateBuyerName(@RequestParam("oldBuyerName") String oldBuyerName,
+                                    @RequestParam("newBuyerName") String newBuyerName) {
+
+        Buyer buyer = buyerService.updateBuyerName(oldBuyerName, newBuyerName);
+        return buyerMapper.toDto(buyer);
+    }
+
 }

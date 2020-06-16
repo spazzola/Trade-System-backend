@@ -101,6 +101,14 @@ public class BuyerService {
         return resultList;
     }
 
+    @Transactional
+    public Buyer updateBuyerName(String oldBuyerName, String newBuyerName) {
+        Buyer buyer = buyerDao.findByName(oldBuyerName);
+        buyer.setName(newBuyerName);
+
+        return buyerDao.save(buyer);
+    }
+
     private Buyer setCurrentBalance(Buyer buyer) {
         List<Invoice> notUsedInvoices = invoiceDao.getBuyerNotUsedInvoices(buyer.getId());
 
