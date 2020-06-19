@@ -1,6 +1,7 @@
 package com.tradesystem.product;
 
 import com.tradesystem.price.Price;
+import com.tradesystem.price.pricehistory.PriceHistory;
 import lombok.*;
 
 import java.util.List;
@@ -25,5 +26,8 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     private List<Price> prices;
+
+    @OneToMany(mappedBy = "product")
+    private List<PriceHistory> priceHistories;
 
 }

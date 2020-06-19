@@ -4,6 +4,7 @@ package com.tradesystem.buyer;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.order.Order;
 import com.tradesystem.price.Price;
+import com.tradesystem.price.pricehistory.PriceHistory;
 import lombok.*;
 
 import javax.persistence.*;
@@ -39,4 +40,7 @@ public class Buyer {
 
     @OneToMany(mappedBy = "buyer")
     private List<Order> orders;
+
+    @OneToMany(mappedBy = "buyer")
+    private List<PriceHistory> priceHistories;
 }

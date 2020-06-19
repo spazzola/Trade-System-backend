@@ -6,6 +6,7 @@ import java.util.List;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.order.Order;
 import com.tradesystem.price.Price;
+import com.tradesystem.price.pricehistory.PriceHistory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,4 +41,7 @@ public class Supplier {
 
     @OneToMany(mappedBy = "supplier")
     private List<Order> orders;
+
+    @OneToMany(mappedBy = "supplier")
+    private List<PriceHistory> priceHistories;
 }

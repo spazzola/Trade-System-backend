@@ -9,6 +9,8 @@ import com.tradesystem.ordercomment.OrderCommentService;
 import com.tradesystem.payment.Payment;
 import com.tradesystem.payment.PaymentDao;
 import com.tradesystem.price.PriceDao;
+import com.tradesystem.price.pricehistory.PriceHistoryService;
+import com.tradesystem.product.Product;
 import com.tradesystem.supplier.Supplier;
 
 import org.springframework.stereotype.Service;
@@ -31,16 +33,19 @@ public class OrderDetailsService {
     private OrderCommentService orderCommentService;
     private OrderCommentDao orderCommentDao;
     private PaymentDao paymentDao;
+    private PriceHistoryService priceHistoryService;
 
 
     public OrderDetailsService(PriceDao priceDao, InvoiceDao invoiceDao, OrderDetailsDao orderDetailsDao,
-                               OrderCommentService orderCommentService, OrderCommentDao orderCommentDao, PaymentDao paymentDao) {
+                               OrderCommentService orderCommentService, OrderCommentDao orderCommentDao,
+                               PaymentDao paymentDao, PriceHistoryService priceHistoryService) {
         this.priceDao = priceDao;
         this.invoiceDao = invoiceDao;
         this.orderDetailsDao = orderDetailsDao;
         this.orderCommentService = orderCommentService;
         this.orderCommentDao = orderCommentDao;
         this.paymentDao = paymentDao;
+        this.priceHistoryService = priceHistoryService;
     }
 
     @Transactional
@@ -77,6 +82,11 @@ public class OrderDetailsService {
         }
 
         if (price != null) {
+            Buyer buyer = orderDetails.getOrder().getBuyer();
+            Supplier supplier = orderDetails.getOrder().getSupplier();
+            Product product = orderDetails.getProduct();
+
+            priceHistoryService.createPriceHistory(buyer, supplier, product, price);
             return quantity.multiply(price).setScale(2, RoundingMode.HALF_UP);
         } else {
             throw new RuntimeException("Kupiec nie ma ustawionej ceny dla tego produktu");

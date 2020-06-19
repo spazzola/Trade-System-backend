@@ -1,8 +1,11 @@
 package com.tradesystem.price;
 
+import com.tradesystem.price.pricehistory.PriceHistory;
+import com.tradesystem.price.pricehistory.PriceHistoryService;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/price")
@@ -11,10 +14,12 @@ public class PriceController {
 
     private PriceService priceService;
     private PriceMapper priceMapper;
+    private PriceHistoryService priceHistoryService;
 
-    public PriceController(PriceService priceService, PriceMapper priceMapper) {
+    public PriceController(PriceService priceService, PriceMapper priceMapper, PriceHistoryService priceHistoryService) {
         this.priceService = priceService;
         this.priceMapper = priceMapper;
+        this.priceHistoryService = priceHistoryService;
     }
 
     @PostMapping("/createBuyerPrice")
@@ -47,5 +52,12 @@ public class PriceController {
 
         BigDecimal newValue = new BigDecimal(value);
         priceService.editSupplierPrice(Long.valueOf(supplierId), Long.valueOf(productId), newValue);
+    }
+
+    @GetMapping("/getBuyerPriceHistory")
+    public List<PriceDto> getBuyerPriceHistory(@RequestParam(value = "buyerId") String buyerId) {
+        List<Price> pricesHistory =  priceHistoryService.getBuyerPriceHistory(Long.valueOf(buyerId));
+
+        return priceMapper.toDto(pricesHistory);
     }
 }
