@@ -76,7 +76,7 @@ public class BuyerController {
         int m = Integer.valueOf(month);
         int y = Integer.valueOf(year);
 
-        List<Order> orders = orderService.getSupplierMonthOrders(id, m, y);
+        List<Order> orders = orderService.getBuyerMonthOrders(id, m, y);
         return orderMapper.toDto(orders);
     }
 
