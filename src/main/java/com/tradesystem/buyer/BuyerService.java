@@ -6,6 +6,7 @@ import com.tradesystem.order.Order;
 import com.tradesystem.order.OrderService;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDao;
+import com.tradesystem.product.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,7 +71,7 @@ public class BuyerService {
         int month = LocalDate.now().getMonthValue();
         int year = LocalDate.now().getYear();
 
-        List<Buyer> buyers = new ArrayList<>();
+        Set<Buyer> buyers = new HashSet<>();
         Set<Order> orders = orderService.getMonthOrders(month, year);
 
         for (Order order : orders) {
