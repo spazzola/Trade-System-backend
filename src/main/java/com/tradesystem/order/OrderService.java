@@ -3,7 +3,6 @@ package com.tradesystem.order;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.buyer.BuyerDao;
 import com.tradesystem.orderdetails.OrderDetails;
-import com.tradesystem.orderdetails.OrderDetailsDao;
 import com.tradesystem.orderdetails.OrderDetailsDto;
 import com.tradesystem.orderdetails.OrderDetailsService;
 import com.tradesystem.product.Product;
@@ -75,18 +74,24 @@ public class OrderService {
                     Long productId = orderDetailsDto.getProduct().getId();
                     Product product = productDao.findById(productId)
                             .orElseThrow(NoSuchElementException::new);
-                    orderDetails.setProduct(product);
 
+                    orderDetails.setProduct(product);
                     orderDetails.setTypedPrice(orderDetailsDto.getTypedPrice());
                     orderDetails.setTransportNumber(orderDetailsDto.getTransportNumber());
                     orderDetails.setQuantity(orderDetailsDto.getQuantity());
                     orderDetails.setOrder(order);
+                    orderDetails.setCreateBuyerInvoice(orderDetailsDto.isCreateBuyerInvoice());
 
+                    if (orderDetailsDto.isCreateBuyerInvoice()) {
+                        orderDetails.setInvoiceNumber(orderDetailsDto.getInvoiceNumber());
+                    }
                     // TODO add functionality to adding comments from user
                     // String userComment = orderDetailsDto.getOrderComment().getUserComment();
                     // orderDetails.getOrderComment().setUserComment(userComment);
 
+
                     orderDetailsList.add(orderDetails);
+
                 } else {
                     throw new RuntimeException("Can't create order detail");
                 }

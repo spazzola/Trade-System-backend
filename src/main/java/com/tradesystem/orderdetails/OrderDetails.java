@@ -35,6 +35,12 @@ public class OrderDetails {
     @Transient
     private BigDecimal typedPrice;
 
+    @Transient
+    private String invoiceNumber;
+
+    @Transient
+    private boolean createBuyerInvoice;
+
     @ManyToOne(cascade=CascadeType.PERSIST)
     @JoinColumn(name = "order_fk")
     private Order order;
@@ -43,7 +49,7 @@ public class OrderDetails {
     @JoinColumn(name = "product_fk")
     private Product product;
 
-    @OneToOne
+    @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name = "order_comment_fk")
     private OrderComment orderComment;
 

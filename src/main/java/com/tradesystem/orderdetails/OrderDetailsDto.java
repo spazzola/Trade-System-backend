@@ -20,7 +20,9 @@ public class OrderDetailsDto {
     private BigDecimal supplierSum;
     private BigDecimal typedPrice;
     private String transportNumber;
+    private String invoiceNumber;
     private ProductDto product;
     private OrderCommentDto orderComment;
+    private boolean createBuyerInvoice;
 
 }

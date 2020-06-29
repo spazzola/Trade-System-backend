@@ -57,7 +57,12 @@ public class OrderDetailsService {
         orderDetails.setSupplierSum(supplierSum);
         orderDetailsDao.save(orderDetails);
 
-        payForBuyerOrder2(orderDetails, buyerSum);
+        if (orderDetails.isCreateBuyerInvoice()) {
+            createBuyerInvoice(orderDetails, buyerSum);
+            addSystemComment(orderDetails);
+        } else {
+            payForBuyerOrder2(orderDetails, buyerSum);
+        }
         payForSupplierOrder2(orderDetails, supplierSum);
 
     }
@@ -359,4 +364,23 @@ public class OrderDetailsService {
         paymentDao.save(payment);
     }
 
+    private void createBuyerInvoice(OrderDetails orderDetails, BigDecimal buyerSum) {
+        Invoice invoice = Invoice.builder()
+                .buyer(orderDetails.getOrder().getBuyer())
+                .date(orderDetails.getOrder().getDate())
+                .amountToUse(buyerSum)
+                .value(buyerSum)
+                .isPaid(false)
+                .isUsed(false)
+                .invoiceNumber(orderDetails.getInvoiceNumber())
+                .build();
+        invoiceDao.save(invoice);
+    }
+
+    private void addSystemComment(OrderDetails orderDetails) {
+        OrderComment orderComment = new OrderComment();
+        orderComment.setSystemComment("Wygenerowano do zamówienia fakturę o nr " + orderDetails.getInvoiceNumber());
+        orderDetails.setOrderComment(orderComment);
+        orderDetailsDao.save(orderDetails);
+    }
 }
