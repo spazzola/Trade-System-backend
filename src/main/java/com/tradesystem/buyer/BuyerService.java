@@ -124,6 +124,14 @@ public class BuyerService {
             balance = balance.add(negativeInvoice.get().getAmountToUse());
         }
 
+        Optional<List <Invoice>> notPaidInvoices = invoiceDao.getBuyerNotPaidInvoices(buyer.getId());
+
+        if (notPaidInvoices.isPresent()) {
+            for (Invoice invoice : notPaidInvoices.get()) {
+                balance = balance.subtract(invoice.getValue());
+            }
+        }
+
         buyer.setCurrentBalance(balance);
 
         return buyer;

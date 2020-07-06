@@ -21,6 +21,18 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
             nativeQuery = true)
     Invoice getByInvoiceNumber(String invoiceNumber);
 
+
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE buyer_fk = ?1 AND is_paid = false AND value > 0",
+            nativeQuery = true)
+    Optional<List <Invoice>> getBuyerNotPaidInvoices(Long buyerId);
+
+
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE buyer_fk IS NOT NULL AND is_paid = false AND amount_to_use > 0",
+            nativeQuery = true)
+    Optional<List <Invoice>> getBuyersNotPaidInvoices();
+
     /***
      *
      * ======================= BUYER =======================

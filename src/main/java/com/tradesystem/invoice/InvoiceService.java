@@ -145,6 +145,13 @@ public class InvoiceService {
                 result = result.add(invoice.getAmountToUse());
             }
         }
+
+        Optional<List <Invoice>> notPaidInvoices = invoiceDao.getBuyersNotPaidInvoices();
+        if (notPaidInvoices.isPresent()) {
+            for (Invoice invoice : notPaidInvoices.get()) {
+                result = result.subtract(invoice.getAmountToUse());
+            }
+        }
         return result;
     }
 
