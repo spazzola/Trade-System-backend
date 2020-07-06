@@ -1,5 +1,6 @@
 package com.tradesystem.buyer;
 
+import com.tradesystem.invoice.*;
 import com.tradesystem.order.Order;
 import com.tradesystem.order.OrderDto;
 import com.tradesystem.order.OrderMapper;
@@ -23,14 +24,19 @@ public class BuyerController {
     private PriceMapper priceMapper;
     private OrderService orderService;
     private OrderMapper orderMapper;
+    private InvoiceService invoiceService;
+    private InvoiceMapper invoiceMapper;
 
     public BuyerController(BuyerService buyerService, BuyerMapper buyerMapper,
-                           PriceMapper priceMapper, OrderService orderService, OrderMapper orderMapper) {
+                           PriceMapper priceMapper, OrderService orderService,
+                           OrderMapper orderMapper, InvoiceService invoiceService, InvoiceMapper invoiceMapper) {
         this.buyerService = buyerService;
         this.buyerMapper = buyerMapper;
         this.priceMapper = priceMapper;
         this.orderService = orderService;
         this.orderMapper = orderMapper;
+        this.invoiceService = invoiceService;
+        this.invoiceMapper = invoiceMapper;
     }
 
     @PostMapping("/create")
@@ -86,6 +92,19 @@ public class BuyerController {
 
         Buyer buyer = buyerService.updateBuyerName(oldBuyerName, newBuyerName);
         return buyerMapper.toDto(buyer);
+    }
+
+    @GetMapping("/getBuyerMonthInvoices")
+    public List<InvoiceDto> getBuyerMonthInvoices(@RequestParam("buyerId") String buyerId,
+                                                  @RequestParam("month") String month,
+                                                  @RequestParam("year") String year) {
+
+        Long id = Long.valueOf(buyerId);
+        int m = Integer.valueOf(month);
+        int y = Integer.valueOf(year);
+
+        List<Invoice> invoices = invoiceService.getBuyerMonthInvoices(id, m, y);
+        return invoiceMapper.toDto(invoices);
     }
 
 }

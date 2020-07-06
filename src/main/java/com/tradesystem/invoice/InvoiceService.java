@@ -180,6 +180,17 @@ public class InvoiceService {
         }
         return result;
     }
+
+    @Transactional
+    public List<Invoice> getBuyerMonthInvoices(Long buyerId, int month, int year) {
+        return invoiceDao.getBuyerMonthInvoices(buyerId, month, year);
+    }
+
+    @Transactional
+    public List<Invoice> getSupplierMonthInvoices(Long supplierId, int month, int year) {
+        return invoiceDao.getSupplierMonthInvoices(supplierId, month, year);
+    }
+
     private boolean checkInvoiceOwner(Invoice invoice) {
         return invoice.getBuyer() != null;
     }

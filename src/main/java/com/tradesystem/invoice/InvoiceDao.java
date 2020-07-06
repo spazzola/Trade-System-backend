@@ -39,6 +39,11 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
      *
      */
 
+    @Query(value = "SELECT * FROM invoices i " +
+            "WHERE buyer_fk = ?1 AND MONTH(i.date) = ?2 AND YEAR(i.date) = ?3",
+            nativeQuery = true)
+    List<Invoice> getBuyerMonthInvoices(Long buyerId, int month, int year);
+
     @Query(value = "SELECT * FROM invoices " +
             "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
             "WHERE invoices.buyer_fk = ?1 AND is_used = false AND is_paid = true",
@@ -164,6 +169,10 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
      *
      */
 
+    @Query(value = "SELECT * FROM invoices i " +
+            "WHERE supplier_fk = ?1 AND MONTH(i.date) = ?2 AND YEAR(i.date) = ?3",
+            nativeQuery = true)
+    List<Invoice> getSupplierMonthInvoices(Long supplierId, int month, int year);
 
     @Query(value = "SELECT * FROM invoices " +
             "INNER JOIN suppliers ON invoices.supplier_fk = suppliers.supplier_id " +

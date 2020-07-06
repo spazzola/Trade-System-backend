@@ -1,5 +1,9 @@
 package com.tradesystem.supplier;
 
+import com.tradesystem.invoice.Invoice;
+import com.tradesystem.invoice.InvoiceDto;
+import com.tradesystem.invoice.InvoiceMapper;
+import com.tradesystem.invoice.InvoiceService;
 import com.tradesystem.order.Order;
 import com.tradesystem.order.OrderDto;
 import com.tradesystem.order.OrderMapper;
@@ -21,14 +25,19 @@ public class SupplierController {
     private PriceMapper priceMapper;
     private OrderService orderService;
     private OrderMapper orderMapper;
+    private InvoiceService invoiceService;
+    private InvoiceMapper invoiceMapper;
 
     public SupplierController(SupplierService supplierService, SupplierMapper supplierMapper,
-                              PriceMapper priceMapper, OrderService orderService, OrderMapper orderMapper) {
+                              PriceMapper priceMapper, OrderService orderService,
+                              OrderMapper orderMapper, InvoiceService invoiceService, InvoiceMapper invoiceMapper) {
         this.supplierService = supplierService;
         this.supplierMapper = supplierMapper;
         this.priceMapper = priceMapper;
         this.orderService = orderService;
         this.orderMapper = orderMapper;
+        this.invoiceService = invoiceService;
+        this.invoiceMapper = invoiceMapper;
     }
 
 
@@ -78,5 +87,18 @@ public class SupplierController {
 
         Supplier supplier = supplierService.updateSupplierName(oldSupplierName, newSupplierName);
         return supplierMapper.toDto(supplier);
+    }
+
+    @GetMapping("/getSupplierMonthInvoices")
+    public List<InvoiceDto> getSupplierMonthInvoices(@RequestParam("supplierId") String supplierId,
+                                                  @RequestParam("month") String month,
+                                                  @RequestParam("year") String year) {
+
+        Long id = Long.valueOf(supplierId);
+        int m = Integer.valueOf(month);
+        int y = Integer.valueOf(year);
+
+        List<Invoice> invoices = invoiceService.getSupplierMonthInvoices(id, m, y);
+        return invoiceMapper.toDto(invoices);
     }
 }
