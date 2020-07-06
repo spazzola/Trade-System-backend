@@ -102,7 +102,7 @@ public class InvoiceService {
         Invoice invoice = optionalInvoice
                 .orElseThrow(NoSuchElementException::new);
 
-        if (invoice.getAmountToUse().doubleValue() <= 0) {
+        if (invoice.getAmountToUse().doubleValue() < 0) {
             throw new RuntimeException("Nie mozna zaplacic negatywnej faktury");
         }
         boolean isBuyerOwner = checkInvoiceOwner(invoice);

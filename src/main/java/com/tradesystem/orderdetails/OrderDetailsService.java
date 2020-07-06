@@ -368,7 +368,7 @@ public class OrderDetailsService {
         Invoice invoice = Invoice.builder()
                 .buyer(orderDetails.getOrder().getBuyer())
                 .date(orderDetails.getOrder().getDate())
-                .amountToUse(buyerSum)
+                .amountToUse(BigDecimal.ZERO)
                 .value(buyerSum)
                 .isPaid(false)
                 .isUsed(false)
