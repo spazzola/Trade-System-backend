@@ -205,22 +205,6 @@ public class ReportMonthService {
         return profits;
     }
 
-    private BigDecimal calculateSuppliersUsedAmount(int month, int year) {
-        List<Invoice> invoices = invoiceDao.getSuppliersMonthInvoices(month, year);
-
-        BigDecimal generalAmountToUse = BigDecimal.valueOf(0);
-        for (Invoice invoice : invoices) {
-            generalAmountToUse = generalAmountToUse.add(invoice.getValue());
-        }
-
-        BigDecimal amountToUse = BigDecimal.valueOf(0);
-        for (Invoice invoice : invoices) {
-            amountToUse = amountToUse.add(invoice.getAmountToUse());
-        }
-
-        return generalAmountToUse.subtract(amountToUse);
-    }
-
     private BigDecimal calculateBuyersUsedAmount(int month, int year) {
         List<Invoice> notUsedInvoices = invoiceDao.getBuyersMonthIncomedInvoices(month, year);
         BigDecimal generalValue = BigDecimal.valueOf(0);

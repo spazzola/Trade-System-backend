@@ -174,6 +174,7 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
             nativeQuery = true)
     List<Invoice> getSupplierMonthInvoices(Long supplierId, int month, int year);
 
+
     @Query(value = "SELECT * FROM invoices " +
             "INNER JOIN suppliers ON invoices.supplier_fk = suppliers.supplier_id " +
             "WHERE invoices.supplier_fk = ?1 AND is_used = false AND is_paid = true",
@@ -197,7 +198,6 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
             nativeQuery = true)
     List<Invoice> getSuppliersMonthInvoices(int month, int year);
 
-
     @Query(value = "SELECT * FROM invoices " +
             "INNER JOIN suppliers ON invoices.supplier_fk = suppliers.supplier_id " +
             "WHERE is_used = false AND amount_to_use > 0 " +
@@ -205,14 +205,6 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
             "AND is_paid = true",
             nativeQuery = true)
     Optional<List<Invoice>> getSuppliersMonthNotUsedInvoices(int month, int year);
-
-
-    @Query(value = "SELECT * FROM invoices " +
-            "WHERE is_used = true AND supplier_fk IS NOT null " +
-            "AND MONTH(invoices.date) = ?1 AND YEAR(invoices.date) = ?2",
-            nativeQuery = true)
-    List<Invoice> getSuppliersMonthUsedInvoices(int month, int year);
-
 
 
     // =====Year=====
