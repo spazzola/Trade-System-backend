@@ -107,4 +107,13 @@ public class BuyerController {
         return invoiceMapper.toDto(invoices);
     }
 
+    @GetMapping("/getBuyersMonthInvoices")
+    public List<InvoiceDto> getBuyersMonthInvoices(@RequestParam("month") String month,
+                                                   @RequestParam("year") String year) {
+        int m = Integer.valueOf(month);
+        int y = Integer.valueOf(year);
+
+        List<Invoice> invoices = invoiceService.getBuyersMonthInvoices(m, y);
+        return invoiceMapper.toDto(invoices);
+    }
 }

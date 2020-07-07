@@ -83,7 +83,7 @@ public class SupplierController {
 
     @PutMapping("/updateSupplierName")
     public SupplierDto updateSupplierName(@RequestParam("oldSupplierName") String oldSupplierName,
-                                    @RequestParam("newSupplierName") String newSupplierName) {
+                                          @RequestParam("newSupplierName") String newSupplierName) {
 
         Supplier supplier = supplierService.updateSupplierName(oldSupplierName, newSupplierName);
         return supplierMapper.toDto(supplier);
@@ -91,14 +91,24 @@ public class SupplierController {
 
     @GetMapping("/getSupplierMonthInvoices")
     public List<InvoiceDto> getSupplierMonthInvoices(@RequestParam("supplierId") String supplierId,
-                                                  @RequestParam("month") String month,
-                                                  @RequestParam("year") String year) {
+                                                     @RequestParam("month") String month,
+                                                     @RequestParam("year") String year) {
 
         Long id = Long.valueOf(supplierId);
         int m = Integer.valueOf(month);
         int y = Integer.valueOf(year);
 
         List<Invoice> invoices = invoiceService.getSupplierMonthInvoices(id, m, y);
+        return invoiceMapper.toDto(invoices);
+    }
+
+    @GetMapping("/getSuppliersMonthInvoices")
+    public List<InvoiceDto> getSuppliersMonthInvoices(@RequestParam("month") String month,
+                                                      @RequestParam("year") String year) {
+        int m = Integer.valueOf(month);
+        int y = Integer.valueOf(year);
+
+        List<Invoice> invoices = invoiceService.getSuppliersMonthInvoices(m, y);
         return invoiceMapper.toDto(invoices);
     }
 }

@@ -187,8 +187,18 @@ public class InvoiceService {
     }
 
     @Transactional
+    public List<Invoice> getBuyersMonthInvoices(int month, int year) {
+        return invoiceDao.getSuppliersMonthInvoices(month, year);
+    }
+
+    @Transactional
     public List<Invoice> getSupplierMonthInvoices(Long supplierId, int month, int year) {
         return invoiceDao.getSupplierMonthInvoices(supplierId, month, year);
+    }
+
+    @Transactional
+    public List<Invoice> getSuppliersMonthInvoices(int month, int year) {
+        return invoiceDao.getSuppliersMonthInvoices(month, year);
     }
 
     private boolean checkInvoiceOwner(Invoice invoice) {
