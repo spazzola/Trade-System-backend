@@ -53,7 +53,7 @@ public class ReportMonthService {
         BigDecimal averagePurchase = calculateAveragePurchase(month, year, soldedQuantity);
         BigDecimal averageEarningsPerM3 = averageSold.subtract(averagePurchase);
 
-        BigDecimal profit = calculateProfits(month, year, sumCosts);
+        BigDecimal profit = calculateProfits(month, year, sumCosts, boughtValue);
 
         String reportType = LocalDate.now().withMonth(month).getMonth().toString();
 
@@ -196,11 +196,10 @@ public class ReportMonthService {
         return totalQuantity;
     }
 
-    private BigDecimal calculateProfits(int month, int year, BigDecimal sumCosts) {
-        BigDecimal suppliersUsedAmount = calculateSuppliersUsedAmount(month, year);
+    private BigDecimal calculateProfits(int month, int year, BigDecimal sumCosts, BigDecimal boughtValue) {
         BigDecimal buyersUsedAmount = calculateBuyersUsedAmount(month, year);
 
-        BigDecimal income = buyersUsedAmount.subtract(suppliersUsedAmount);
+        BigDecimal income = buyersUsedAmount.subtract(boughtValue);
         BigDecimal profits = income.add(sumCosts);
 
         return profits;
