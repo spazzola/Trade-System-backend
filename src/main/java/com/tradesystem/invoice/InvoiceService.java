@@ -188,7 +188,7 @@ public class InvoiceService {
 
     @Transactional
     public List<Invoice> getBuyersMonthInvoices(int month, int year) {
-        return invoiceDao.getSuppliersMonthInvoices(month, year);
+        return invoiceDao.getBuyersMonthInvoices(month, year);
     }
 
     @Transactional
