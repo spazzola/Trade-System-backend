@@ -1,6 +1,7 @@
 package com.tradesystem.cost;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -45,5 +46,11 @@ public class CostController {
         List<Cost> costs = costService.getMonthCosts(month, year);
 
         return costMapper.toDto(costs);
+    }
+
+    @DeleteMapping("/deleteCost")
+    public void delete(@RequestParam(value = "name") String name) {
+        costService.deleteCost(name);
+
     }
 }

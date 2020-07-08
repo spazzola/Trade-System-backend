@@ -18,4 +18,6 @@ public interface CostDao extends JpaRepository<Cost, Long> {
             "WHERE YEAR(costs.date) = ?1",
             nativeQuery = true)
     List<Cost> getYearCosts(int year);
+
+    void deleteByName(String name);
 }

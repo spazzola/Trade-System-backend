@@ -48,9 +48,15 @@ public class CostService {
     }
 
     @Transactional
+    public void deleteCost(String name) {
+        costDao.deleteByName(name);
+    }
+
+    @Transactional
     public List<Cost> getMonthCosts(int month, int year) {
         return costDao.getMonthCosts(month, year);
     }
+
     private boolean validateCost(CostDto cost) {
         if (cost.getName().equals("") || cost.getName() == null) {
             return false;
