@@ -51,7 +51,7 @@ public class ReportYearService {
         BigDecimal averagePurchase = calculateAvaragePurchase(year, soldedQuantity);
         BigDecimal averageEarningsPerM3 = averageSold.subtract(averagePurchase);
 
-        BigDecimal profit = calculateProfits(year, sumCosts);
+        BigDecimal profit = calculateProfits(year, sumCosts, boughtValue);
 
         String reportType = String.valueOf(year);
 
@@ -220,11 +220,10 @@ public class ReportYearService {
         return generalAmountToUse.subtract(amountToUse);
     }
 
-    private BigDecimal calculateProfits(int year, BigDecimal sumCosts) {
-        BigDecimal suppliersUsedAmount = calculateSuppliersUsedAmount(year);
+    private BigDecimal calculateProfits(int year, BigDecimal sumCosts, BigDecimal boughtValue) {
         BigDecimal paidOrders = calculateBuyersUsedAmount(year);
 
-        BigDecimal income = paidOrders.subtract(suppliersUsedAmount);
+        BigDecimal income = paidOrders.subtract(boughtValue);
         BigDecimal profits = income.add(sumCosts);
 
         return profits;
