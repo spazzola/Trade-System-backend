@@ -31,6 +31,7 @@ public class Invoice {
     private BigDecimal amountToUse;
     private boolean isUsed;
     private boolean isPaid;
+    private boolean toEqualizeNegativeInvoice;
     private String comment;
 
     @ManyToOne

@@ -38,6 +38,7 @@ public class InvoiceMapper {
                 .isUsed(invoice.isUsed())
                 .isPaid(invoice.isPaid())
                 .comment(invoice.getComment())
+                .toEqualizeNegativeInvoice(invoice.isToEqualizeNegativeInvoice())
                 .buyer(buyerDto)
                 .supplier(supplierDto)
                 .build();

@@ -62,6 +62,7 @@ public class InvoiceService {
                     .isUsed(invoiceDto.isUsed())
                     .isPaid(invoiceDto.isPaid())
                     .comment(invoiceDto.getComment())
+                    .toEqualizeNegativeInvoice(invoiceDto.isToEqualizeNegativeInvoice())
                     .buyer(buyer)
                     .supplier(supplier)
                     .build();

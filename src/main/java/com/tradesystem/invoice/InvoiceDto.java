@@ -23,6 +23,7 @@ public class InvoiceDto {
     private BigDecimal amountToUse;
     private boolean isUsed;
     private boolean isPaid;
+    private boolean toEqualizeNegativeInvoice;
     private String comment;
     private BuyerDto buyer;
     private SupplierDto supplier;

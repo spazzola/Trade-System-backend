@@ -23,7 +23,7 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
 
 
     @Query(value = "SELECT * FROM invoices " +
-            "WHERE buyer_fk = ?1 AND is_paid = false AND value > 0",
+            "WHERE buyer_fk = ?1 AND is_paid = false AND value > 0 AND to_equalize_negative_invoice != true",
             nativeQuery = true)
     Optional<List <Invoice>> getBuyerNotPaidInvoices(Long buyerId);
 
