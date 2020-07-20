@@ -1,11 +1,15 @@
 package com.tradesystem.orderdetails;
 
+import com.tradesystem.buyer.Buyer;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
 import com.tradesystem.order.UpdateOrderDetailsRequest;
 import com.tradesystem.ordercomment.OrderCommentService;
 import com.tradesystem.payment.Payment;
 import com.tradesystem.payment.PaymentDao;
+import com.tradesystem.price.PriceDao;
+import com.tradesystem.product.Product;
+import com.tradesystem.supplier.Supplier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,28 +23,25 @@ public class UpdateOrderDetailsService {
     private OrderDetailsService orderDetailsService;
     private PaymentDao paymentDao;
     private InvoiceDao invoiceDao;
+    private PriceDao priceDao;
     private OrderCommentService orderCommentService;
 
     public UpdateOrderDetailsService(PaymentDao paymentDao, OrderDetailsService orderDetailsService,
-                                     InvoiceDao invoiceDao,  OrderCommentService orderCommentService) {
+                                     InvoiceDao invoiceDao,  OrderCommentService orderCommentService, PriceDao priceDao) {
         this.paymentDao = paymentDao;
         this.orderDetailsService = orderDetailsService;
         this.invoiceDao = invoiceDao;
         this.orderCommentService = orderCommentService;
+        this.priceDao = priceDao;
     }
 
 
     @Transactional
     public OrderDetails updateOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest) {
-        OrderDetails orderDetails = updateBuyerOrder(updateOrderDetailsRequest);
-        orderDetails = updateSupplierOrder(updateOrderDetailsRequest);
-
-        return orderDetails;
-    }
-
-    @Transactional
-    public OrderDetails updateBuyerOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest) {
         OrderDetails orderDetails = orderDetailsService.getOrderByTransportNumber(updateOrderDetailsRequest.getOldTransportNumber());
+        Product product = orderDetails.getProduct();
+        Buyer buyer = orderDetails.getOrder().getBuyer();
+        Supplier supplier = orderDetails.getOrder().getSupplier();
 
         if (!orderDetails.getTransportNumber().equals(updateOrderDetailsRequest.getNewTransportNumber())) {
             orderDetails.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
@@ -50,8 +51,22 @@ public class UpdateOrderDetailsService {
             updateOrderDetailsRequest.setNewQuantity(orderDetails.getQuantity());
         }
 
-        orderCommentService.addEditComment(orderDetails, " ZAMÓWIENIE EDYTOWANO");
+        if (updateOrderDetailsRequest.getNewBuyerPrice() == null || updateOrderDetailsRequest.getNewBuyerPrice().equals(BigDecimal.ZERO)) {
+            BigDecimal oldBuyerPrice = priceDao.getBuyerPrice(buyer.getId(), product.getId());
+            updateOrderDetailsRequest.setNewBuyerPrice(oldBuyerPrice);
+        }
 
+        if (updateOrderDetailsRequest.getNewSupplierPrice() == null || updateOrderDetailsRequest.getNewSupplierPrice().equals(BigDecimal.ZERO)) {
+            BigDecimal oldSupplierPrice = priceDao.getSupplierPrice(supplier.getId(), product.getId());
+            updateOrderDetailsRequest.setNewSupplierPrice(oldSupplierPrice);
+        }
+
+        updateBuyerOrder(updateOrderDetailsRequest, orderDetails);
+
+        return updateSupplierOrder(updateOrderDetailsRequest, orderDetails);
+    }
+
+    private void updateBuyerOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest, OrderDetails orderDetails) {
         List<Invoice> invoices = new ArrayList<>();
         List<Payment> payments = paymentDao.findBuyerPayment(orderDetails.getId());
 
@@ -74,6 +89,34 @@ public class UpdateOrderDetailsService {
             processUpdatingBuyerOrderDetails(orderDetails, updateOrderDetailsRequest);
 
         }
+        orderCommentService.addEditComment(orderDetails, " ZAMÓWIENIE EDYTOWANO");
+    }
+
+    private OrderDetails updateSupplierOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest, OrderDetails orderDetails) {
+        List<Invoice> invoices = new ArrayList<>();
+        List<Payment> payments = paymentDao.findSupplierPayment(orderDetails.getId());
+
+        for (Payment payment : payments) {
+            Long invoiceId = payment.getSupplierInvoice().getId();
+            Invoice invoice = invoiceDao.findById(invoiceId)
+                    .orElseThrow(RuntimeException::new);
+            invoices.add(invoice);
+        }
+
+        if (invoices.size() == 1) {
+            Invoice oldInvoice = invoices.get(0);
+
+            processUpdatingSupplierInvoice(orderDetails, updateOrderDetailsRequest, oldInvoice, true);
+            processUpdatingSupplierOrderDetails(orderDetails, updateOrderDetailsRequest);
+
+        } else {
+            Invoice oldInvoice = invoices.get(invoices.size() - 1);
+            processUpdatingSupplierInvoice(orderDetails, updateOrderDetailsRequest, oldInvoice, false);
+            processUpdatingSupplierOrderDetails(orderDetails, updateOrderDetailsRequest);
+
+        }
+        orderCommentService.addEditComment(orderDetails, " ZAMÓWIENIE EDYTOWANO");
+
         return orderDetails;
     }
 
@@ -104,45 +147,6 @@ public class UpdateOrderDetailsService {
     private void processUpdatingBuyerOrderDetails(OrderDetails orderDetails, UpdateOrderDetailsRequest updateOrderDetailsRequest) {
         orderDetails.setQuantity(updateOrderDetailsRequest.getNewQuantity());
         orderDetails.setBuyerSum(updateOrderDetailsRequest.getNewBuyerSum());
-    }
-
-
-    @Transactional
-    public OrderDetails updateSupplierOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest) {
-        OrderDetails orderDetails = orderDetailsService.getOrderByTransportNumber(updateOrderDetailsRequest.getOldTransportNumber());
-
-        if (!orderDetails.getTransportNumber().equals(updateOrderDetailsRequest.getNewTransportNumber())) {
-            orderDetails.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
-        }
-
-        if (updateOrderDetailsRequest.getNewQuantity() == null || updateOrderDetailsRequest.getNewQuantity().equals(BigDecimal.ZERO)) {
-            updateOrderDetailsRequest.setNewQuantity(orderDetails.getQuantity());
-        }
-        orderCommentService.addEditComment(orderDetails, " ZAMÓWIENIE EDYTOWANO");
-
-        List<Invoice> invoices = new ArrayList<>();
-        List<Payment> payments = paymentDao.findSupplierPayment(orderDetails.getId());
-
-        for (Payment payment : payments) {
-            Long invoiceId = payment.getSupplierInvoice().getId();
-            Invoice invoice = invoiceDao.findById(invoiceId)
-                    .orElseThrow(RuntimeException::new);
-            invoices.add(invoice);
-        }
-
-        if (invoices.size() == 1) {
-            Invoice oldInvoice = invoices.get(0);
-
-            processUpdatingSupplierInvoice(orderDetails, updateOrderDetailsRequest, oldInvoice, true);
-            processUpdatingSupplierOrderDetails(orderDetails, updateOrderDetailsRequest);
-
-        } else {
-            Invoice oldInvoice = invoices.get(invoices.size() - 1);
-            processUpdatingSupplierInvoice(orderDetails, updateOrderDetailsRequest, oldInvoice, false);
-            processUpdatingSupplierOrderDetails(orderDetails, updateOrderDetailsRequest);
-
-        }
-        return orderDetails;
     }
 
     private void processUpdatingSupplierInvoice(OrderDetails orderDetails,

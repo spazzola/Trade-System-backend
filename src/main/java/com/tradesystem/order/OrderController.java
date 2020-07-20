@@ -64,16 +64,4 @@ public class OrderController {
         return orderDetailsMapper.toDto(orderDetails);
     }
 
-    @PutMapping("/updateBuyerOrder")
-    public OrderDetailsDto updateBuyerOrder(@RequestBody UpdateOrderDetailsRequest updateOrderDetailsRequest) {
-        OrderDetails orderDetails = updateOrderDetailsService.updateBuyerOrder(updateOrderDetailsRequest);
-        return orderDetailsMapper.toDto(orderDetails);
-    }
-
-    @PutMapping("/updateSupplierOrder")
-    public OrderDetailsDto updateSupplierOrder(@RequestBody UpdateOrderDetailsRequest updateOrderDetailsRequest) {
-        OrderDetails orderDetails = updateOrderDetailsService.updateSupplierOrder(updateOrderDetailsRequest);
-        return orderDetailsMapper.toDto(orderDetails);
-    }
-
 }
