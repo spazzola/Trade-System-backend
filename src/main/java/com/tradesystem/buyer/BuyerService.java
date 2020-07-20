@@ -6,7 +6,6 @@ import com.tradesystem.order.Order;
 import com.tradesystem.order.OrderService;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDao;
-import com.tradesystem.product.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -142,10 +141,8 @@ public class BuyerService {
             return false;
         }
         Buyer buyer = buyerDao.findByName(buyerDto.getName());
-        if (buyer != null) {
-            return false;
-        }
-        return true;
+
+        return buyer == null;
     }
 
 }

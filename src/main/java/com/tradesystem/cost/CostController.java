@@ -1,10 +1,8 @@
 package com.tradesystem.cost;
 
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -22,6 +20,8 @@ public class CostController {
     }
 
 /*
+    Additional functionality for later, to add list of costs
+
     @PostMapping("/create")
     public List<CostDto> create(@RequestBody List<CostDto> costsDtoList) {
         final List<Cost> costs = costService.createCosts(costsDtoList);

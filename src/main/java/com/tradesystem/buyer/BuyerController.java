@@ -8,9 +8,6 @@ import com.tradesystem.order.OrderService;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDto;
 import com.tradesystem.price.PriceMapper;
-import com.tradesystem.product.Product;
-import com.tradesystem.product.ProductDto;
-import com.tradesystem.product.ProductMapper;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 

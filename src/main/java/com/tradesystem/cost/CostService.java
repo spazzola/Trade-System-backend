@@ -3,7 +3,6 @@ package com.tradesystem.cost;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,6 +15,8 @@ public class CostService {
         this.costDao = costDao;
     }
 /*
+    Additional functionality for later, to add list of costs
+
     @Transactional
     public List<Cost> createCosts(List<CostDto> costsDtoList) {
         List<Cost> costsList = new ArrayList<>();
@@ -64,9 +65,7 @@ public class CostService {
         if (cost.getDate() == null) {
             return false;
         }
-        if (cost.getValue().doubleValue() <= 0) {
-            return false;
-        }
-        return true;
+
+        return !(cost.getValue().doubleValue() <= 0);
     }
 }
