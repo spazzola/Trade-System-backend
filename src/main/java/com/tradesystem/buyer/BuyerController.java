@@ -8,10 +8,13 @@ import com.tradesystem.order.OrderService;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDto;
 import com.tradesystem.price.PriceMapper;
+import com.tradesystem.user.RoleSecurity;
 import com.tradesystem.user.UserController;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -28,13 +31,15 @@ public class BuyerController {
     private OrderMapper orderMapper;
     private InvoiceService invoiceService;
     private InvoiceMapper invoiceMapper;
+    private RoleSecurity roleSecurity;
 
     private Logger logger = LogManager.getLogger(BuyerController.class);
 
 
     public BuyerController(BuyerService buyerService, BuyerMapper buyerMapper,
                            PriceMapper priceMapper, OrderService orderService,
-                           OrderMapper orderMapper, InvoiceService invoiceService, InvoiceMapper invoiceMapper) {
+                           OrderMapper orderMapper, InvoiceService invoiceService,
+                           InvoiceMapper invoiceMapper, RoleSecurity roleSecurity) {
         this.buyerService = buyerService;
         this.buyerMapper = buyerMapper;
         this.priceMapper = priceMapper;
@@ -42,11 +47,15 @@ public class BuyerController {
         this.orderMapper = orderMapper;
         this.invoiceService = invoiceService;
         this.invoiceMapper = invoiceMapper;
+        this.roleSecurity = roleSecurity;
     }
 
     @PostMapping("/create")
     public BuyerDto createBuyer(@RequestBody BuyerDto buyerDto) {
         logger.info("Dodawanie kupca: " + buyerDto);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
 
         final Buyer buyer = buyerService.createBuyer(buyerDto);
 
@@ -98,6 +107,9 @@ public class BuyerController {
                                     @RequestParam("newBuyerName") String newBuyerName) {
 
         logger.info("Aktualizacja nazwy kupca z: " + oldBuyerName + " na: " + newBuyerName);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
 
         Buyer buyer = buyerService.updateBuyerName(oldBuyerName, newBuyerName);
         return buyerMapper.toDto(buyer);

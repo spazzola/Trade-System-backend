@@ -51,9 +51,12 @@ public class InvoiceController {
 
     @PutMapping("/payForInvoice")
     public void payForInvoice(@RequestParam(value = "id") String id) {
-        Long invoiceId = Long.valueOf(id);
-
         logger.info("Płacenie za fakturę o id: " + id);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
+
+        Long invoiceId = Long.valueOf(id);
 
         invoiceService.payForInvoice(invoiceId);
     }
@@ -85,12 +88,16 @@ public class InvoiceController {
     @PostMapping("/transfer")
     public void transferInvoicesToNextMonth(@RequestParam(value = "localDate", required = false)
                                                             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String localDate) {
+
+        logger.info("Przenoszenie faktury na następny miesiąc. Otrzymana data w requescie: " + localDate);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
+
         int year = Integer.valueOf(localDate.substring(0, 4));
         int month = Integer.valueOf(localDate.substring(5, 7));
 
         LocalDate currentDate = LocalDate.of(year, month, 15);
-
-        logger.info("Przenoszenie faktury na następny miesiąc. Otrzymana data w requescie: " + localDate);
 
         invoiceService.transferInvoicesToNextMonth(currentDate);
     }
@@ -124,6 +131,9 @@ public class InvoiceController {
     @PutMapping("/updateInvoice")
     public InvoiceDto updateInvoice(@RequestBody UpdateInvoiceRequest updateInvoiceRequest) {
         logger.info("Aktualizacja faktury: " + updateInvoiceRequest);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
 
         Invoice invoice = updateInvoiceService.updateInvoice(updateInvoiceRequest);
 

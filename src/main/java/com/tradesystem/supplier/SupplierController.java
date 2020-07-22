@@ -11,9 +11,12 @@ import com.tradesystem.order.OrderService;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDto;
 import com.tradesystem.price.PriceMapper;
+import com.tradesystem.user.RoleSecurity;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,13 +34,15 @@ public class SupplierController {
     private OrderMapper orderMapper;
     private InvoiceService invoiceService;
     private InvoiceMapper invoiceMapper;
+    private RoleSecurity roleSecurity;
 
     private Logger logger = LogManager.getLogger(SupplierController.class);
 
 
     public SupplierController(SupplierService supplierService, SupplierMapper supplierMapper,
                               PriceMapper priceMapper, OrderService orderService,
-                              OrderMapper orderMapper, InvoiceService invoiceService, InvoiceMapper invoiceMapper) {
+                              OrderMapper orderMapper, InvoiceService invoiceService,
+                              InvoiceMapper invoiceMapper, RoleSecurity roleSecurity) {
         this.supplierService = supplierService;
         this.supplierMapper = supplierMapper;
         this.priceMapper = priceMapper;
@@ -45,12 +50,17 @@ public class SupplierController {
         this.orderMapper = orderMapper;
         this.invoiceService = invoiceService;
         this.invoiceMapper = invoiceMapper;
+        this.roleSecurity = roleSecurity;
     }
 
 
     @PostMapping("/create")
     public SupplierDto createBuyer(@RequestBody SupplierDto supplierDto) {
         logger.info("Dodawanie sprzedawcy: " + supplierDto);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
+
         final Supplier supplier = supplierService.createSupplier(supplierDto);
 
         return supplierMapper.toDto(supplier);
@@ -94,6 +104,10 @@ public class SupplierController {
                                           @RequestParam("newSupplierName") String newSupplierName) {
 
         logger.info("Aktualizacja nazwy sprzedawcy z: " + oldSupplierName + " na: " + newSupplierName);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
+
         Supplier supplier = supplierService.updateSupplierName(oldSupplierName, newSupplierName);
         return supplierMapper.toDto(supplier);
     }

@@ -1,9 +1,12 @@
 package com.tradesystem.order;
 
 import com.tradesystem.orderdetails.*;
+import com.tradesystem.user.RoleSecurity;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,24 +23,30 @@ public class OrderController {
     private OrderDetailsService orderDetailsService;
     private OrderDetailsMapper orderDetailsMapper;
     private UpdateOrderDetailsService updateOrderDetailsService;
+    private RoleSecurity roleSecurity;
 
     private Logger logger = LogManager.getLogger(OrderController.class);
 
 
     public OrderController(OrderService orderService, OrderMapper orderMapper,
                            OrderDao orderDao, OrderDetailsService orderDetailsService,
-                           OrderDetailsMapper orderDetailsMapper, UpdateOrderDetailsService updateOrderDetailsService) {
+                           OrderDetailsMapper orderDetailsMapper, RoleSecurity roleSecurity,
+                           UpdateOrderDetailsService updateOrderDetailsService) {
         this.orderService = orderService;
         this.orderMapper = orderMapper;
         this.orderDao = orderDao;
         this.orderDetailsService = orderDetailsService;
         this.orderDetailsMapper = orderDetailsMapper;
         this.updateOrderDetailsService = updateOrderDetailsService;
+        this.roleSecurity = roleSecurity;
     }
 
     @PostMapping("/create")
     public OrderDto createOrder(@RequestBody CreateOrderRequest createOrderRequest) {
         logger.info("Dodawanie zamówienia: " + createOrderRequest);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
 
         final Order order = orderService.createOrder(createOrderRequest);
 
@@ -70,6 +79,9 @@ public class OrderController {
     @PutMapping("/updateOrder")
     public OrderDetailsDto updateOrder(@RequestBody UpdateOrderDetailsRequest updateOrderDetailsRequest) {
         logger.info("Aktualizowanie zamówienia: " + updateOrderDetailsRequest);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
 
         OrderDetails orderDetails = updateOrderDetailsService.updateOrder(updateOrderDetailsRequest);
 
