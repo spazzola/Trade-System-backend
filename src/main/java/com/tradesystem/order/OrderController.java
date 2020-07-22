@@ -1,10 +1,14 @@
 package com.tradesystem.order;
 
 import com.tradesystem.orderdetails.*;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Log4j2
 @RestController
 @RequestMapping("/order")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -16,6 +20,9 @@ public class OrderController {
     private OrderDetailsService orderDetailsService;
     private OrderDetailsMapper orderDetailsMapper;
     private UpdateOrderDetailsService updateOrderDetailsService;
+
+    private Logger logger = LogManager.getLogger(OrderController.class);
+
 
     public OrderController(OrderService orderService, OrderMapper orderMapper,
                            OrderDao orderDao, OrderDetailsService orderDetailsService,
@@ -30,6 +37,8 @@ public class OrderController {
 
     @PostMapping("/create")
     public OrderDto createOrder(@RequestBody CreateOrderRequest createOrderRequest) {
+        logger.info("Dodawanie zamówienia: " + createOrderRequest);
+
         final Order order = orderService.createOrder(createOrderRequest);
 
         return orderMapper.toDto(order);
@@ -60,7 +69,10 @@ public class OrderController {
 
     @PutMapping("/updateOrder")
     public OrderDetailsDto updateOrder(@RequestBody UpdateOrderDetailsRequest updateOrderDetailsRequest) {
+        logger.info("Aktualizowanie zamówienia: " + updateOrderDetailsRequest);
+
         OrderDetails orderDetails = updateOrderDetailsService.updateOrder(updateOrderDetailsRequest);
+
         return orderDetailsMapper.toDto(orderDetails);
     }
 

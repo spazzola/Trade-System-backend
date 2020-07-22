@@ -11,10 +11,14 @@ import com.tradesystem.order.OrderService;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDto;
 import com.tradesystem.price.PriceMapper;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Log4j2
 @RestController
 @RequestMapping("/supplier")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -27,6 +31,9 @@ public class SupplierController {
     private OrderMapper orderMapper;
     private InvoiceService invoiceService;
     private InvoiceMapper invoiceMapper;
+
+    private Logger logger = LogManager.getLogger(SupplierController.class);
+
 
     public SupplierController(SupplierService supplierService, SupplierMapper supplierMapper,
                               PriceMapper priceMapper, OrderService orderService,
@@ -43,6 +50,7 @@ public class SupplierController {
 
     @PostMapping("/create")
     public SupplierDto createBuyer(@RequestBody SupplierDto supplierDto) {
+        logger.info("Dodawanie sprzedawcy: " + supplierDto);
         final Supplier supplier = supplierService.createSupplier(supplierDto);
 
         return supplierMapper.toDto(supplier);
@@ -85,6 +93,7 @@ public class SupplierController {
     public SupplierDto updateSupplierName(@RequestParam("oldSupplierName") String oldSupplierName,
                                           @RequestParam("newSupplierName") String newSupplierName) {
 
+        logger.info("Aktualizacja nazwy sprzedawcy z: " + oldSupplierName + " na: " + newSupplierName);
         Supplier supplier = supplierService.updateSupplierName(oldSupplierName, newSupplierName);
         return supplierMapper.toDto(supplier);
     }

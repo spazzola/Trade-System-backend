@@ -1,13 +1,19 @@
 package com.tradesystem.invoice;
 
 import com.tradesystem.user.RoleSecurity;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+@Log4j2
 @RestController
 @RequestMapping("/invoice")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -20,6 +26,10 @@ public class InvoiceController {
     private RoleSecurity roleSecurity;
     private UpdateInvoiceService updateInvoiceService;
 
+    private Logger logger = LogManager.getLogger(InvoiceController.class);
+
+
+
     public InvoiceController(InvoiceService invoiceService, InvoiceMapper invoiceMapper,
                              RoleSecurity roleSecurity, UpdateInvoiceService updateInvoiceService) {
         this.invoiceService = invoiceService;
@@ -30,7 +40,11 @@ public class InvoiceController {
 
     @PostMapping("/create")
     public InvoiceDto create(@RequestBody InvoiceDto invoiceDto) {
-        //roleSecurity.checkUserRole(authentication);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
+
+        logger.info("Dodawanie faktury: " + invoiceDto);
+
         final Invoice invoice = invoiceService.createInvoice(invoiceDto);
         return invoiceMapper.toDto(invoice);
     }
@@ -38,6 +52,8 @@ public class InvoiceController {
     @PutMapping("/payForInvoice")
     public void payForInvoice(@RequestParam(value = "id") String id) {
         Long invoiceId = Long.valueOf(id);
+
+        logger.info("Płacenie za fakturę o id: " + id);
 
         invoiceService.payForInvoice(invoiceId);
     }
@@ -73,6 +89,9 @@ public class InvoiceController {
         int month = Integer.valueOf(localDate.substring(5, 7));
 
         LocalDate currentDate = LocalDate.of(year, month, 15);
+
+        logger.info("Przenoszenie faktury na następny miesiąc. Otrzymana data w requescie: " + localDate);
+
         invoiceService.transferInvoicesToNextMonth(currentDate);
     }
 
@@ -104,7 +123,10 @@ public class InvoiceController {
 
     @PutMapping("/updateInvoice")
     public InvoiceDto updateInvoice(@RequestBody UpdateInvoiceRequest updateInvoiceRequest) {
+        logger.info("Aktualizacja faktury: " + updateInvoiceRequest);
+
         Invoice invoice = updateInvoiceService.updateInvoice(updateInvoiceRequest);
+
         return invoiceMapper.toDto(invoice);
     }
 }

@@ -8,9 +8,14 @@ import com.tradesystem.order.OrderService;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDto;
 import com.tradesystem.price.PriceMapper;
+import com.tradesystem.user.UserController;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
+@Log4j2
 @RestController
 @RequestMapping("/buyer")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -23,6 +28,9 @@ public class BuyerController {
     private OrderMapper orderMapper;
     private InvoiceService invoiceService;
     private InvoiceMapper invoiceMapper;
+
+    private Logger logger = LogManager.getLogger(BuyerController.class);
+
 
     public BuyerController(BuyerService buyerService, BuyerMapper buyerMapper,
                            PriceMapper priceMapper, OrderService orderService,
@@ -38,6 +46,8 @@ public class BuyerController {
 
     @PostMapping("/create")
     public BuyerDto createBuyer(@RequestBody BuyerDto buyerDto) {
+        logger.info("Dodawanie kupca: " + buyerDto);
+
         final Buyer buyer = buyerService.createBuyer(buyerDto);
 
         return buyerMapper.toDto(buyer);
@@ -86,6 +96,8 @@ public class BuyerController {
     @PutMapping("/updateBuyerName")
     public BuyerDto updateBuyerName(@RequestParam("oldBuyerName") String oldBuyerName,
                                     @RequestParam("newBuyerName") String newBuyerName) {
+
+        logger.info("Aktualizacja nazwy kupca z: " + oldBuyerName + " na: " + newBuyerName);
 
         Buyer buyer = buyerService.updateBuyerName(oldBuyerName, newBuyerName);
         return buyerMapper.toDto(buyer);

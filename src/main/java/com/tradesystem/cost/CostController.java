@@ -1,10 +1,15 @@
 package com.tradesystem.cost;
 
+import com.tradesystem.user.UserController;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Log4j2
 @RestController
 @RequestMapping("/cost")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -12,6 +17,8 @@ public class CostController {
 
     private CostMapper costMapper;
     private CostService costService;
+
+    private Logger logger = LogManager.getLogger(CostController.class);
 
 
     public CostController(CostMapper costMapper, CostService costService) {
@@ -32,6 +39,8 @@ public class CostController {
 
     @PostMapping("/create")
     public CostDto create(@RequestBody CostDto costDto) {
+        logger.info("Dodanie kosztu: " + costDto);
+
         final Cost cost = costService.createCost(costDto);
 
         return costMapper.toDto(cost);
@@ -50,6 +59,8 @@ public class CostController {
 
     @DeleteMapping("/deleteCost")
     public void delete(@RequestParam(value = "name") String name) {
+        logger.info("Usuwanie kosztu: " + name);
+
         costService.deleteCost(name);
 
     }
