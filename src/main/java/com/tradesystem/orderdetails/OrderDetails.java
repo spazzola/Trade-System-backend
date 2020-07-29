@@ -35,10 +35,8 @@ public class OrderDetails {
     @Transient
     private BigDecimal typedPrice;
 
-    @Transient
     private String invoiceNumber;
 
-    @Transient
     private boolean createBuyerInvoice;
 
     @ManyToOne(cascade=CascadeType.PERSIST)

@@ -52,7 +52,6 @@ public class OrderDetailsService {
     public void calculateOrderDetail(OrderDetails orderDetails) {
         BigDecimal buyerSum = calculateBuyerOrder(orderDetails);
         BigDecimal supplierSum = calculateSupplierOrder(orderDetails);
-
         orderDetails.setBuyerSum(buyerSum);
         orderDetails.setSupplierSum(supplierSum);
         orderDetailsDao.save(orderDetails);
@@ -68,11 +67,12 @@ public class OrderDetailsService {
     }
 
     @Transactional
-    public OrderDetails getOrderByTransportNumber(String transportNumber) {
-        return orderDetailsDao.findByTransportNumber(transportNumber);
+    public OrderDetails getOrderById(Long orderId) {
+        return orderDetailsDao.findById(orderId)
+                .orElseThrow(RuntimeException::new);
     }
 
-    private BigDecimal calculateBuyerOrder(OrderDetails orderDetails) {
+    public BigDecimal calculateBuyerOrder(OrderDetails orderDetails) {
         Long buyerId = orderDetails.getOrder().getBuyer().getId();
         Long productId = orderDetails.getProduct().getId();
 
@@ -120,7 +120,7 @@ public class OrderDetailsService {
         payForSupplierOrder(orderDetails, amount, invoices);
     }
 
-    private void payForBuyerOrder2(OrderDetails orderDetails, BigDecimal amount) {
+    public void payForBuyerOrder2(OrderDetails orderDetails, BigDecimal amount) {
         Long buyerId = orderDetails.getOrder().getBuyer().getId();
         List<Invoice> invoices = invoiceDao.getBuyerNotUsedInvoices(buyerId);
 
@@ -364,7 +364,7 @@ public class OrderDetailsService {
         paymentDao.save(payment);
     }
 
-    private void createBuyerInvoice(OrderDetails orderDetails, BigDecimal buyerSum) {
+    public void createBuyerInvoice(OrderDetails orderDetails, BigDecimal buyerSum) {
         Invoice invoice = Invoice.builder()
                 .buyer(orderDetails.getOrder().getBuyer())
                 .date(orderDetails.getOrder().getDate())
@@ -372,12 +372,14 @@ public class OrderDetailsService {
                 .value(buyerSum)
                 .isPaid(false)
                 .isUsed(false)
+                .isCreatedToOrder(true)
                 .invoiceNumber(orderDetails.getInvoiceNumber())
                 .build();
         invoiceDao.save(invoice);
+        createBuyerPayment(orderDetails, invoice);
     }
 
-    private void addSystemComment(OrderDetails orderDetails) {
+    public void addSystemComment(OrderDetails orderDetails) {
         OrderComment orderComment = new OrderComment();
         orderComment.setSystemComment("Wygenerowano do zamówienia fakturę o nr " + orderDetails.getInvoiceNumber());
         orderDetails.setOrderComment(orderComment);

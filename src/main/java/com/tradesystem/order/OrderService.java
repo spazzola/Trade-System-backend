@@ -49,6 +49,12 @@ public class OrderService {
     }
 
     @Transactional
+    public Order getOrderById(Long id) {
+        return orderDao.findById(id)
+                .orElseThrow(RuntimeException::new);
+    }
+
+    @Transactional
     public Order createOrder(CreateOrderRequest createOrderRequest) {
         Buyer buyer = buyerDao.findById(createOrderRequest.getBuyerId())
                 .orElseThrow(RuntimeException::new);
@@ -116,7 +122,8 @@ public class OrderService {
         return orderDao.getBuyerMonthOrders(buyerId, month, year);
     }
 
-    private Order calculateOrder(Order order) {
+    @Transactional
+    public Order calculateOrder(Order order) {
         List<OrderDetails> orderDetails = order.getOrderDetails();
         for (OrderDetails orderDetail : orderDetails) {
             orderDetailsService.calculateOrderDetail(orderDetail);

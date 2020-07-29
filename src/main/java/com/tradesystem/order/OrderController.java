@@ -70,22 +70,24 @@ public class OrderController {
         return orderMapper.toDto(ordersDto);
     }
 
-    @GetMapping("/getOrderByTransportNumber")
-    public OrderDetailsDto getOrderByTransportNumber(@RequestParam(value = "transportNumber") String transportNumber) {
-        OrderDetails orderDetails = orderDetailsService.getOrderByTransportNumber(transportNumber);
-        return orderDetailsMapper.toDto(orderDetails);
+    @GetMapping("/getOrderById")
+    public OrderDto getOrderById(@RequestParam(value = "orderId") String orderId) {
+        Long id = Long.valueOf(orderId);
+        Order order = orderService.getOrderById(id);
+        return orderMapper.toDto(order);
     }
 
     @PutMapping("/updateOrder")
-    public OrderDetailsDto updateOrder(@RequestBody UpdateOrderDetailsRequest updateOrderDetailsRequest) {
+    public void updateOrder(@RequestBody UpdateOrderDetailsRequest updateOrderDetailsRequest) {
         logger.info("Aktualizowanie zamówienia: " + updateOrderDetailsRequest);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         roleSecurity.checkUserRole(authentication);
 
-        OrderDetails orderDetails = updateOrderDetailsService.updateOrder(updateOrderDetailsRequest);
+        //OrderDetails orderDetails = updateOrderDetailsService.updateOrder(updateOrderDetailsRequest);
+        updateOrderDetailsService.updateOrder(updateOrderDetailsRequest);
 
-        return orderDetailsMapper.toDto(orderDetails);
+        //return orderDetailsMapper.toDto(orderDetails);
     }
 
 }
