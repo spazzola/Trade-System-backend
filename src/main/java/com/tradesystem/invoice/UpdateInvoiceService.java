@@ -17,8 +17,6 @@ public class UpdateInvoiceService {
     public Invoice updateInvoice(UpdateInvoiceRequest updateInvoiceRequest) {
         Invoice invoice = invoiceDao.getByInvoiceNumber(updateInvoiceRequest.getOldInvoiceNumber());
 
-        invoice.setValue(updateInvoiceRequest.getNewValue());
-        invoice.setAmountToUse(updateInvoiceRequest.getNewValue());
         invoice.setDate(updateInvoiceRequest.getNewDate());
         invoice.setInvoiceNumber(updateInvoiceRequest.getNewInvoiceNumber());
 

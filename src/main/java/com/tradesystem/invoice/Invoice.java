@@ -32,6 +32,7 @@ public class Invoice {
     private boolean isUsed;
     private boolean isPaid;
     private boolean toEqualizeNegativeInvoice;
+    private boolean isCreatedToOrder;
     private String comment;
 
     @ManyToOne
