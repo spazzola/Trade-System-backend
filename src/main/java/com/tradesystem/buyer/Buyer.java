@@ -43,4 +43,18 @@ public class Buyer {
 
     @OneToMany(mappedBy = "buyer")
     private List<PriceHistory> priceHistories;
+
+    @Override
+    public String toString() {
+        return "Buyer{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", currentBalance=" + currentBalance +
+                ", averageProfitPerM3=" + averageProfitPerM3 +
+                ", prices=" + prices +
+                ", invoices=" + invoices +
+                ", orders=" + orders +
+                ", priceHistories=" + priceHistories +
+                '}';
+    }
 }
