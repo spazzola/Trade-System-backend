@@ -170,6 +170,9 @@ public class UpdateOrderDetailsService {
             } else {
                 invoiceDao.save(invoice);
             }
+            if (invoice.isCreatedToOrder()) {
+                invoiceDao.delete(invoice);
+            }
         }
     }
 
