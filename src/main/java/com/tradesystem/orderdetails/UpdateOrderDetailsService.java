@@ -153,7 +153,7 @@ public class UpdateOrderDetailsService {
         }
 
         if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) > 0) {
-            invoice.setAmountToUse(oldInvoiceValue.subtract(orderDetails.getBuyerSum()));
+            invoice.setAmountToUse(oldInvoiceValue.add(orderDetails.getBuyerSum()));
         }
     }
 
@@ -182,7 +182,7 @@ public class UpdateOrderDetailsService {
         }
 
         if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) > 0) {
-            invoice.setAmountToUse(oldInvoiceValue.subtract(orderDetails.getSupplierSum()));
+            invoice.setAmountToUse(oldInvoiceValue.add(orderDetails.getSupplierSum()));
         }
     }
 
