@@ -140,39 +140,49 @@ public class UpdateOrderDetailsService {
         Invoice invoice = payment.getBuyerInvoice();
         BigDecimal oldInvoiceValue = invoice.getAmountToUse();
 
-        if (oldInvoiceValue.compareTo(BigDecimal.ZERO) < 0) {
-            BigDecimal newInvoiceValue = oldInvoiceValue.add(orderDetails.getBuyerSum());
-            invoice.setAmountToUse(newInvoiceValue);
-            invoice.setValue(newInvoiceValue);
+        if (invoice.isCreatedToOrder()) {
+            invoiceDao.delete(invoice);
+        }
 
-            if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) == 0) {
+        if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+            if (checkIfValuesAreEqual(invoice.getAmountToUse(), orderDetails.getBuyerSum())) {
                 invoiceDao.delete(invoice);
             } else {
-                invoiceDao.save(invoice);
+                invoice.setAmountToUse(oldInvoiceValue.add(orderDetails.getBuyerSum()));
             }
-        } if (invoice.isCreatedToOrder()) {
-            invoiceDao.delete(invoice);
+        }
+
+        if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) > 0) {
+            invoice.setAmountToUse(oldInvoiceValue.subtract(orderDetails.getBuyerSum()));
         }
     }
 
+    private boolean checkIfValuesAreEqual(BigDecimal negativeInvoiceValue, BigDecimal orderDetailsValue) {
+        BigDecimal convertedInvoiceValue = negativeInvoiceValue.multiply(BigDecimal.valueOf(-1));
+
+        return convertedInvoiceValue.compareTo(orderDetailsValue) == 0;
+    }
+
     private void processDeletingSupplierInvoice(Payment payment, OrderDetails orderDetails) {
-        Invoice invoice = invoiceDao.findById(payment.getSupplierInvoice().getId())
-                .orElseThrow(RuntimeException::new);
+        //Invoice invoice = invoiceDao.findById(payment.getSupplierInvoice().getId())
+                //.orElseThrow(RuntimeException::new);
+        Invoice invoice = payment.getSupplierInvoice();
         BigDecimal oldInvoiceValue = invoice.getAmountToUse();
 
-        if (oldInvoiceValue.compareTo(BigDecimal.ZERO) < 0) {
-            BigDecimal newInvoiceValue = oldInvoiceValue.add(orderDetails.getSupplierSum());
-            invoice.setAmountToUse(newInvoiceValue);
-            invoice.setValue(newInvoiceValue);
+        if (invoice.isCreatedToOrder()) {
+            invoiceDao.delete(invoice);
+        }
 
-            if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) == 0) {
+        if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+            if (checkIfValuesAreEqual(invoice.getAmountToUse(), orderDetails.getSupplierSum())) {
                 invoiceDao.delete(invoice);
             } else {
-                invoiceDao.save(invoice);
+                invoice.setAmountToUse(oldInvoiceValue.add(orderDetails.getSupplierSum()));
             }
-            if (invoice.isCreatedToOrder()) {
-                invoiceDao.delete(invoice);
-            }
+        }
+
+        if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) > 0) {
+            invoice.setAmountToUse(oldInvoiceValue.subtract(orderDetails.getSupplierSum()));
         }
     }
 
