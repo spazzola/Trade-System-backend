@@ -29,7 +29,7 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
 
 
     @Query(value = "SELECT * FROM invoices " +
-            "WHERE buyer_fk IS NOT NULL AND is_paid = false AND amount_to_use > 0",
+            "WHERE buyer_fk IS NOT NULL AND is_paid = false AND amount_to_use > 0 AND to_equalize_negative_invoice != true",
             nativeQuery = true)
     Optional<List <Invoice>> getBuyersNotPaidInvoices();
 
@@ -72,8 +72,12 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
     @Query(value = "SELECT * FROM invoices " +
             "WHERE buyer_fk IS NOT null AND is_used = false AND amount_to_use < 0",
             nativeQuery = true)
-    Optional<List <Invoice>> getBuyersPaidNotUsedNegativeInvoices();
+    Optional<List <Invoice>> getBuyersNegativeInvoices();
 
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE buyer_fk IS NOT null AND is_paid = false AND is_created_to_order = true AND to_equalize_negative_invoice = false",
+            nativeQuery = true)
+    Optional<List <Invoice>> getBuyersNotPaidInvoicesCreatedToOrder();
 
     @Query(value = "SELECT * FROM invoices " +
             "WHERE supplier_fk IS NOT null AND is_paid = true AND is_used = false AND amount_to_use > 0",

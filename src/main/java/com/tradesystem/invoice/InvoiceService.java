@@ -138,19 +138,12 @@ public class InvoiceService {
 
     @Transactional
     public BigDecimal getBuyersNegativeBalance() {
-        Optional<List <Invoice>> optionalInvoices = invoiceDao.getBuyersPaidNotUsedNegativeInvoices();
         BigDecimal result = BigDecimal.valueOf(0);
 
-        if (optionalInvoices.isPresent()) {
-            for (Invoice invoice : optionalInvoices.get()) {
-                result = result.add(invoice.getAmountToUse());
-            }
-        }
-
-        Optional<List <Invoice>> notPaidInvoices = invoiceDao.getBuyersNotPaidInvoices();
-        if (notPaidInvoices.isPresent()) {
-            for (Invoice invoice : notPaidInvoices.get()) {
-                result = result.subtract(invoice.getAmountToUse());
+        List<Buyer> buyers = buyerDao.findAll();
+        for (Buyer buyer : buyers) {
+            if (buyer.getCurrentBalance().compareTo(BigDecimal.ZERO) < 0) {
+                result = result.add(buyer.getCurrentBalance());
             }
         }
         return result;
