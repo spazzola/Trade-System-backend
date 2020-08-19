@@ -21,16 +21,18 @@ public class PriceController {
 
     private PriceService priceService;
     private PriceMapper priceMapper;
+    private PriceDao priceDao;
     private PriceHistoryService priceHistoryService;
     private RoleSecurity roleSecurity;
 
     private Logger logger = LogManager.getLogger(PriceController.class);
 
 
-    public PriceController(PriceService priceService, PriceMapper priceMapper,
+    public PriceController(PriceService priceService, PriceMapper priceMapper, PriceDao priceDao,
                            PriceHistoryService priceHistoryService, RoleSecurity roleSecurity) {
         this.priceService = priceService;
         this.priceMapper = priceMapper;
+        this.priceDao = priceDao;
         this.priceHistoryService = priceHistoryService;
         this.roleSecurity = roleSecurity;
     }
@@ -92,5 +94,12 @@ public class PriceController {
         List<Price> pricesHistory =  priceHistoryService.getBuyerPriceHistory(Long.valueOf(buyerId));
 
         return priceMapper.toDto(pricesHistory);
+    }
+
+    @GetMapping("/getSupplierPrice")
+    public BigDecimal getSupplierPrice(@RequestParam(value = "supplierId") String supplierId,
+                                    @RequestParam(value = "productId") String productId) {
+
+        return priceDao.getSupplierPrice(Long.valueOf(supplierId), Long.valueOf(productId));
     }
 }

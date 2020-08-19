@@ -28,7 +28,6 @@ public class OrderService {
     private OrderDao orderDao;
     private OrderDetailsService orderDetailsService;
 
-
     public OrderService(BuyerDao buyerDao, SupplierDao supplierDao, ProductDao productDao,
                         OrderDetailsService orderDetailsService, OrderDao orderDao) {
         this.buyerDao = buyerDao;
@@ -82,7 +81,8 @@ public class OrderService {
                             .orElseThrow(NoSuchElementException::new);
 
                     orderDetails.setProduct(product);
-                    orderDetails.setTypedPrice(orderDetailsDto.getTypedPrice());
+                    orderDetails.setTypedSoldPrice(orderDetailsDto.getTypedSoldPrice());
+                    orderDetails.setTypedBoughtPrice(orderDetailsDto.getTypedBoughtPrice());
                     orderDetails.setTransportNumber(orderDetailsDto.getTransportNumber());
                     orderDetails.setQuantity(orderDetailsDto.getQuantity());
                     orderDetails.setOrder(order);
@@ -129,6 +129,14 @@ public class OrderService {
             orderDetailsService.calculateOrderDetail(orderDetail);
         }
         return order;
+    }
+
+    @Transactional
+    public void deleteOrder(Long id) {
+        Order order = orderDao.findById(id)
+                .orElseThrow(RuntimeException::new);
+
+        //updateOrderDetailsService.processDeletingOrder(order.getOrderDetails().get(0));
     }
 
     private boolean validateOrder(CreateOrderRequest order) {

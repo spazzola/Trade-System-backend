@@ -80,8 +80,8 @@ public class OrderDetailsService {
 
         BigDecimal price;
 
-        if (orderDetails.getTypedPrice().doubleValue() > 0) {
-            price = orderDetails.getTypedPrice();
+        if (orderDetails.getTypedSoldPrice().doubleValue() > 0) {
+            price = orderDetails.getTypedSoldPrice();
         } else {
             price = priceDao.getBuyerPrice(buyerId, productId);
         }
@@ -104,7 +104,14 @@ public class OrderDetailsService {
 
         BigDecimal quantity = orderDetails.getQuantity();
 
-        BigDecimal price = priceDao.getSupplierPrice(supplierId, productId);
+        BigDecimal price;
+
+        if (orderDetails.getTypedBoughtPrice().doubleValue() > 0) {
+            price = orderDetails.getTypedBoughtPrice();
+        } else {
+            price = priceDao.getSupplierPrice(supplierId, productId);
+        }
+
         if (price != null) {
             return quantity.multiply(price).setScale(2, RoundingMode.HALF_UP);
         } else {

@@ -18,7 +18,8 @@ public class OrderDetailsDto {
     private BigDecimal quantity;
     private BigDecimal buyerSum;
     private BigDecimal supplierSum;
-    private BigDecimal typedPrice;
+    private BigDecimal typedSoldPrice;
+    private BigDecimal typedBoughtPrice;
     private String transportNumber;
     private String invoiceNumber;
     private ProductDto product;

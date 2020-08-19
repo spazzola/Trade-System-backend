@@ -3,10 +3,7 @@ package com.tradesystem.orderdetails;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
-import com.tradesystem.order.CreateOrderRequest;
-import com.tradesystem.order.OrderDao;
-import com.tradesystem.order.OrderService;
-import com.tradesystem.order.UpdateOrderDetailsRequest;
+import com.tradesystem.order.*;
 import com.tradesystem.ordercomment.OrderCommentService;
 import com.tradesystem.payment.Payment;
 import com.tradesystem.payment.PaymentDao;
@@ -50,7 +47,7 @@ public class UpdateOrderDetailsService {
     @Transactional
     public void updateOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest) {
         OrderDetails orderDetails = orderDetailsService.getOrderById(updateOrderDetailsRequest.getId());
-        orderDetails.setTypedPrice(BigDecimal.ZERO);
+        orderDetails.setTypedSoldPrice(BigDecimal.ZERO);
         Product product = orderDetails.getProduct();
         Buyer oldBuyer = orderDetails.getOrder().getBuyer();
         Supplier oldSupplier = orderDetails.getOrder().getSupplier();
@@ -81,6 +78,14 @@ public class UpdateOrderDetailsService {
         }
     }
 
+    @Transactional
+    public void deleteOrder(Long id) {
+        Order order = orderDao.findById(id)
+                .orElseThrow(RuntimeException::new);
+
+        processDeletingOrder(order.getOrderDetails().get(0));
+    }
+
     private boolean checkIfMerchantIsChanged(UpdateOrderDetailsRequest updateOrderDetailsRequest,
                                              Buyer oldBuyer, Supplier oldSupplier) {
 
@@ -91,7 +96,7 @@ public class UpdateOrderDetailsService {
     }
 
     private void processNewOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest, OrderDetails orderDetails) {
-        deletePreviousRelationships(orderDetails);
+        processDeletingOrder(orderDetails);
         createNewOrder(updateOrderDetailsRequest, orderDetails);
     }
 
@@ -109,7 +114,7 @@ public class UpdateOrderDetailsService {
         orderDetailsDto.setProduct(productDto);
         orderDetailsDto.setQuantity(updateOrderDetailsRequest.getNewQuantity());
         orderDetailsDto.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
-        orderDetailsDto.setTypedPrice(BigDecimal.ZERO);
+        orderDetailsDto.setTypedSoldPrice(BigDecimal.ZERO);
         orderDetailsDto.setCreateBuyerInvoice(orderDetails.isCreateBuyerInvoice());
         orderDetailsDto.setInvoiceNumber(orderDetails.getInvoiceNumber());
 
@@ -122,7 +127,7 @@ public class UpdateOrderDetailsService {
         orderService.createOrder(createOrderRequest);
     }
 
-    private void deletePreviousRelationships(OrderDetails orderDetails) {
+    private void processDeletingOrder(OrderDetails orderDetails) {
         List<Payment> payments = paymentDao.findByOrderDetailsId(orderDetails.getId());
         for (Payment payment : payments) {
             if (payment.getBuyerInvoice() != null) {
@@ -144,7 +149,7 @@ public class UpdateOrderDetailsService {
             invoiceDao.delete(invoice);
         }
 
-        if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+        else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
             if (checkIfValuesAreEqual(invoice.getAmountToUse(), orderDetails.getBuyerSum())) {
                 invoiceDao.delete(invoice);
             } else {
@@ -152,8 +157,12 @@ public class UpdateOrderDetailsService {
             }
         }
 
-        if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) > 0) {
+        else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) > 0) {
             invoice.setAmountToUse(oldInvoiceValue.add(orderDetails.getBuyerSum()));
+        }
+        else {
+            invoice.setAmountToUse(invoice.getValue());
+            invoice.setUsed(false);
         }
     }
 
@@ -173,7 +182,7 @@ public class UpdateOrderDetailsService {
             invoiceDao.delete(invoice);
         }
 
-        if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+        else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
             if (checkIfValuesAreEqual(invoice.getAmountToUse(), orderDetails.getSupplierSum())) {
                 invoiceDao.delete(invoice);
             } else {
@@ -181,8 +190,12 @@ public class UpdateOrderDetailsService {
             }
         }
 
-        if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) > 0) {
+       else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) > 0) {
             invoice.setAmountToUse(oldInvoiceValue.add(orderDetails.getSupplierSum()));
+        }
+        else {
+            invoice.setAmountToUse(invoice.getValue());
+            invoice.setUsed(false);
         }
     }
 

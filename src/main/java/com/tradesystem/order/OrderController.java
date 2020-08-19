@@ -84,10 +84,17 @@ public class OrderController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         roleSecurity.checkUserRole(authentication);
 
-        //OrderDetails orderDetails = updateOrderDetailsService.updateOrder(updateOrderDetailsRequest);
         updateOrderDetailsService.updateOrder(updateOrderDetailsRequest);
+    }
 
-        //return orderDetailsMapper.toDto(orderDetails);
+    @DeleteMapping("/deleteOrder")
+    public void deleteOrder(@RequestParam(value = "id") Long id) {
+        logger.info("Usuwanie zamówienia: id=" + id);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        roleSecurity.checkUserRole(authentication);
+
+       updateOrderDetailsService.deleteOrder(id);
     }
 
 }

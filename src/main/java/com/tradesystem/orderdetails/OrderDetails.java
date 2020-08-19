@@ -33,7 +33,10 @@ public class OrderDetails {
     private String transportNumber;
 
     @Transient
-    private BigDecimal typedPrice;
+    private BigDecimal typedSoldPrice;
+
+    @Transient
+    private BigDecimal typedBoughtPrice;
 
     private String invoiceNumber;
 
