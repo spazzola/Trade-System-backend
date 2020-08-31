@@ -48,6 +48,7 @@ public class UpdateOrderDetailsService {
     public void updateOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest) {
         OrderDetails orderDetails = orderDetailsService.getOrderById(updateOrderDetailsRequest.getId());
         orderDetails.setTypedSoldPrice(BigDecimal.ZERO);
+        orderDetails.setTypedBoughtPrice(BigDecimal.ZERO);
         Product product = orderDetails.getProduct();
         Buyer oldBuyer = orderDetails.getOrder().getBuyer();
         Supplier oldSupplier = orderDetails.getOrder().getSupplier();
@@ -115,6 +116,7 @@ public class UpdateOrderDetailsService {
         orderDetailsDto.setQuantity(updateOrderDetailsRequest.getNewQuantity());
         orderDetailsDto.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
         orderDetailsDto.setTypedSoldPrice(BigDecimal.ZERO);
+        orderDetailsDto.setTypedBoughtPrice(BigDecimal.ZERO);
         orderDetailsDto.setCreateBuyerInvoice(orderDetails.isCreateBuyerInvoice());
         orderDetailsDto.setInvoiceNumber(orderDetails.getInvoiceNumber());
 
