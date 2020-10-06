@@ -18,6 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,16 +37,18 @@ public class UserController {
     private AuthenticationManager authenticationManager;
     private MyUserDetailsService myUserDetailsService;
     private JwtUtil jwtUtil;
-
+    private final PasswordEncoder passwordEncoder;
     private Logger logger = LogManager.getLogger(UserController.class);
 
     public UserController(UserService userService, UserMapper userMapper,
-                          AuthenticationManager authenticationManager, MyUserDetailsService myUserDetailsService, JwtUtil jwtUtil) {
+                          AuthenticationManager authenticationManager,
+                          MyUserDetailsService myUserDetailsService, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.userMapper = userMapper;
         this.authenticationManager = authenticationManager;
         this.myUserDetailsService = myUserDetailsService;
         this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/getAll")
@@ -66,19 +70,28 @@ public class UserController {
 
         logger.info("Logowanie na konto: " + authenticationRequest.getLogin() + " , IP: " + ipAddress);
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authenticationRequest.getLogin(), authenticationRequest.getPassword())
-            );
-        } catch (BadCredentialsException e) {
-            logger.error("Blad logowania, nieprawidlowe haslo");
-            throw new RuntimeException("Nieprawidłowe hasło!");
-        }
+//        try {
+//            authenticationManager.authenticate(
+//                    new UsernamePasswordAuthenticationToken(authenticationRequest.getLogin(), authenticationRequest.getPassword())
+//            );
+//        } catch (BadCredentialsException e) {
+//            logger.error("Blad logowania, nieprawidlowe haslo");
+//            throw new RuntimeException("Nieprawidłowe hasło!");
+//        }
 
         UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getLogin());
-        final String jwt = jwtUtil.generateToken(userDetails);
+        boolean isMatch = passwordEncoder.matches(authenticationRequest.getPassword(), userDetails.getPassword());
+        String jwt;
 
-        logger.info("Zalogowano");
+        if (!isMatch) {
+            logger.error("Blad logowania, nieprawidlowe haslo");
+            throw new RuntimeException("Nieprawidłowe hasło!");
+        } else {
+
+            jwt = jwtUtil.generateToken(userDetails);
+
+            logger.info("Zalogowano");
+        }
 
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
