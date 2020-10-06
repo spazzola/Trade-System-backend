@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class SupplierService {
@@ -65,7 +64,7 @@ public class SupplierService {
         return resultSuppliers;
     }
 
-    private void calculateMonthTakenQuantity(List<Supplier> suppliers) {
+    private void calculateCurrentlyTakenQuantity(List<Supplier> suppliers) {
         int month = LocalDate.now().getMonthValue();
         int year = LocalDate.now().getYear();
 
@@ -77,9 +76,26 @@ public class SupplierService {
                 sumQuantity = sumQuantity.add(order.getOrderDetails().get(0).getQuantity());
             }
 
-            supplier.setMonthTakenQuantity(sumQuantity);
+            supplier.setCurrentlyTakenQuantity(sumQuantity);
             supplierDao.save(supplier);
         }
+    }
+
+    @Transactional
+    public List<Supplier> getSuppliersMonthTakenQuantity(int month, int year) {
+        List<Supplier> suppliers = supplierDao.findAll();
+
+        for (Supplier supplier : suppliers) {
+            List<Order> orders = orderDao.getSupplierMonthOrders(supplier.getId(), month, year);
+            BigDecimal sumQuantity = BigDecimal.valueOf(0);
+
+            for (Order order : orders) {
+                sumQuantity = sumQuantity.add(order.getOrderDetails().get(0).getQuantity());
+            }
+
+            supplier.setMonthTakenQuantity(sumQuantity);
+        }
+        return suppliers;
     }
 
     @Transactional

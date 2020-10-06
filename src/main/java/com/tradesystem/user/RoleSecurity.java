@@ -1,6 +1,5 @@
 package com.tradesystem.user;
 
-import com.tradesystem.report.ReportController;
 import com.tradesystem.userdetails.MyUserDetails;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
@@ -10,7 +9,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.naming.NoPermissionException;
 import java.util.NoSuchElementException;
 
 @Log4j2

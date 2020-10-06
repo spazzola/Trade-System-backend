@@ -1,11 +1,8 @@
 package com.tradesystem.order;
 
 import java.util.List;
-import com.tradesystem.buyer.Buyer;
 import com.tradesystem.buyer.BuyerDto;
-import com.tradesystem.orderdetails.OrderDetails;
 import com.tradesystem.orderdetails.OrderDetailsDto;
-import com.tradesystem.supplier.Supplier;
 import com.tradesystem.supplier.SupplierDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

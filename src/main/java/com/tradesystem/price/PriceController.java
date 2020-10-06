@@ -1,6 +1,5 @@
 package com.tradesystem.price;
 
-import com.tradesystem.price.pricehistory.PriceHistory;
 import com.tradesystem.price.pricehistory.PriceHistoryService;
 import com.tradesystem.user.RoleSecurity;
 import lombok.extern.log4j.Log4j2;

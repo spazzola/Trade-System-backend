@@ -1,7 +1,6 @@
 package com.tradesystem.cost;
 
 import com.tradesystem.user.RoleSecurity;
-import com.tradesystem.user.UserController;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,4 +74,5 @@ public class CostController {
         costService.deleteCost(name);
 
     }
+
 }

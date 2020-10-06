@@ -1,9 +1,6 @@
 package com.tradesystem.jwt;
 
 import com.tradesystem.userdetails.MyUserDetailsService;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;

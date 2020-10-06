@@ -1,7 +1,6 @@
 package com.tradesystem.invoice;
 
 import com.tradesystem.buyer.Buyer;
-import com.tradesystem.orderdetails.OrderDetails;
 import com.tradesystem.payment.Payment;
 import com.tradesystem.supplier.Supplier;
 import lombok.*;
