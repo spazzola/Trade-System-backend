@@ -13,9 +13,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ReportDto {
 
-    private BigDecimal soldedValue;
+    private BigDecimal soldValue;
     private BigDecimal boughtValue;
-    private BigDecimal soldedQuantity;
+    private BigDecimal soldQuantity;
     private BigDecimal buyersNotUsedValue;
     private BigDecimal suppliersNotUsedValue;
     private BigDecimal averageSold;

@@ -20,11 +20,11 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reportId;
 
-    private BigDecimal soldedValue;
+    private BigDecimal soldValue;
 
     private BigDecimal boughtValue;
 
-    private BigDecimal soldedQuantity;
+    private BigDecimal soldQuantity;
 
     private BigDecimal buyersNotUsedValue;
 
@@ -47,8 +47,8 @@ public class Report {
     public String toString() {
         return "Report{" +
                 "\nreportId=" + reportId +
-                "\nsoldedValue=" + soldedValue +
-                "\nsoldedQuantity=" + soldedQuantity +
+                "\nsoldValue=" + soldValue +
+                "\nsoldQuantity=" + soldQuantity +
                 "\naverageSold=" + averageSold +
                 "\naveragePurchase=" + averagePurchase +
                 "\naverageEarningsPerM3=" + averageEarningsPerM3 +

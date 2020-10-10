@@ -10,11 +10,11 @@ public class ReportMapper {
 
     public ReportDto toDto(Report report) {
         return ReportDto.builder()
-                .soldedValue(report.getSoldedValue())
+                .soldValue(report.getSoldValue())
                 .boughtValue(report.getBoughtValue())
                 .buyersNotUsedValue(report.getBuyersNotUsedValue())
                 .suppliersNotUsedValue(report.getSuppliersNotUsedValue())
-                .soldedQuantity(report.getSoldedQuantity())
+                .soldQuantity(report.getSoldQuantity())
                 .averageSold(report.getAverageSold())
                 .averagePurchase(report.getAveragePurchase())
                 .averageEarningsPerM3(report.getAverageEarningsPerM3())
