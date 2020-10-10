@@ -31,6 +31,9 @@ public class Supplier {
 
     private BigDecimal currentBalance;
 
+    private BigDecimal currentlyTakenQuantity;
+
+    @Transient
     private BigDecimal monthTakenQuantity;
 
     @OneToMany(mappedBy = "supplier", fetch = FetchType.EAGER)

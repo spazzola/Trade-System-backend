@@ -13,6 +13,7 @@ public class SupplierMapper {
                 .id(supplier.getId())
                 .name(supplier.getName())
                 .currentBalance(supplier.getCurrentBalance())
+                .currentlyTakenQuantity(supplier.getCurrentlyTakenQuantity())
                 .monthTakenQuantity(supplier.getMonthTakenQuantity())
                 .build();
     }

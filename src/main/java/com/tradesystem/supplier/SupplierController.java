@@ -15,6 +15,7 @@ import com.tradesystem.user.RoleSecurity;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -133,5 +134,16 @@ public class SupplierController {
 
         List<Invoice> invoices = invoiceService.getSuppliersMonthInvoices(m, y);
         return invoiceMapper.toDto(invoices);
+    }
+
+    @GetMapping("/getSuppliersMonthTakenQuantity")
+    public List<SupplierDto> getSuppliersMonthTakenQuantity(@RequestParam("localDate")
+                                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String localDate) {
+        int year = Integer.valueOf(localDate.substring(0, 4));
+        int month = Integer.valueOf(localDate.substring(5, 7));
+
+        List<Supplier> suppliers = supplierService.getSuppliersMonthTakenQuantity(month, year);
+
+        return supplierMapper.toDto(suppliers);
     }
 }

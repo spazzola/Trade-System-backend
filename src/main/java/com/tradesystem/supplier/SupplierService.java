@@ -54,7 +54,7 @@ public class SupplierService {
         List<Supplier> suppliers = supplierDao.findAll();
         List<Supplier> resultSuppliers = new ArrayList<>();
 
-        calculateMonthTakenQuantity(suppliers);
+        calculateCurrentlyTakenQuantity(suppliers);
 
         for (Supplier supplier : suppliers) {
             supplier = setCurrentBalance(supplier);

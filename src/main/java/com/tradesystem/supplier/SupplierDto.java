@@ -16,6 +16,7 @@ public class SupplierDto {
     private Long id;
     private String name;
     private BigDecimal currentBalance;
+    private BigDecimal currentlyTakenQuantity;
     private BigDecimal monthTakenQuantity;
 
 }
