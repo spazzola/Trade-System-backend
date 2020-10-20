@@ -8,6 +8,8 @@ import com.tradesystem.ordercomment.OrderCommentService;
 import com.tradesystem.payment.Payment;
 import com.tradesystem.payment.PaymentDao;
 import com.tradesystem.price.PriceDao;
+import com.tradesystem.price.pricehistory.PriceHistory;
+import com.tradesystem.price.pricehistory.PriceHistoryDao;
 import com.tradesystem.product.Product;
 import com.tradesystem.product.ProductDto;
 import com.tradesystem.supplier.Supplier;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,10 +32,11 @@ public class UpdateOrderDetailsService {
     private OrderDao orderDao;
     private OrderDetailsDao orderDetailsDao;
     private OrderCommentService orderCommentService;
+    private PriceHistoryDao priceHistoryDao;
 
     public UpdateOrderDetailsService(OrderService orderService, PaymentDao paymentDao, OrderDetailsService orderDetailsService,
                                      InvoiceDao invoiceDao,  OrderCommentService orderCommentService,
-                                     PriceDao priceDao, OrderDetailsDao orderDetailsDao, OrderDao orderDao) {
+                                     PriceDao priceDao, OrderDetailsDao orderDetailsDao, OrderDao orderDao, PriceHistoryDao priceHistoryDao) {
         this.orderService = orderService;
         this.paymentDao = paymentDao;
         this.orderDetailsService = orderDetailsService;
@@ -41,6 +45,7 @@ public class UpdateOrderDetailsService {
         this.priceDao = priceDao;
         this.orderDao = orderDao;
         this.orderDetailsDao = orderDetailsDao;
+        this.priceHistoryDao = priceHistoryDao;
     }
 
 
@@ -57,18 +62,17 @@ public class UpdateOrderDetailsService {
             orderDetails.setTransportNumber(updateOrderDetailsRequest.getNewTransportNumber());
         }
 
-        if (updateOrderDetailsRequest.getNewQuantity() == null || updateOrderDetailsRequest.getNewQuantity().equals(BigDecimal.ZERO)) {
+        if (updateOrderDetailsRequest.getNewQuantity() == null) {
             updateOrderDetailsRequest.setNewQuantity(orderDetails.getQuantity());
         }
-
-        if (updateOrderDetailsRequest.getNewBuyerPrice() == null || updateOrderDetailsRequest.getNewBuyerPrice().equals(BigDecimal.ZERO)) {
-            BigDecimal oldBuyerPrice = priceDao.getBuyerPrice(oldBuyer.getId(), product.getId());
-            updateOrderDetailsRequest.setNewBuyerPrice(oldBuyerPrice);
+        if (updateOrderDetailsRequest.getNewBuyerPrice() == null) {
+            BigDecimal previousPrice = calculatePreviousPrice(orderDetails, orderDetails.getBuyerSum());
+            updateOrderDetailsRequest.setNewBuyerPrice(previousPrice);
         }
 
-        if (updateOrderDetailsRequest.getNewSupplierPrice() == null || updateOrderDetailsRequest.getNewSupplierPrice().equals(BigDecimal.ZERO)) {
-            BigDecimal oldSupplierPrice = priceDao.getSupplierPrice(oldSupplier.getId(), product.getId());
-            updateOrderDetailsRequest.setNewSupplierPrice(oldSupplierPrice);
+        if (updateOrderDetailsRequest.getNewSupplierPrice() == null) {
+            BigDecimal previousPrice = calculatePreviousPrice(orderDetails, orderDetails.getSupplierSum());
+            updateOrderDetailsRequest.setNewSupplierPrice(previousPrice);
         }
 
         if (checkIfMerchantIsChanged(updateOrderDetailsRequest, oldBuyer, oldSupplier)) {
@@ -119,9 +123,6 @@ public class UpdateOrderDetailsService {
         orderDetailsDto.setTypedBoughtPrice(BigDecimal.ZERO);
         orderDetailsDto.setCreateBuyerInvoice(orderDetails.isCreateBuyerInvoice());
         orderDetailsDto.setInvoiceNumber(orderDetails.getInvoiceNumber());
-
-        System.out.println(orderDetails.isCreateBuyerInvoice() + " create  buyer invoice =======");
-        System.out.println(orderDetails.getInvoiceNumber() + " invoice number");
 
         newOrderDetails.add(orderDetailsDto);
         createOrderRequest.setOrderDetails(newOrderDetails);
@@ -326,6 +327,11 @@ public class UpdateOrderDetailsService {
     private void processUpdatingSupplierOrderDetails(OrderDetails orderDetails, UpdateOrderDetailsRequest updateOrderDetailsRequest) {
         orderDetails.setQuantity(updateOrderDetailsRequest.getNewQuantity());
         orderDetails.setSupplierSum(updateOrderDetailsRequest.getNewSupplierSum());
+    }
+
+    private BigDecimal calculatePreviousPrice(OrderDetails orderDetails, BigDecimal merchantSum) {
+        BigDecimal quantity = orderDetails.getQuantity();
+        return merchantSum.divide(quantity, RoundingMode.HALF_EVEN);
     }
 
 }
