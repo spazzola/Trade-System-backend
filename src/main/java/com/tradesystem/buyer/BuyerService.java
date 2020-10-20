@@ -43,16 +43,15 @@ public class BuyerService {
     }
 
     @Transactional
-    public List<Buyer> getBalances() {
+    public List<Buyer> calculateAndSetBalances() {
         List<Buyer> buyers = buyerDao.findAll();
-        List<Buyer> resultBuers = new ArrayList<>();
 
         for (Buyer buyer : buyers) {
-            buyer = setCurrentBalance(buyer);
-            resultBuers.add(buyer);
+            BigDecimal currentBalance = calculateCurrentBalance(buyer);
+            buyer.setCurrentBalance(currentBalance);
         }
 
-        return resultBuers;
+        return buyers;
     }
 
     @Transactional
@@ -109,31 +108,35 @@ public class BuyerService {
         return buyerDao.save(buyer);
     }
 
-    private Buyer setCurrentBalance(Buyer buyer) {
-        List<Invoice> notUsedInvoices = invoiceDao.getBuyerNotUsedInvoices(buyer.getId());
+    /**
+     * Metda oblicza aktualny stan kupującego.
+     * @param buyer
+     * @return BigDecimal
+     */
+    private BigDecimal calculateCurrentBalance(Buyer buyer) {
+            List<Invoice> notUsedInvoices = invoiceDao.getBuyerNotUsedInvoices(buyer.getId());
 
-        BigDecimal balance = BigDecimal.valueOf(0);
+            BigDecimal balance = BigDecimal.valueOf(0);
 
-        for (Invoice invoice : notUsedInvoices) {
-            balance = balance.add(invoice.getAmountToUse());
-        }
-
-        Optional<Invoice> negativeInvoice = invoiceDao.getBuyerNegativeInvoice(buyer.getId());
-        if (negativeInvoice.isPresent()) {
-            balance = balance.add(negativeInvoice.get().getAmountToUse());
-        }
-
-        Optional<List <Invoice>> notPaidInvoices = invoiceDao.getBuyerNotPaidInvoices(buyer.getId());
-
-        if (notPaidInvoices.isPresent()) {
-            for (Invoice invoice : notPaidInvoices.get()) {
-                balance = balance.subtract(invoice.getValue());
+            for (Invoice invoice : notUsedInvoices) {
+                if (invoice.isCreatedToOrder()) {
+                    balance = balance.subtract(invoice.getValue());
+                }
+                balance = balance.add(invoice.getAmountToUse());
             }
-        }
 
-        buyer.setCurrentBalance(balance);
+            Optional<Invoice> negativeInvoice = invoiceDao.getBuyerNegativeInvoice(buyer.getId());
+            if (negativeInvoice.isPresent()) {
+                balance = balance.add(negativeInvoice.get().getAmountToUse());
+            }
 
-        return buyer;
+            Optional<List<Invoice>> notPaidInvoices = invoiceDao.getBuyerNotPaidInvoices(buyer.getId());
+            if (notPaidInvoices.isPresent()) {
+                for (Invoice invoice : notPaidInvoices.get()) {
+                    balance = balance.subtract(invoice.getValue());
+                }
+            }
+        return balance;
     }
 
     private boolean validateBuyer(BuyerDto buyerDto) {

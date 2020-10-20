@@ -69,8 +69,8 @@ public class BuyerController {
     }
 
     @GetMapping("/getAllWithBalances")
-    public List<BuyerDto> getAllWithBalances(){
-        final List<Buyer> buyers = buyerService.getBalances();
+    public List<BuyerDto> getAllWithRefreshedBalances(){
+        final List<Buyer> buyers = buyerService.calculateAndSetBalances();
 
         return buyerMapper.toDto(buyers);
     }
