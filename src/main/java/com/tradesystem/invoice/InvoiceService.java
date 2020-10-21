@@ -110,6 +110,9 @@ public class InvoiceService {
 
         if (isBuyerOwner) {
             invoice.setPaid(true);
+            if (invoice.isCreatedToOrder()) {
+                invoice.setUsed(true);
+            }
             processNegativeInvoicesForBuyer(invoice);
         } else {
             invoice.setPaid(true);
@@ -182,7 +185,8 @@ public class InvoiceService {
 
     @Transactional
     public List<Invoice> getBuyersMonthInvoices(int month, int year) {
-        return invoiceDao.getBuyersMonthInvoices(month, year);
+        List<Invoice> list = invoiceDao.getBuyersMonthInvoices(month, year);
+        return list;
     }
 
     @Transactional

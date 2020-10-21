@@ -51,7 +51,7 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
 
     @Query(value = "SELECT * FROM invoices " +
             "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
-            "WHERE invoices.buyer_fk = ?1 AND is_used = false AND is_paid = true",
+            "WHERE invoices.buyer_fk = ?1 AND is_used = false AND is_paid = true AND is_created_to_order = false",
             nativeQuery = true)
     List<Invoice> getBuyerNotUsedInvoices(Long buyerId);
 
