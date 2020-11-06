@@ -3,6 +3,8 @@ package com.tradesystem.invoice;
 import com.tradesystem.buyer.Buyer;
 import com.tradesystem.buyer.BuyerDao;
 import com.tradesystem.buyer.BuyerDto;
+import com.tradesystem.payment.Payment;
+import com.tradesystem.payment.PaymentDao;
 import com.tradesystem.supplier.Supplier;
 import com.tradesystem.supplier.SupplierDao;
 import com.tradesystem.supplier.SupplierDto;
@@ -22,12 +24,14 @@ public class InvoiceService {
     private InvoiceDao invoiceDao;
     private BuyerDao buyerDao;
     private SupplierDao supplierDao;
+    private PaymentDao paymentDao;
 
 
-    public InvoiceService(InvoiceDao invoiceDao, BuyerDao buyerDao, SupplierDao supplierDao) {
+    public InvoiceService(InvoiceDao invoiceDao, BuyerDao buyerDao, SupplierDao supplierDao, PaymentDao paymentDao) {
         this.invoiceDao = invoiceDao;
         this.buyerDao = buyerDao;
         this.supplierDao = supplierDao;
+        this.paymentDao = paymentDao;
     }
 
 
@@ -69,6 +73,7 @@ public class InvoiceService {
 
             if (invoice.getBuyer() != null) {
                 processNegativeInvoicesForBuyer(invoice);
+                matchWithNegativeInvoice(invoice);
             } else {
                 processNegativeInvoicesForSupplier(invoice);
             }
@@ -203,8 +208,21 @@ public class InvoiceService {
         return invoice.getBuyer() != null;
     }
 
-    private void processNegativeInvoicesForBuyer(Invoice invoice) {
+    private void matchWithNegativeInvoice(Invoice invoice) {
+        Buyer buyer = invoice.getBuyer();
+        Optional<Invoice> negativeInvoice = invoiceDao.getBuyerNegativeInvoice(buyer.getId());
 
+        if (negativeInvoice.isPresent()) {
+            Long invoiceId = negativeInvoice.get().getId();
+            Payment payment = paymentDao.findByBuyerInvoiceId(invoiceId);
+            Payment newPayment = new Payment();
+            newPayment.setOrderDetails(payment.getOrderDetails());
+            newPayment.setBuyerInvoice(invoice);
+            paymentDao.save(newPayment);
+        }
+    }
+
+    private void processNegativeInvoicesForBuyer(Invoice invoice) {
         if (invoice.isPaid()) {
             Long buyerId = invoice.getBuyer().getId();
             Optional<Invoice> optionalNegativeInvoice = invoiceDao.getBuyerNegativeInvoice(buyerId);

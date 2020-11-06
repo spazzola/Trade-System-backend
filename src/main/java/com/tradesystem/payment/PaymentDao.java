@@ -21,5 +21,7 @@ public interface PaymentDao extends JpaRepository<Payment, Long> {
 
     List<Payment> findByOrderDetailsId(Long id);
 
+    Payment findByBuyerInvoiceId(Long id);
+
     void deleteByOrderDetailsId(Long id);
 }
