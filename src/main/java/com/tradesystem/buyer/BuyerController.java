@@ -77,8 +77,12 @@ public class BuyerController {
     }
 
     @GetMapping("/getAllWithAverageEarnings")
-    public List<BuyerDto> getAllWithAverageEarnings() {
-        final List<Buyer> buyers = buyerService.getAllWithAverageEarning();
+    public List<BuyerDto> getAllWithAverageEarnings(@RequestParam("localDate")
+                                                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String localDate) {
+        int year = Integer.valueOf(localDate.substring(0, 4));
+        int month = Integer.valueOf(localDate.substring(5, 7));
+
+        final List<Buyer> buyers = buyerService.getAllWithAverageEarning(month, year);
         return buyerMapper.toDto(buyers);
     }
 

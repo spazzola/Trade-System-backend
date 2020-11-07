@@ -69,9 +69,7 @@ public class BuyerService {
     }
 
     @Transactional
-    public List<Buyer> getAllWithAverageEarning() {
-        int month = LocalDate.now().getMonthValue();
-        int year = LocalDate.now().getYear();
+    public List<Buyer> getAllWithAverageEarning(int month, int year) {
 
         Set<Buyer> buyers = new HashSet<>();
         Set<Order> orders = orderService.getMonthOrders(month, year);
