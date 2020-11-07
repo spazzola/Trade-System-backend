@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -35,7 +36,7 @@ public class UpdateOrderDetailsService {
     private PriceHistoryDao priceHistoryDao;
 
     public UpdateOrderDetailsService(OrderService orderService, PaymentDao paymentDao, OrderDetailsService orderDetailsService,
-                                     InvoiceDao invoiceDao,  OrderCommentService orderCommentService,
+                                     InvoiceDao invoiceDao, OrderCommentService orderCommentService,
                                      PriceDao priceDao, OrderDetailsDao orderDetailsDao, OrderDao orderDao, PriceHistoryDao priceHistoryDao) {
         this.orderService = orderService;
         this.paymentDao = paymentDao;
@@ -132,41 +133,115 @@ public class UpdateOrderDetailsService {
 
     private void processDeletingOrder(OrderDetails orderDetails) {
         List<Payment> payments = paymentDao.findByOrderDetailsId(orderDetails.getId());
+        List<Invoice> buyerInvoices = new ArrayList<>();
+        List<Invoice> supplierInvoices = new ArrayList<>();
+
         for (Payment payment : payments) {
             if (payment.getBuyerInvoice() != null) {
-                processDeletingBuyerInvoice(payment, orderDetails);
+                buyerInvoices.add(payment.getBuyerInvoice());
             } else {
-                processDeletingSupplierInvoice(payment, orderDetails);
+                supplierInvoices.add(payment.getSupplierInvoice());
             }
             paymentDao.delete(payment);
         }
+        processDeletingInvoices(buyerInvoices, orderDetails.getBuyerSum());
+        processDeletingInvoices(supplierInvoices, orderDetails.getSupplierSum());
+
         orderDetailsDao.delete(orderDetails);
         orderDao.delete(orderDetails.getOrder());
+
     }
 
-    private void processDeletingBuyerInvoice(Payment payment, OrderDetails orderDetails) {
-        Invoice invoice = payment.getBuyerInvoice();
-        BigDecimal oldInvoiceValue = invoice.getAmountToUse();
+    private void processDeletingInvoices(List<Invoice> invoices, BigDecimal orderValue) {
+        if (invoices.size() == 1) {
+            Invoice invoice = invoices.get(0);
 
-        if (invoice.isCreatedToOrder()) {
-            invoiceDao.delete(invoice);
-        }
-
-        else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
-            if (checkIfValuesAreEqual(invoice.getAmountToUse(), orderDetails.getBuyerSum())) {
+            if (invoice.isCreatedToOrder()) {
                 invoiceDao.delete(invoice);
+            }
+            else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+                processRecalculatingNegativeInvoice(invoice, orderValue);
+                if (isOrderIsRelatedWithEqualizedInvoice(invoice)) {
+                    invoice = getBuyerEqualizedInvoice(invoice);
+                    processRecalculatingEqualizedInvoice(invoice, orderValue);
+                }
             } else {
-                invoice.setAmountToUse(oldInvoiceValue.add(orderDetails.getBuyerSum()));
+                processRecalculatingPrePaymentInvoice(invoice, orderValue);
+            }
+        } else {
+            if (checkIfExistEqualizedInvoice(invoices)) {
+                for (Invoice invoice : invoices) {
+                    if (invoice.isToEqualizeNegativeInvoice()) {
+                        processRecalculatingEqualizedInvoice(invoice, orderValue);
+                    } else {
+                        processRecalculatingNegativeInvoice(invoice, orderValue);
+                    }
+                }
+            } else {
+                for (Invoice invoice : invoices) {
+                    if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+                        BigDecimal previousAmountToUse = invoice.getAmountToUse();
+                        invoiceDao.delete(invoice);
+                        orderValue = orderValue.add(previousAmountToUse);
+                    } else {
+                        orderValue = processRecalculatingPrePaymentInvoice(invoice, orderValue);
+                    }
+                }
             }
         }
+    }
 
-        else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) > 0) {
-            invoice.setAmountToUse(oldInvoiceValue.add(orderDetails.getBuyerSum()));
+    private void processRecalculatingEqualizedInvoice(Invoice invoice, BigDecimal orderValue) {
+        BigDecimal previousAmountToUse = invoice.getAmountToUse();
+        BigDecimal previousValue = invoice.getValue();
+        BigDecimal newAmountToUse = previousAmountToUse.subtract(orderValue);
+        BigDecimal newValue = previousValue.subtract(orderValue);
+        if (newValue.compareTo(BigDecimal.ZERO) == 0) {
+            invoiceDao.delete(invoice);
+        } else {
+            invoice.setAmountToUse(newAmountToUse);
+            invoice.setValue(newValue);
+            invoiceDao.save(invoice);
         }
-        else {
-            invoice.setAmountToUse(invoice.getValue());
+    }
+
+    private void processRecalculatingNegativeInvoice(Invoice invoice, BigDecimal orderValue) {
+        BigDecimal previousAmountToUse = invoice.getAmountToUse();
+        BigDecimal previousValue = invoice.getValue();
+        BigDecimal newAmountToUse = previousAmountToUse.add(orderValue);
+        BigDecimal newValue = previousValue.add(orderValue);
+        if (newValue.compareTo(BigDecimal.ZERO) == 0) {
+            invoiceDao.delete(invoice);
+        } else {
+            invoice.setAmountToUse(newAmountToUse);
+            invoice.setValue(newValue);
+            invoiceDao.save(invoice);
+        }
+    }
+
+    private BigDecimal processRecalculatingPrePaymentInvoice(Invoice invoice, BigDecimal orderValue) {
+        BigDecimal lackDifference = invoice.getValue().subtract(invoice.getAmountToUse());
+        if (orderValue.compareTo(lackDifference) > 0) {
+            invoice.setAmountToUse(lackDifference);
+            orderValue = orderValue.subtract(lackDifference);
             invoice.setUsed(false);
+        } else {
+            BigDecimal previousAmountToUse = invoice.getAmountToUse();
+            BigDecimal newAmountToUse = previousAmountToUse.add(orderValue);
+            invoice.setAmountToUse(newAmountToUse);
+            invoice.setUsed(false);
+            invoiceDao.save(invoice);
         }
+        return orderValue;
+    }
+
+    private boolean checkIfExistEqualizedInvoice(List<Invoice> invoices) {
+        for (Invoice invoice : invoices) {
+            if (invoice.isToEqualizeNegativeInvoice()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean checkIfValuesAreEqual(BigDecimal negativeInvoiceValue, BigDecimal orderDetailsValue) {
@@ -175,31 +250,22 @@ public class UpdateOrderDetailsService {
         return convertedInvoiceValue.compareTo(orderDetailsValue) == 0;
     }
 
-    private void processDeletingSupplierInvoice(Payment payment, OrderDetails orderDetails) {
-        //Invoice invoice = invoiceDao.findById(payment.getSupplierInvoice().getId())
-                //.orElseThrow(RuntimeException::new);
-        Invoice invoice = payment.getSupplierInvoice();
-        BigDecimal oldInvoiceValue = invoice.getAmountToUse();
+    private boolean isOrderIsRelatedWithEqualizedInvoice(Invoice invoice) {
+        return getBuyerEqualizedInvoice(invoice) != null;
+    }
 
-        if (invoice.isCreatedToOrder()) {
-            invoiceDao.delete(invoice);
-        }
-
-        else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
-            if (checkIfValuesAreEqual(invoice.getAmountToUse(), orderDetails.getSupplierSum())) {
-                invoiceDao.delete(invoice);
-            } else {
-                invoice.setAmountToUse(oldInvoiceValue.add(orderDetails.getSupplierSum()));
+    private Invoice getBuyerEqualizedInvoice(Invoice invoice) {
+        List<Payment> payments = paymentDao.findByBuyerInvoiceId(invoice.getId());
+        Invoice resultInvoice = null;
+        for (Payment payment : payments) {
+            List<Payment> extendedPayments = paymentDao.findByOrderDetailsId(payment.getOrderDetails().getId());
+            for (Payment nestedPayment : extendedPayments) {
+                if (nestedPayment.getBuyerInvoice() != null && !nestedPayment.getBuyerInvoice().getInvoiceNumber().equals("Negatywna")) {
+                    resultInvoice = nestedPayment.getBuyerInvoice();
+                }
             }
         }
-
-       else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) > 0) {
-            invoice.setAmountToUse(oldInvoiceValue.add(orderDetails.getSupplierSum()));
-        }
-        else {
-            invoice.setAmountToUse(invoice.getValue());
-            invoice.setUsed(false);
-        }
+        return resultInvoice;
     }
 
     private void updateBuyerOrder(UpdateOrderDetailsRequest updateOrderDetailsRequest, OrderDetails orderDetails) {
