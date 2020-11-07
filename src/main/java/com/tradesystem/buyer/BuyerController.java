@@ -12,6 +12,7 @@ import com.tradesystem.user.RoleSecurity;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -136,4 +137,15 @@ public class BuyerController {
         List<Invoice> invoices = invoiceService.getBuyersMonthInvoices(m, y);
         return invoiceMapper.toDto(invoices);
     }
+
+    @GetMapping("/getBuyersMonthTakenQuantity")
+    public List<BuyerDto> getSuppliersMonthTakenQuantity(@RequestParam("localDate")
+                                                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String localDate) {
+        int year = Integer.valueOf(localDate.substring(0, 4));
+        int month = Integer.valueOf(localDate.substring(5, 7));
+
+        List<Buyer> buyers = buyerService.getBuyersMonthTakenQuantity(month, year);
+        return buyerMapper.toDto(buyers);
+    }
+
 }

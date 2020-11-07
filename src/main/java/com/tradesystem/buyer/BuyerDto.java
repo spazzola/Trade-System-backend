@@ -17,5 +17,6 @@ public class BuyerDto {
     private String name;
     private BigDecimal currentBalance;
     private BigDecimal averageProfitPerM3;
+    private BigDecimal monthTakenQuantity;
 
 }

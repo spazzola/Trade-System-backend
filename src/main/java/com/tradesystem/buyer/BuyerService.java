@@ -3,6 +3,7 @@ package com.tradesystem.buyer;
 import com.tradesystem.invoice.Invoice;
 import com.tradesystem.invoice.InvoiceDao;
 import com.tradesystem.order.Order;
+import com.tradesystem.order.OrderDao;
 import com.tradesystem.order.OrderService;
 import com.tradesystem.price.Price;
 import com.tradesystem.price.PriceDao;
@@ -21,12 +22,15 @@ public class BuyerService {
     private BuyerDao buyerDao;
     private PriceDao priceDao;
     private OrderService orderService;
+    private OrderDao orderDao;
 
-    public BuyerService(InvoiceDao invoiceDao, BuyerDao buyerDao, PriceDao priceDao, OrderService orderService) {
+    public BuyerService(InvoiceDao invoiceDao, BuyerDao buyerDao,
+                        PriceDao priceDao, OrderService orderService, OrderDao orderDao) {
         this.invoiceDao = invoiceDao;
         this.buyerDao = buyerDao;
         this.priceDao = priceDao;
         this.orderService = orderService;
+        this.orderDao = orderDao;
     }
 
 
@@ -108,11 +112,23 @@ public class BuyerService {
         return buyerDao.save(buyer);
     }
 
-    /**
-     * Metda oblicza aktualny stan kupującego.
-     * @param buyer
-     * @return BigDecimal
-     */
+    @Transactional
+    public List<Buyer> getBuyersMonthTakenQuantity(int month, int year) {
+        List<Buyer> buyers = buyerDao.findAll();
+
+        for (Buyer buyer : buyers) {
+            List<Order> orders = orderDao.getBuyerMonthOrders(buyer.getId(), month, year);
+            BigDecimal sumQuantity = BigDecimal.valueOf(0);
+
+            for (Order order : orders) {
+                sumQuantity = sumQuantity.add(order.getOrderDetails().get(0).getQuantity());
+            }
+
+            buyer.setMonthTakenQuantity(sumQuantity);
+        }
+        return buyers;
+    }
+
     private BigDecimal calculateCurrentBalance(Buyer buyer) {
             List<Invoice> notUsedInvoices = invoiceDao.getBuyerNotUsedInvoices(buyer.getId());
 

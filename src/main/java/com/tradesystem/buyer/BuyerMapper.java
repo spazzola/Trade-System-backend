@@ -13,6 +13,7 @@ public class BuyerMapper {
                 .name(buyer.getName())
                 .currentBalance(buyer.getCurrentBalance())
                 .averageProfitPerM3(buyer.getAverageProfitPerM3())
+                .monthTakenQuantity(buyer.getMonthTakenQuantity())
                 .build();
     }
 

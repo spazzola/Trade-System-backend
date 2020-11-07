@@ -32,6 +32,9 @@ public class Buyer {
     @Transient
     private BigDecimal averageProfitPerM3;
 
+    @Transient
+    private BigDecimal monthTakenQuantity;
+
     @OneToMany(mappedBy = "buyer")
     private List<Price> prices;
 
