@@ -214,9 +214,9 @@ public class InvoiceService {
 
         if (negativeInvoice.isPresent()) {
             Long invoiceId = negativeInvoice.get().getId();
-            Payment payment = paymentDao.findByBuyerInvoiceId(invoiceId);
+            List<Payment> payments = paymentDao.findByBuyerInvoiceId(invoiceId);
             Payment newPayment = new Payment();
-            newPayment.setOrderDetails(payment.getOrderDetails());
+            newPayment.setOrderDetails(payments.get(0).getOrderDetails());
             newPayment.setBuyerInvoice(invoice);
             paymentDao.save(newPayment);
         }
