@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository("invoiceDao")
@@ -32,6 +33,18 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
             "WHERE buyer_fk IS NOT NULL AND is_paid = false AND amount_to_use > 0 AND to_equalize_negative_invoice != true",
             nativeQuery = true)
     Optional<List <Invoice>> getBuyersNotPaidInvoices();
+
+
+    /*@Query(value = "SELECT * FROM invoices " +
+            "WHERE comment LIKE '%Pomniejszono o' AND comment LIKE '%z faktury o id ?1'",
+            nativeQuery = true)
+    Invoice getPrePaidInvoiceReducedByNegativeInvoice(Long invoiceId);*/
+
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE comment LIKE :firstPart AND comment LIKE :secondPart",
+            nativeQuery = true)
+    Invoice getPrePaidInvoiceReducedByNegativeInvoice(@Param("firstPart") String firstPart,
+                                                      @Param("secondPart") String secondPart);
 
     /***
      *

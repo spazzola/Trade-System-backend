@@ -165,7 +165,17 @@ public class UpdateOrderDetailsService {
                     invoice = getBuyerEqualizedInvoice(invoice);
                     processRecalculatingEqualizedInvoice(invoice, orderValue);
                 }
-            } else {
+            }
+            else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) == 0 && invoice.getInvoiceNumber().equals("Negatywna")) {
+                // znalezc fv ktorej amountToUse zostala pomniejszona o wartosc negatywnej
+                // dodac do niej wartosc zamowienia (przy okazji sprawdzic czy amountToUse =< value)
+                String firstPart = "Pomniejszono o%";
+                String secondPart = "%z faktury o id " + invoice.getId();
+                Invoice prePaymentInvoice = invoiceDao.getPrePaidInvoiceReducedByNegativeInvoice(firstPart, secondPart);
+                BigDecimal previousAmountToUse = prePaymentInvoice.getAmountToUse();
+                prePaymentInvoice.setAmountToUse(previousAmountToUse.add(orderValue));
+            }
+            else {
                 processRecalculatingPrePaymentInvoice(invoice, orderValue);
             }
         } else {
