@@ -8,7 +8,6 @@ import com.tradesystem.ordercomment.OrderCommentService;
 import com.tradesystem.payment.Payment;
 import com.tradesystem.payment.PaymentDao;
 import com.tradesystem.price.PriceDao;
-import com.tradesystem.price.pricehistory.PriceHistory;
 import com.tradesystem.price.pricehistory.PriceHistoryDao;
 import com.tradesystem.product.Product;
 import com.tradesystem.product.ProductDto;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -144,58 +142,63 @@ public class UpdateOrderDetailsService {
             }
             paymentDao.delete(payment);
         }
-        processDeletingInvoices(buyerInvoices, orderDetails.getBuyerSum());
-        processDeletingInvoices(supplierInvoices, orderDetails.getSupplierSum());
+        processRecalculatingInvoices(buyerInvoices, orderDetails.getBuyerSum());
+        processRecalculatingInvoices(supplierInvoices, orderDetails.getSupplierSum());
 
         orderDetailsDao.delete(orderDetails);
         orderDao.delete(orderDetails.getOrder());
 
     }
 
-    private void processDeletingInvoices(List<Invoice> invoices, BigDecimal orderValue) {
+    private void processRecalculatingInvoices(List<Invoice> invoices, BigDecimal orderValue) {
         if (invoices.size() == 1) {
-            Invoice invoice = invoices.get(0);
+            processRecalculatingOneInvoice(invoices.get(0), orderValue);
+        } else {
+            processRecalculatingManyInvoices(invoices, orderValue);
+        }
+    }
 
-            if (invoice.isCreatedToOrder()) {
-                invoiceDao.delete(invoice);
+    private void processRecalculatingOneInvoice(Invoice invoice, BigDecimal orderValue) {
+        if (invoice.isCreatedToOrder()) {
+            invoiceDao.delete(invoice);
+        }
+        else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+            processRecalculatingNegativeInvoice(invoice, orderValue);
+            if (isOrderIsRelatedWithEqualizedInvoice(invoice)) {
+                invoice = getBuyerEqualizedInvoice(invoice);
+                processRecalculatingEqualizedInvoice(invoice, orderValue);
             }
-            else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
-                processRecalculatingNegativeInvoice(invoice, orderValue);
-                if (isOrderIsRelatedWithEqualizedInvoice(invoice)) {
-                    invoice = getBuyerEqualizedInvoice(invoice);
+        }
+        else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) == 0 && invoice.getInvoiceNumber().equals("Negatywna")) {
+            //TODO change that part to proper jpa-function
+            String firstPart = "Pomniejszono o%";
+            String secondPart = "%z faktury o id " + invoice.getId();
+            Invoice prePaymentInvoice = invoiceDao.getPrePaidInvoiceReducedByNegativeInvoice(firstPart, secondPart);
+            BigDecimal previousAmountToUse = prePaymentInvoice.getAmountToUse();
+            prePaymentInvoice.setAmountToUse(previousAmountToUse.add(orderValue));
+        }
+        else {
+            processRecalculatingPrePaymentInvoice(invoice, orderValue);
+        }
+    }
+
+    private void processRecalculatingManyInvoices(List<Invoice> invoices, BigDecimal orderValue) {
+        if (checkIfExistEqualizedInvoice(invoices)) {
+            for (Invoice invoice : invoices) {
+                if (invoice.isToEqualizeNegativeInvoice()) {
                     processRecalculatingEqualizedInvoice(invoice, orderValue);
+                } else {
+                    processRecalculatingNegativeInvoice(invoice, orderValue);
                 }
-            }
-            else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) == 0 && invoice.getInvoiceNumber().equals("Negatywna")) {
-                // znalezc fv ktorej amountToUse zostala pomniejszona o wartosc negatywnej
-                // dodac do niej wartosc zamowienia (przy okazji sprawdzic czy amountToUse =< value)
-                String firstPart = "Pomniejszono o%";
-                String secondPart = "%z faktury o id " + invoice.getId();
-                Invoice prePaymentInvoice = invoiceDao.getPrePaidInvoiceReducedByNegativeInvoice(firstPart, secondPart);
-                BigDecimal previousAmountToUse = prePaymentInvoice.getAmountToUse();
-                prePaymentInvoice.setAmountToUse(previousAmountToUse.add(orderValue));
-            }
-            else {
-                processRecalculatingPrePaymentInvoice(invoice, orderValue);
             }
         } else {
-            if (checkIfExistEqualizedInvoice(invoices)) {
-                for (Invoice invoice : invoices) {
-                    if (invoice.isToEqualizeNegativeInvoice()) {
-                        processRecalculatingEqualizedInvoice(invoice, orderValue);
-                    } else {
-                        processRecalculatingNegativeInvoice(invoice, orderValue);
-                    }
-                }
-            } else {
-                for (Invoice invoice : invoices) {
-                    if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
-                        BigDecimal previousAmountToUse = invoice.getAmountToUse();
-                        invoiceDao.delete(invoice);
-                        orderValue = orderValue.add(previousAmountToUse);
-                    } else {
-                        orderValue = processRecalculatingPrePaymentInvoice(invoice, orderValue);
-                    }
+            for (Invoice invoice : invoices) {
+                if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+                    BigDecimal previousAmountToUse = invoice.getAmountToUse();
+                    invoiceDao.delete(invoice);
+                    orderValue = orderValue.add(previousAmountToUse);
+                } else {
+                    orderValue = processRecalculatingPrePaymentInvoice(invoice, orderValue);
                 }
             }
         }
