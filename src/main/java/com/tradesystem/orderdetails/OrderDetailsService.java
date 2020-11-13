@@ -90,7 +90,6 @@ public class OrderDetailsService {
             Buyer buyer = orderDetails.getOrder().getBuyer();
             Supplier supplier = orderDetails.getOrder().getSupplier();
             Product product = orderDetails.getProduct();
-
             priceHistoryService.createPriceHistory(buyer, supplier, product, price);
             return quantity.multiply(price).setScale(2, RoundingMode.HALF_UP);
         } else {

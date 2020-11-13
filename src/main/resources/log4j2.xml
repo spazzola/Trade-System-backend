@@ -7,8 +7,8 @@
         </Console>
 
         <RollingFile name="RollingFile"
-                     fileName="./logs/spring-boot-logger-log4j2.log"
-                     filePattern="./logs/$${date:yyyy-MM}/spring-boot-logger-log4j2-%d{-dd-MMMM-yyyy}-%i.log.gz">
+                     fileName="${sys:catalina.home}/logs/trade-system-logger-log4j2.log"
+                     filePattern="${sys:catalina.home}/logs/$${date:yyyy-MM}/trade-system-logger-log4j2-%d{-dd-MMMM-yyyy}-%i.log.txt">
             <PatternLayout>
                 <pattern>%d %p %C{1.} [%t] %m%n</pattern>
             </PatternLayout>
@@ -34,5 +34,4 @@
         <!-- LOG "com.baeldung*" at TRACE level -->
         <Logger name="com.tradesystem" level="trace"></Logger>
     </Loggers>
-
 </Configuration>
