@@ -26,17 +26,11 @@ public class Report {
 
     private BigDecimal soldQuantity;
 
-    private BigDecimal buyersNotUsedValue;
-
-    private BigDecimal suppliersNotUsedValue;
-
-    private BigDecimal averageSold;
-
-    private BigDecimal averagePurchase;
-
     private BigDecimal averageEarningsPerM3;
 
-    private BigDecimal profit;
+    private BigDecimal income;
+
+    private BigDecimal buyersNotPaidInvoices;
 
     private BigDecimal sumCosts;
 
@@ -49,10 +43,8 @@ public class Report {
                 "\nreportId=" + reportId +
                 "\nsoldValue=" + soldValue +
                 "\nsoldQuantity=" + soldQuantity +
-                "\naverageSold=" + averageSold +
-                "\naveragePurchase=" + averagePurchase +
                 "\naverageEarningsPerM3=" + averageEarningsPerM3 +
-                "\nprofit=" + profit +
+                "\nincome=" + income +
                 "\ntype='" + type + '\'' +
                 '}';
     }

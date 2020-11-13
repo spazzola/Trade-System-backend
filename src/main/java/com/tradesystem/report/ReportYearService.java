@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,33 +39,24 @@ public class ReportYearService {
     @Transactional
     public Report generateYearReport(int year) {
         BigDecimal sumCosts = calculateCosts(year);
-
         BigDecimal soldValue = sumYearSoldValue(year);
         BigDecimal boughtValue = sumYearBoughtValue(year);
-
-        BigDecimal buyersNotUsedValue = calculateBuyersNotUsedAmount(year);
-        BigDecimal suppliersNotUsedValue = calculateSuppliersNotUsedValue(year);
-
         BigDecimal soldQuantity = sumMonthlySoldQuantity(year);
-
         BigDecimal averageSold = calculateAverageSold(year, soldQuantity);
         BigDecimal averagePurchase = calculateAveragePurchase(year, soldQuantity);
         BigDecimal averageEarningsPerM3 = averageSold.subtract(averagePurchase);
-
-        BigDecimal profit = calculateProfits(year, sumCosts, boughtValue);
+        BigDecimal income = soldValue.subtract(boughtValue);
+        BigDecimal buyersNotPaidInvoices = calculateBuyersNotPaidInvoices(year);
 
         String reportType = String.valueOf(year);
 
         Report report = Report.builder()
                 .soldValue(soldValue)
                 .boughtValue(boughtValue)
-                .buyersNotUsedValue(buyersNotUsedValue)
-                .suppliersNotUsedValue(suppliersNotUsedValue)
                 .soldQuantity(soldQuantity)
-                .averageSold(averageSold)
-                .averagePurchase(averagePurchase)
                 .averageEarningsPerM3(averageEarningsPerM3)
-                .profit(profit)
+                .income(income)
+                .buyersNotPaidInvoices(buyersNotPaidInvoices)
                 .sumCosts(sumCosts)
                 .type(reportType)
                 .build();
@@ -74,16 +66,14 @@ public class ReportYearService {
         }
         else {
         Report previousReport = reportDao.findByType(report.getType());
-        previousReport.setSoldValue(soldValue);
-        previousReport.setBoughtValue(boughtValue);
-        previousReport.setBuyersNotUsedValue(buyersNotUsedValue);
-        previousReport.setSuppliersNotUsedValue(suppliersNotUsedValue);
-        previousReport.setSoldQuantity(soldQuantity);
-        previousReport.setAverageSold(averageSold);
-        previousReport.setAverageEarningsPerM3(averageEarningsPerM3);
-        previousReport.setProfit(profit);
-        previousReport.setSumCosts(sumCosts);
-        previousReport.setType(reportType);
+            previousReport.setSoldValue(soldValue);
+            previousReport.setBoughtValue(boughtValue);
+            previousReport.setSoldQuantity(soldQuantity);
+            previousReport.setAverageEarningsPerM3(averageEarningsPerM3);
+            previousReport.setIncome(income);
+            previousReport.setSumCosts(sumCosts);
+            previousReport.setBuyersNotPaidInvoices(buyersNotPaidInvoices);
+            previousReport.setType(reportType);
 
         reportDao.save(previousReport);
     }
@@ -240,6 +230,26 @@ public class ReportYearService {
         }
 
         return generalValue.subtract(notUsedAmount);
+    }
+
+    private BigDecimal calculateBuyersNotPaidInvoices(int year) {
+        BigDecimal result = new BigDecimal(0);
+
+        List<Invoice> notPaidInvoicesNotCreatedToOrder = invoiceDao.getBuyersYearNotPaidInvoicesNotCreatedToOrder(year)
+                .orElseThrow(NoSuchElementException::new);
+
+        for (Invoice invoice : notPaidInvoicesNotCreatedToOrder) {
+            result = result.add(invoice.getAmountToUse());
+        }
+
+        List<Invoice> notPaidInvoicesCreatedToOrder = invoiceDao.getBuyersYearNotPaidInvoicesCreatedToOrder(year)
+                .orElseThrow(NoSuchElementException::new);
+
+        for (Invoice invoice : notPaidInvoicesCreatedToOrder) {
+            result = result.add(invoice.getValue());
+        }
+
+        return result;
     }
 
 }

@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 @Service
@@ -40,33 +40,24 @@ public class ReportMonthService {
     @Transactional
     public Report generateMonthReport(int month, int year) {
         BigDecimal sumCosts = calculateCosts(month, year);
-
         BigDecimal soldValue = sumMonthlySoldValue(month, year);
         BigDecimal boughtValue = sumMonthlyBoughtValue(month, year);
-
-        BigDecimal buyersNotUsedValue = calculateBuyersNotUsedAmount(month, year);
-        BigDecimal suppliersNotUsedValue = calculateSuppliersNotUsedValue(month, year);
-
         BigDecimal soldQuantity = sumMonthlySoldQuantity(month, year);
-
         BigDecimal averageSold = calculateAverageSold(month, year, soldQuantity);
         BigDecimal averagePurchase = calculateAveragePurchase(month, year, soldQuantity);
         BigDecimal averageEarningsPerM3 = averageSold.subtract(averagePurchase);
-
-        BigDecimal profit = calculateProfits(month, year, sumCosts, boughtValue);
+        BigDecimal income = soldValue.subtract(boughtValue);
+        BigDecimal buyersNotPaidInvoices = calculateBuyersNotPaidInvoices(month, year);
 
         String reportType = LocalDate.now().withMonth(month).getMonth().toString();
 
         Report report = Report.builder()
                 .soldValue(soldValue)
                 .boughtValue(boughtValue)
-                .buyersNotUsedValue(buyersNotUsedValue)
-                .suppliersNotUsedValue(suppliersNotUsedValue)
                 .soldQuantity(soldQuantity)
-                .averageSold(averageSold)
-                .averagePurchase(averagePurchase)
                 .averageEarningsPerM3(averageEarningsPerM3)
-                .profit(profit)
+                .income(income)
+                .buyersNotPaidInvoices(buyersNotPaidInvoices)
                 .sumCosts(sumCosts)
                 .type(reportType)
                 .build();
@@ -78,13 +69,11 @@ public class ReportMonthService {
             Report previousReport = reportDao.findByType(report.getType());
             previousReport.setSoldValue(soldValue);
             previousReport.setBoughtValue(boughtValue);
-            previousReport.setBuyersNotUsedValue(buyersNotUsedValue);
-            previousReport.setSuppliersNotUsedValue(suppliersNotUsedValue);
             previousReport.setSoldQuantity(soldQuantity);
-            previousReport.setAverageSold(averageSold);
             previousReport.setAverageEarningsPerM3(averageEarningsPerM3);
-            previousReport.setProfit(profit);
+            previousReport.setIncome(income);
             previousReport.setSumCosts(sumCosts);
+            previousReport.setBuyersNotPaidInvoices(buyersNotPaidInvoices);
             previousReport.setType(reportType);
 
             reportDao.save(previousReport);
@@ -100,30 +89,6 @@ public class ReportMonthService {
             sumCosts = sumCosts.add(cost.getValue().multiply(BigDecimal.valueOf(-1)));
         }
         return sumCosts;
-    }
-
-    private BigDecimal calculateBuyersNotUsedAmount(int month, int year) {
-        Optional<List<Invoice>> notUsedInvoices = invoiceDao.getBuyersMonthNotUsedPositivesInvoices(month, year);
-        BigDecimal notUsedValue = BigDecimal.valueOf(0);
-
-        if (notUsedInvoices.isPresent()) {
-            for (Invoice invoice : notUsedInvoices.get()) {
-                notUsedValue = notUsedValue.add(invoice.getAmountToUse());
-            }
-        }
-        return notUsedValue;
-    }
-
-    private BigDecimal calculateSuppliersNotUsedValue(int month, int year) {
-        Optional<List<Invoice>> suppliersNotUsedInvoices = invoiceDao.getSuppliersMonthNotUsedInvoices(month, year);
-        BigDecimal notUsedValue = BigDecimal.valueOf(0);
-
-        if (suppliersNotUsedInvoices.isPresent()) {
-            for (Invoice invoice : suppliersNotUsedInvoices.get()) {
-                notUsedValue = notUsedValue.add(invoice.getAmountToUse());
-            }
-        }
-        return notUsedValue;
     }
 
     private BigDecimal calculateAverageSold(int month, int year, BigDecimal quantity) {
@@ -196,25 +161,24 @@ public class ReportMonthService {
         return totalQuantity;
     }
 
-    private BigDecimal calculateProfits(int month, int year, BigDecimal sumCosts, BigDecimal boughtValue) {
-        BigDecimal buyersUsedAmount = calculateBuyersUsedAmount(month, year);
+    private BigDecimal calculateBuyersNotPaidInvoices(int month, int year) {
+        BigDecimal result = new BigDecimal(0);
 
-        BigDecimal income = buyersUsedAmount.subtract(boughtValue);
-        BigDecimal profits = income.add(sumCosts);
+        List<Invoice> notPaidInvoicesNotCreatedToOrder = invoiceDao.getBuyersMonthNotPaidInvoicesNotCreatedToOrder(month, year)
+                .orElseThrow(NoSuchElementException::new);
 
-        return profits;
-    }
-
-    private BigDecimal calculateBuyersUsedAmount(int month, int year) {
-        List<Invoice> notUsedInvoices = invoiceDao.getBuyersMonthIncomedInvoices(month, year);
-        BigDecimal generalValue = BigDecimal.valueOf(0);
-        BigDecimal notUsedAmount = BigDecimal.valueOf(0);
-
-        for (Invoice invoice : notUsedInvoices) {
-            generalValue = generalValue.add(invoice.getValue());
-            notUsedAmount = notUsedAmount.add(invoice.getAmountToUse());
+        for (Invoice invoice : notPaidInvoicesNotCreatedToOrder) {
+            result = result.add(invoice.getAmountToUse());
         }
 
-        return generalValue.subtract(notUsedAmount);
+        List<Invoice> notPaidInvoicesCreatedToOrder = invoiceDao.getBuyersMonthNotPaidInvoicesCreatedToOrder(month, year)
+                .orElseThrow(NoSuchElementException::new);
+
+        for (Invoice invoice : notPaidInvoicesCreatedToOrder) {
+            result = result.add(invoice.getValue());
+        }
+
+        return result;
     }
+
 }

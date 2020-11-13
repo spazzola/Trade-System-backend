@@ -12,14 +12,11 @@ public class ReportMapper {
         return ReportDto.builder()
                 .soldValue(report.getSoldValue())
                 .boughtValue(report.getBoughtValue())
-                .buyersNotUsedValue(report.getBuyersNotUsedValue())
-                .suppliersNotUsedValue(report.getSuppliersNotUsedValue())
                 .soldQuantity(report.getSoldQuantity())
-                .averageSold(report.getAverageSold())
-                .averagePurchase(report.getAveragePurchase())
                 .averageEarningsPerM3(report.getAverageEarningsPerM3())
-                .profit(report.getProfit())
+                .income(report.getIncome())
                 .sumCosts(report.getSumCosts())
+                .buyersNotPaidInvoices(report.getBuyersNotPaidInvoices())
                 .type(report.getType())
                 .build();
     }

@@ -122,6 +122,22 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
 
 
     @Query(value = "SELECT * FROM invoices " +
+            "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
+            "WHERE value > 0 AND buyer_fk IS NOT NULL AND is_paid = false AND is_created_to_order = false " +
+            "AND MONTH(invoices.date) = ?1 AND YEAR(invoices.date) = ?2",
+            nativeQuery = true)
+    Optional<List<Invoice>> getBuyersMonthNotPaidInvoicesNotCreatedToOrder(int month, int year);
+
+
+    @Query(value = "SELECT * FROM invoices " +
+            "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
+            "WHERE value > 0 AND buyer_fk IS NOT NULL AND is_paid = false AND is_created_to_order = true " +
+            "AND MONTH(invoices.date) = ?1 AND YEAR(invoices.date) = ?2",
+            nativeQuery = true)
+    Optional<List<Invoice>> getBuyersMonthNotPaidInvoicesCreatedToOrder(int month, int year);
+
+
+    @Query(value = "SELECT * FROM invoices " +
             "WHERE MONTH(invoices.date) = ?1 AND YEAR(invoices.date) = ?2 " +
             "AND is_used = false AND amount_to_use < 0",
             nativeQuery = true)
@@ -183,7 +199,19 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
     Optional<List<Invoice>> getBuyersYearNegativeInvoices(int year);
 
 
+    @Query(value = "SELECT * FROM invoices " +
+            "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
+            "WHERE value > 0 AND buyer_fk IS NOT NULL AND is_paid = false AND is_created_to_order = true " +
+            "AND YEAR(invoices.date) = ?1",
+            nativeQuery = true)
+    Optional<List<Invoice>> getBuyersYearNotPaidInvoicesCreatedToOrder(int year);
 
+    @Query(value = "SELECT * FROM invoices " +
+            "INNER JOIN buyers ON invoices.buyer_fk = buyers.buyer_id " +
+            "WHERE value > 0 AND buyer_fk IS NOT NULL AND is_paid = false AND is_created_to_order = false " +
+            "AND YEAR(invoices.date) = ?1",
+            nativeQuery = true)
+    Optional<List<Invoice>> getBuyersYearNotPaidInvoicesNotCreatedToOrder(int year);
 
     /***
      *

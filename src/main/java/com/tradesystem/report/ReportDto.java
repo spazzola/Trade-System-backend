@@ -16,12 +16,10 @@ public class ReportDto {
     private BigDecimal soldValue;
     private BigDecimal boughtValue;
     private BigDecimal soldQuantity;
-    private BigDecimal buyersNotUsedValue;
-    private BigDecimal suppliersNotUsedValue;
-    private BigDecimal averageSold;
-    private BigDecimal averagePurchase;
     private BigDecimal averageEarningsPerM3;
-    private BigDecimal profit;
+    private BigDecimal income;
     private BigDecimal sumCosts;
+    private BigDecimal buyersNotPaidInvoices;
     private String type;
+
 }
