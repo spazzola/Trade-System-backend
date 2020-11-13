@@ -184,4 +184,5 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
             nativeQuery = true)
     Optional<List<Invoice>> getSuppliersMonthNotUsedInvoices(int month, int year);
 
+
 }
