@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -90,30 +89,6 @@ public class ReportYearService {
         return sumCosts;
     }
 
-    private BigDecimal calculateBuyersNotUsedAmount(int year) {
-        Optional<List<Invoice>> notUsedInvoices = invoiceDao.getBuyersYearNotUsedPositivesInvoices(year);
-        BigDecimal notUsedValue = BigDecimal.valueOf(0);
-
-        if (notUsedInvoices.isPresent()) {
-            for (Invoice invoice : notUsedInvoices.get()) {
-                notUsedValue = notUsedValue.add(invoice.getAmountToUse());
-            }
-        }
-        return notUsedValue;
-    }
-
-    private BigDecimal calculateSuppliersNotUsedValue(int year) {
-        Optional<List<Invoice>> suppliersNotUsedInvoices = invoiceDao.getSuppliersYearNotUsedInvoices(year);
-        BigDecimal notUsedValue = BigDecimal.valueOf(0);
-
-        if (suppliersNotUsedInvoices.isPresent()) {
-            for (Invoice invoice : suppliersNotUsedInvoices.get()) {
-                notUsedValue = notUsedValue.add(invoice.getAmountToUse());
-            }
-        }
-        return notUsedValue;
-    }
-
     private BigDecimal sumYearSoldValue(int year) {
         Set<Order> orders = orderDao.getYearOrders(year);
         BigDecimal sum = BigDecimal.valueOf(0);
@@ -156,16 +131,6 @@ public class ReportYearService {
         return sum.divide(quantity, RoundingMode.HALF_EVEN);
     }
 
-    private BigDecimal sumYearIncomes(int year) {
-        List<Invoice> invoices = invoiceDao.getBuyersYearIncomedInvoices(year);
-        BigDecimal incomeValue = BigDecimal.valueOf(0);
-
-        for (Invoice invoice : invoices) {
-            incomeValue = incomeValue.add(invoice.getValue());
-        }
-        return incomeValue;
-    }
-
     private BigDecimal calculateAveragePurchase(int year, BigDecimal soldedQuantity) {
         Set<Order> orders = orderDao.getYearOrders(year);
         BigDecimal sum = BigDecimal.valueOf(0);
@@ -192,44 +157,6 @@ public class ReportYearService {
             }
         }
         return totalQuantity;
-    }
-
-    private BigDecimal calculateSuppliersUsedAmount(int year) {
-        List<Invoice> invoices = invoiceDao.getSuppliersYearInvoices(year);
-
-        BigDecimal generalAmountToUse = BigDecimal.valueOf(0);
-        for (Invoice invoice : invoices) {
-            generalAmountToUse = generalAmountToUse.add(invoice.getValue());
-        }
-
-        BigDecimal amountToUse = BigDecimal.valueOf(0);
-        for (Invoice invoice : invoices) {
-            amountToUse = amountToUse.add(invoice.getAmountToUse());
-        }
-
-        return generalAmountToUse.subtract(amountToUse);
-    }
-
-    private BigDecimal calculateProfits(int year, BigDecimal sumCosts, BigDecimal boughtValue) {
-        BigDecimal paidOrders = calculateBuyersUsedAmount(year);
-
-        BigDecimal income = paidOrders.subtract(boughtValue);
-        BigDecimal profits = income.add(sumCosts);
-
-        return profits;
-    }
-
-    private BigDecimal calculateBuyersUsedAmount(int year) {
-        List<Invoice> notUsedInvoices = invoiceDao.getBuyersYearIncomedInvoices(year);
-        BigDecimal generalValue = BigDecimal.valueOf(0);
-        BigDecimal notUsedAmount = BigDecimal.valueOf(0);
-
-        for (Invoice invoice : notUsedInvoices) {
-            generalValue = generalValue.add(invoice.getValue());
-            notUsedAmount = notUsedAmount.add(invoice.getAmountToUse());
-        }
-
-        return generalValue.subtract(notUsedAmount);
     }
 
     private BigDecimal calculateBuyersNotPaidInvoices(int year) {
