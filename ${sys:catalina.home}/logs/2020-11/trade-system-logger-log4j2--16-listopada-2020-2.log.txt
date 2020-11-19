@@ -1,0 +1,13 @@
+2020-11-16 16:12:48,101 INFO o.h.v.i.u.Version [background-preinit] HV000001: Hibernate Validator 6.0.18.Final
+2020-11-16 16:12:53,290 INFO o.h.j.i.u.LogHelper [main] HHH000204: Processing PersistenceUnitInfo [name: default]
+2020-11-16 16:12:53,454 INFO o.h.Version [main] HHH000412: Hibernate Core {5.4.10.Final}
+2020-11-16 16:12:53,877 INFO o.h.a.c.r.j.JavaReflectionManager [main] HCANN000001: Hibernate Commons Annotations {5.1.0.Final}
+2020-11-16 16:12:54,180 INFO o.h.d.Dialect [main] HHH000400: Using dialect: org.hibernate.dialect.H2Dialect
+2020-11-16 16:12:55,610 INFO o.h.e.t.j.p.i.JtaPlatformInitiator [main] HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2020-11-16 16:13:34,196 INFO c.t.u.UserController [http-nio-8080-exec-2] Logowanie na konto: f , IP: 0:0:0:0:0:0:0:1
+2020-11-16 16:13:34,440 INFO c.t.u.UserController [http-nio-8080-exec-2] Zalogowano
+2020-11-16 16:13:57,894 INFO c.t.u.UserController [http-nio-8080-exec-10] Logowanie na konto: f , IP: 0:0:0:0:0:0:0:1
+2020-11-16 16:13:57,987 INFO c.t.u.UserController [http-nio-8080-exec-10] Zalogowano
+2020-11-16 16:14:23,551 INFO c.t.o.OrderController [http-nio-8080-exec-5] Dodawanie zamówienia: CreateOrderRequest(date=2020-11-11, buyerId=1, supplierId=1, orderDetails=[OrderDetailsDto(quantity=10, buyerSum=null, supplierSum=null, typedSoldPrice=0, typedBoughtPrice=0, transportNumber=, invoiceNumber=null, product=ProductDto(id=1, product=null), orderComment=null, createBuyerInvoice=false)])
+2020-11-16 16:14:34,430 INFO c.t.i.InvoiceController [http-nio-8080-exec-4] Dodawanie faktury: InvoiceDto(id=null, invoiceNumber=ABC, date=2020-11-11, value=3000, amountToUse=3000, isUsed=false, isPaid=true, toEqualizeNegativeInvoice=false, comment=, buyer=BuyerDto(id=1, name=null, currentBalance=null, averageProfitPerM3=null, monthTakenQuantity=null), supplier=null)
+2020-11-16 16:14:39,992 INFO c.t.o.OrderController [http-nio-8080-exec-10] Usuwanie zamówienia: id=1
