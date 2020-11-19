@@ -15,6 +15,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -164,20 +165,22 @@ public class ReportMonthService {
     private BigDecimal calculateBuyersNotPaidInvoices(int month, int year) {
         BigDecimal result = new BigDecimal(0);
 
-        List<Invoice> notPaidInvoicesNotCreatedToOrder = invoiceDao.getBuyersMonthNotPaidInvoicesNotCreatedToOrder(month, year)
-                .orElseThrow(NoSuchElementException::new);
+        Optional<List<Invoice>> notPaidInvoicesNotCreatedToOrder = invoiceDao.getBuyersMonthNotPaidInvoicesNotCreatedToOrder(month, year);
 
-        for (Invoice invoice : notPaidInvoicesNotCreatedToOrder) {
-            result = result.add(invoice.getAmountToUse());
+        if (notPaidInvoicesNotCreatedToOrder.isPresent()) {
+            for (Invoice invoice : notPaidInvoicesNotCreatedToOrder.get()) {
+                result = result.add(invoice.getAmountToUse());
+            }
         }
 
-        List<Invoice> notPaidInvoicesCreatedToOrder = invoiceDao.getBuyersMonthNotPaidInvoicesCreatedToOrder(month, year)
-                .orElseThrow(NoSuchElementException::new);
 
-        for (Invoice invoice : notPaidInvoicesCreatedToOrder) {
-            result = result.add(invoice.getValue());
+        Optional<List<Invoice>> notPaidInvoicesCreatedToOrder = invoiceDao.getBuyersMonthNotPaidInvoicesCreatedToOrder(month, year);
+
+        if (notPaidInvoicesCreatedToOrder.isPresent()) {
+            for (Invoice invoice : notPaidInvoicesCreatedToOrder.get()) {
+                result = result.add(invoice.getValue());
+            }
         }
-
         return result;
     }
 
