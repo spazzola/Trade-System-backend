@@ -1,8 +1,0 @@
-2020-11-17 16:56:59,945 INFO o.h.v.i.u.Version [background-preinit] HV000001: Hibernate Validator 6.0.18.Final
-2020-11-17 16:57:03,251 INFO o.h.j.i.u.LogHelper [main] HHH000204: Processing PersistenceUnitInfo [name: default]
-2020-11-17 16:57:03,385 INFO o.h.Version [main] HHH000412: Hibernate Core {5.4.10.Final}
-2020-11-17 16:57:03,571 INFO o.h.a.c.r.j.JavaReflectionManager [main] HCANN000001: Hibernate Commons Annotations {5.1.0.Final}
-2020-11-17 16:57:04,083 INFO o.h.d.Dialect [main] HHH000400: Using dialect: org.hibernate.dialect.MySQL5Dialect
-2020-11-17 16:57:05,320 INFO o.h.e.t.j.p.i.JtaPlatformInitiator [main] HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
-2020-11-17 16:57:18,977 INFO c.t.u.UserController [http-nio-8080-exec-1] Logowanie na konto: Forester25 , IP: 0:0:0:0:0:0:0:1
-2020-11-17 16:57:19,152 INFO c.t.u.UserController [http-nio-8080-exec-1] Zalogowano
