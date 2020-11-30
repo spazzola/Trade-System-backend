@@ -170,7 +170,6 @@ public class UpdateOrderDetailsService {
             }
         }
         else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) == 0 && invoice.getInvoiceNumber().equals("Negatywna")) {
-            //TODO change that part to proper jpa-function
             String firstPart = "Pomniejszono o%";
             String secondPart = "%z faktury o id " + invoice.getId();
             Invoice prePaymentInvoice = invoiceDao.getPrePaidInvoiceReducedByNegativeInvoice(firstPart, secondPart);
@@ -348,16 +347,16 @@ public class UpdateOrderDetailsService {
         BigDecimal oldAmountToUse = invoice.getAmountToUse();
 
         if (isOneInvoice) {
-            if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
-                invoice.setAmountToUse(oldAmountToUse.add(difference));
-            } else {
-                BigDecimal previousInvoiceAmountToUse = oldAmountToUse.add(oldBuyerSum);
-                BigDecimal newInvoiceAmountToUse = previousInvoiceAmountToUse.subtract(newBuyerSum);
-                invoice.setAmountToUse(newInvoiceAmountToUse);
-            }
             if (invoice.isCreatedToOrder()) {
-                invoice.setAmountToUse(newBuyerSum);
                 invoice.setValue(newBuyerSum);
+            } else {
+                if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+                    invoice.setAmountToUse(oldAmountToUse.add(difference));
+                } else {
+                    BigDecimal previousInvoiceAmountToUse = oldAmountToUse.add(oldBuyerSum);
+                    BigDecimal newInvoiceAmountToUse = previousInvoiceAmountToUse.subtract(newBuyerSum);
+                    invoice.setAmountToUse(newInvoiceAmountToUse);
+                }
             }
         } else {
             BigDecimal previousInvoiceAmountToUse = oldAmountToUse.add(oldBuyerSum);

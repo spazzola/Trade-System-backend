@@ -36,11 +36,6 @@ public interface InvoiceDao extends JpaRepository<Invoice, Long> {
     Optional<List <Invoice>> getBuyersNotPaidInvoices();
 
 
-    /*@Query(value = "SELECT * FROM invoices " +
-            "WHERE comment LIKE '%Pomniejszono o' AND comment LIKE '%z faktury o id ?1'",
-            nativeQuery = true)
-    Invoice getPrePaidInvoiceReducedByNegativeInvoice(Long invoiceId);*/
-
     @Query(value = "SELECT * FROM invoices " +
             "WHERE comment LIKE :firstPart AND comment LIKE :secondPart",
             nativeQuery = true)
