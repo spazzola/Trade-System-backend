@@ -14,7 +14,7 @@ public class OrderComment {
     @Column(name = "order_comment_id")
     private Long id;
 
-    @Column(name = "system_comment")
+    @Column(name = "system_comment", columnDefinition="TEXT")
     private String systemComment;
 
     @Column(name = "user_comment")
