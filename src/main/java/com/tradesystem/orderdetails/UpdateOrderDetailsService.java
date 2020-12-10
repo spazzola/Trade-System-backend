@@ -161,22 +161,19 @@ public class UpdateOrderDetailsService {
     private void processRecalculatingOneInvoice(Invoice invoice, BigDecimal orderValue) {
         if (invoice.isCreatedToOrder()) {
             invoiceDao.delete(invoice);
-        }
-        else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+        } else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
             processRecalculatingNegativeInvoice(invoice, orderValue);
             if (isOrderIsRelatedWithEqualizedInvoice(invoice)) {
                 invoice = getBuyerEqualizedInvoice(invoice);
                 processRecalculatingEqualizedInvoice(invoice, orderValue);
             }
-        }
-        else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) == 0 && invoice.getInvoiceNumber().equals("Negatywna")) {
+        } else if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) == 0 && invoice.getInvoiceNumber().equals("Negatywna")) {
             String firstPart = "Pomniejszono o%";
             String secondPart = "%z faktury o id " + invoice.getId();
             Invoice prePaymentInvoice = invoiceDao.getPrePaidInvoiceReducedByNegativeInvoice(firstPart, secondPart);
             BigDecimal previousAmountToUse = prePaymentInvoice.getAmountToUse();
             prePaymentInvoice.setAmountToUse(previousAmountToUse.add(orderValue));
-        }
-        else {
+        } else {
             processRecalculatingPrePaymentInvoice(invoice, orderValue);
         }
     }
@@ -222,12 +219,20 @@ public class UpdateOrderDetailsService {
         BigDecimal previousValue = invoice.getValue();
         BigDecimal newAmountToUse = previousAmountToUse.add(orderValue);
         BigDecimal newValue = previousValue.add(orderValue);
-        if (newValue.compareTo(BigDecimal.ZERO) == 0) {
+        if (previousAmountToUse.add(orderValue).compareTo(BigDecimal.ZERO) > 0) {
             invoiceDao.delete(invoice);
+            Invoice lastUsedInvoice = invoiceDao.getLastUsedSupplierInvoice(invoice.getSupplier().getId());
+            lastUsedInvoice.setAmountToUse(newAmountToUse);
+            lastUsedInvoice.setUsed(false);
+            invoiceDao.save(lastUsedInvoice);
         } else {
-            invoice.setAmountToUse(newAmountToUse);
-            invoice.setValue(newValue);
-            invoiceDao.save(invoice);
+            if (newValue.compareTo(BigDecimal.ZERO) == 0) {
+                invoiceDao.delete(invoice);
+            } else {
+                invoice.setAmountToUse(newAmountToUse);
+                invoice.setValue(newValue);
+                invoiceDao.save(invoice);
+            }
         }
     }
 
@@ -347,16 +352,17 @@ public class UpdateOrderDetailsService {
         BigDecimal oldAmountToUse = invoice.getAmountToUse();
 
         if (isOneInvoice) {
-            if (invoice.isCreatedToOrder()) {
-                invoice.setValue(newBuyerSum);
+            if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
+                invoice.setAmountToUse(oldAmountToUse.add(difference));
             } else {
-                if (invoice.getAmountToUse().compareTo(BigDecimal.ZERO) < 0) {
-                    invoice.setAmountToUse(oldAmountToUse.add(difference));
-                } else {
-                    BigDecimal previousInvoiceAmountToUse = oldAmountToUse.add(oldBuyerSum);
-                    BigDecimal newInvoiceAmountToUse = previousInvoiceAmountToUse.subtract(newBuyerSum);
-                    invoice.setAmountToUse(newInvoiceAmountToUse);
-                }
+                BigDecimal previousInvoiceAmountToUse = oldAmountToUse.add(oldBuyerSum);
+                BigDecimal newInvoiceAmountToUse = previousInvoiceAmountToUse.subtract(newBuyerSum);
+                invoice.setAmountToUse(newInvoiceAmountToUse);
+
+            }
+            if (invoice.isCreatedToOrder()) {
+                invoice.setAmountToUse(BigDecimal.ZERO);
+                invoice.setValue(newBuyerSum);
             }
         } else {
             BigDecimal previousInvoiceAmountToUse = oldAmountToUse.add(oldBuyerSum);

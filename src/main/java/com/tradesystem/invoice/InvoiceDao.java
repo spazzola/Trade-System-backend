@@ -11,6 +11,13 @@ import org.springframework.stereotype.Repository;
 @Repository("invoiceDao")
 public interface InvoiceDao extends JpaRepository<Invoice, Long> {
 
+    @Query(value = "SELECT * FROM invoices " +
+            "WHERE is_used = true AND value > 0 AND supplier_fk = ?1 " +
+            "ORDER BY invoice_id desc " +
+            "LIMIT 1",
+            nativeQuery = true)
+    Invoice getLastUsedSupplierInvoice(Long id);
+
 
     @Query(value = "SELECT * FROM invoices " +
             "WHERE MONTH(invoices.date) = ?1 AND YEAR(invoices.date) = ?2 AND value > 0",
