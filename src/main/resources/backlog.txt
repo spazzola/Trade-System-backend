@@ -1,2 +1,0 @@
-1. Dodać do wszystkich metod w controllerach sprzedzenie roli user lub admin.
-2. POPRAWIĆ - podczas generowania kolejnej negatywnej fv nie zwiększa się pole Wartość (powinno się powiększyć tak jak u suppliera)
